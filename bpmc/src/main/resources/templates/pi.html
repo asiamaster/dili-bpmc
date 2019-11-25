@@ -1,0 +1,120 @@
+<#body head_title="测试页面">
+<h2><a href="${contextPath}/model/index.html">模型和部署</a> |
+    <span style="font-size: 21px;color: dodgerblue"> 定义和实例</span> |
+    <a href="${contextPath}/task/index.html"> 任务管理</a>
+</h2>
+<h2>流程定义</h2>
+<hr>
+<table border="1" id="processDefinition-list">
+    <tr>
+        <td>编号</td>
+        <td>名称</td>
+        <td>KEY</td>
+        <td>版本号</td>
+        <td>resourceName</td>
+        <td>category</td>
+        <td>部署ID</td>
+        <td>操作</td>
+    </tr>
+    <% for (processDefinition in processDefinitions){ %>
+    <tr>
+        <td>${processDefinition.id}</td>
+        <td>${processDefinition.name}</td>
+        <td>${processDefinition.key}</td>
+        <td>${processDefinition.version}</td>
+        <td>${processDefinition.resourceName}</td>
+        <td>${processDefinition.category}</td>
+        <td>${processDefinition.deploymentId}</td>
+        <td>
+            <a href="${contextPath}/pi/start.action?processDefinitionId=${processDefinition.id}">启动</a>
+            <a href="javascript:window.open('${contextPath}/pi/startForm.html?processDefinitionId=${processDefinition.id}');">表单启动</a>
+            <a href="${contextPath}/pi/run.action?processDefinitionId=${processDefinition.id}">流转完成</a>
+        </td>
+    </tr>
+    <%}%>
+</table>
+<br>
+<h2>流程实例</h2>
+<hr>
+<table border="1" id="processInstance-list">
+    <tr>
+        <td>流程定义Id</td>
+        <td>流程定义名称</td>
+        <td>流程定义Key</td>
+        <td>部署ID</td>
+        <td>业务KEY</td>
+        <td>流程实例ID</td>
+        <td>流程实例名称</td>
+        <td>流程实例描述</td>
+        <td>流程实例变量</td>
+        <td>操作</td>
+    </tr>
+    <% for (processInstance in processInstances){ %>
+    <tr>
+        <td>${processInstance.processDefinitionId}</td>
+        <td>${processInstance.processDefinitionName}</td>
+        <td>${processInstance.processDefinitionKey}</td>
+        <td>${processInstance.deploymentId}</td>
+        <td>${processInstance.businessKey}</td>
+        <td>${processInstance.id}</td>
+        <td>${processInstance.name}</td>
+        <td>${processInstance.description}</td>
+        <td>${processInstance.processVariables}</td>
+        <td width="240px">
+            <a href="${contextPath}/pi/process.action?processInstanceId=${processInstance.processInstanceId}">流转到下一节点</a>
+            <a href="${contextPath}/pi/end.action?processInstanceId=${processInstance.processInstanceId}">强制结束</a>
+            <a href="#" onclick="showProgress('${processInstance.processInstanceId}', '${processInstance.processDefinitionId}', '${processInstance.name!processInstance.processInstanceId}');">查看进度</a>
+            <a href="#" onclick="clainAndCompleteTask('${processInstance.processInstanceId}')">申领并完成任务</a>
+        </td>
+    </tr>
+    <%}%>
+    <tr>
+        <td colspan="10">
+            <input type="text" id="param" size="150">
+        </td>
+    </tr>
+</table>
+<br>
+流程实例:<label id="processInstanceName"></label>
+<hr>
+<b>流程图</b>
+<br>
+<img id="processInstanceImg" />
+<script>
+    function clainAndCompleteTask(processInstanceId) {
+        var param = $("#param").val();
+        var url = "${contextPath}/task/claimAndCompleteByPi.action?processInstanceId="+processInstanceId+param;
+        $.ajax({
+            type: "POST",
+            url: url,
+            processData:true,
+            dataType: "json",
+            async : true,
+            success: function (data) {
+                if(data.success){
+                    window.location.reload(false);
+                }else{
+                    swal('错误',data.result, 'error');
+                }
+            },
+            error: function(){
+                swal('错误', '远程访问失败', 'error');
+            }
+        });
+    }
+    /**
+     * 查看进度图片
+     * @param processInstanceId
+     * @param processDefinitionId
+     * @param processInstanceName
+     */
+    function showProgress(processInstanceId, processDefinitionId, processInstanceName){
+        var href = '${contextPath}/pi/progress.action?processInstanceId='+processInstanceId+'&processDefinitionId='+processDefinitionId+"&"+Math.random();;
+        $("#processInstanceImg").attr("src", href);
+        $("#processInstanceName").html(processInstanceName);
+    }
+$(function() {
+
+})
+</script>
+</#body>

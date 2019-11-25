@@ -1,0 +1,144 @@
+<#body>
+<style>
+    div.fileUpload {
+        display: inline-block;
+        width: 80px;
+        height: 20px;
+        line-height: 20px;
+        position: relative;
+        overflow: hidden;
+    }
+    div.fileUpload input:hover {
+        cursor: pointer;
+    }
+    div.fileUpload input {
+        position: absolute;
+        left: 0px;
+        top: 0px;
+        zoom: 1;
+        filter: alpha(opacity=0);
+        opacity: 0;
+        font-size: 20px;
+        margin-left: -240px
+    }
+</style>
+<h2><span style="font-size: 21px;color: dodgerblue">模型和部署</span> |
+    <a href="${contextPath}/pi/index.html">定义和实例</a> |
+    <a href="${contextPath}/task/index.html"> 任务管理</a> |
+    <a href="${contextPath}/actForm/index.html"> 动态表单管理</a>
+</h2>
+<h2>流程模型</h2>
+<hr>
+<div class="fileUpload">
+<a href="${contextPath!}/modeler/create.html?closeUrl=model/index.html" style="text-decoration: none;" >绘制流程</a>
+</div>
+
+<div class="fileUpload">上传xml模型
+    <input type="file" class="fileInput" name="bpmnXmlFile" id="bpmnXmlFile"
+           data-url="${contextPath!}/modeler/uploadBpmnXml.action" multiple="multiple" value="" placeholder="" />
+</div>
+
+<table border="1" id="model-list">
+    <tr>
+        <td>模型编号</td>
+        <td>模型名称</td>
+        <td>版本</td>
+        <td>创建时间</td>
+        <td>操作</td>
+    </tr>
+    <% for (modelItem in models){ %>
+    <tr>
+        <td>${modelItem.id}</td>
+        <td>${modelItem.name}</td>
+        <td>${modelItem.version}</td>
+        <td>${modelItem.createTime, dateFormat="yyyy-MM-dd HH:mm:ss"}</td>
+        <td>
+             <a href="${contextPath}/modeler.html?modelId=${modelItem.id}&closeUrl=model/index.html">编辑</a>
+             <a href="${contextPath}/model/del.action?modelId=${modelItem.id}">删除</a>
+            <a href="${contextPath}/deployment/deploy.action?modelId=${modelItem.id}">部署</a>
+            <a onclick="showModelImg('${modelItem.id}', '${modelItem.name}')" href="#">图片</a>
+            <a href="javascript:window.open('${contextPath}/modeler/export.action?modelId=${modelItem.id}')">导出</a>
+        </td>
+    </tr>
+    <%}%>
+</table>
+<br>
+<h2>流程部署</h2>
+<hr>
+<table border="1" id="deployment-list">
+    <tr>
+        <td>编号</td>
+        <td>名称</td>
+        <td>部署时间</td>
+        <td>操作</td>
+    </tr>
+    <% for (deployment in deployments){ %>
+    <tr>
+        <td>${deployment.id}</td>
+        <td>${deployment.name}</td>
+        <td>${deployment.deploymentTime, dateFormat="yyyy-MM-dd HH:mm:ss"}</td>
+        <td>
+            <a href="${contextPath}/deployment/del.action?deploymentId=${deployment.id}">删除</a>
+            <a onclick="showImg('${deployment.id}', '${deployment.name}')" href="#">图片</a>
+        </td>
+    </tr>
+    <%}%>
+</table>
+<br>
+部署名称:<label id="deploymentName"></label>
+<hr>
+<b>流程图</b>
+<br>
+<img id="deploymentImg" />
+<script>
+    /**
+     * 查看模型图片
+     * @param deploymentId
+     * @param processInstanceName
+     */
+    function showImg(deploymentId, deploymentName){
+        var href = '${contextPath}/deployment/img.action?deploymentId=' + deploymentId;
+        $("#deploymentImg").attr("src", href);
+        $("#deploymentName").html(deploymentName);
+    }
+    function showModelImg(modelId, modelName){
+        var href = '${contextPath}/modeler/img.action?modelId=' + modelId;
+        $("#deploymentImg").attr("src", href);
+        $("#deploymentName").html(modelName);
+    }
+
+    function initFileUpload(){
+        $('#bpmnXmlFile').fileupload({
+            dataType : 'json',
+            done : function(e, res) {
+                if (res.result.code == 200) {
+                    window.location.reload();
+                }else{
+                    swal('错误',res.result.result, 'error');
+                }
+            },
+            add:function (e, data){//判断文件类型 var acceptFileTypes = /\/(pdf|xml)$/i;
+                var acceptFileTypes = /^xml$/i;
+                var name = data.originalFiles[0]["name"];
+                var index = name.lastIndexOf(".")+1;
+                var fileType = name.substring(index,name.length);
+                if(!acceptFileTypes.test(fileType)){
+                    swal('错误', '请上传xml文件!', 'error');
+                    return ;
+                }
+                var size = data.originalFiles[0]["size"];
+                // 1M限制
+                if(size > (1024*1024)){
+                    swal('错误', '上传文件超过最大限制(1MB)!', 'error');
+                    return ;
+                }
+                data.submit();
+            }
+        });
+    }
+$(function() {
+    initFileUpload();
+})
+</script>
+<#imp-jquery-file-upload/>
+</#body>

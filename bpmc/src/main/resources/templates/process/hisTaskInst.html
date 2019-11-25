@@ -1,0 +1,125 @@
+<#body head_title="历史任务实例列表">
+
+<div class="easyui-layout" fit="true">
+    <!-- ====================================== ================================================================================ -->
+    <!-- 上方布局 -->
+    <!-- ====================================================================================================================== -->
+    <div region="north" height="110" align="center">
+        <div id="nav" style="padding-left:15px;padding-top:10px;" align="left">
+            <#nav/>
+        </div>
+        <!-- =========================================================表单========================================================= -->
+        <div class="easyui-panel" style="width:100%;" align="left" >
+            <form id="form" class="easyui-form" method="post" fit="true">
+                <table style="padding: 20px 0;">
+                    <tr>
+                        <td>
+                            <input class="easyui-textbox" name="processDefinitionId" id="processDefinitionId" style="width:390px" labelWidth="150" labelAlign="right" data-options="label:'processDefinitionId:', validType:'length[0,40]'" />
+                        </td>
+                        <td>
+                            <input class="easyui-textbox" name="processInstanceId" id="processInstanceId" style="width:320px" labelWidth="150" labelAlign="right" data-options="label:'processInstanceId:', validType:'length[0,40]'" />
+                        </td>
+                        <td>
+                            <input class="easyui-textbox" name="taskId" id="taskId" style="width:240px" labelAlign="right" labelWidth="65" data-options="label:'taskId:', validType:'length[0,40]'" />
+                        </td>
+                        <td>
+                            <input class="easyui-textbox" name="assignee" id="assignee" style="width:240px" labelAlign="right" data-options="label:'assignee:', validType:'length[0,40]'" />
+                        </td>
+                        <td >
+                            <a style="margin-left: 20px;" href="#" class="easyui-linkbutton" iconCls="icon-search" id="queryBtn"
+                               onclick="queryGrid()">查询</a>&nbsp;&nbsp;
+                            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-clear" onclick="clearForm()">清除</a>
+                        </td>
+                    </tr>
+                </table>
+            </form>
+        </div>
+    </div>
+    <div region="center" style="width:100%;padding-top: 1px" height="auto">
+        <table class="easyui-datagrid" title="历史任务实例" id="hisTaskInstGrid" fitColumns="true" fit="true" noheader="true" pageList="[30,50,100]"
+               pageSize="50" pageNumber="1" pagePosition="top" rownumbers="true" remoteSort="false"
+               loadMsg="数据加载中..." singleSelect="true" method="post" multiSort="false" sortName="id"
+               align="center" striped="true" idField="id" data-options="view:scrollview, autoRowHeight:false" >
+            <thead>
+            <tr>
+                <th width="220" data-options="field:'id',   sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
+                    id
+                </th>
+                <th width="220" data-options="field:'name',  sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
+                    name
+                </th>
+                <th width="310" data-options="field:'processDefinitionId',  sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
+                    processDefinitionId
+                </th>
+                <th width="220" data-options="field:'processInstanceId', sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
+                    processInstanceId
+                </th>
+                <th width="220" data-options="field:'executionId',  sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
+                    executionId
+                </th>
+                <th width="350" data-options="field:'taskDefinitionKey',  sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
+                    taskDefinitionKey
+                </th>
+                <th width="170" data-options="field:'startTime',  _provider:'datetimeProvider',  sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
+                    startTime
+                </th>
+                <th width="170" data-options="field:'endTime', _provider:'datetimeProvider',  sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
+                    endTime
+                </th>
+                <th data-options="field:'deleteReason',   sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
+                    deleteReason
+                </th>
+                <th data-options="field:'durationInMillis',   sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
+                    durationInMillis
+                </th>
+                <th width="170" data-options="field:'claimTime', _provider:'datetimeProvider', sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
+                    claimTime
+                </th>
+                <th width="80" data-options="field:'owner',  sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
+                    owner
+                </th>
+                <th width="90" data-options="field:'assignee',  sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
+                    assignee
+                </th>
+                <th width="90" data-options="field:'formKey',  sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
+                    formKey
+                </th>
+                <th width="90" data-options="field:'category',  sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
+                    category
+                </th>
+                <th width="180" data-options="field:'description',  sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
+                    description
+                </th>
+                <th data-options="field:'parentTaskId',   sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
+                    parentTaskId
+                </th>
+            </tr>
+            </thead>
+        </table>
+    </div>
+</div>
+
+<script>
+    //表格查询
+    function queryGrid() {
+        //$('#hisTaskInstGrid').datagrid({
+        //    url:"${contextPath}/his/listHisTaskInst.action"
+        //});
+        var opts = $("#hisTaskInstGrid").datagrid("options");
+        if (null == opts.url || "" == opts.url) {
+            opts.url = "${contextPath}/his/listHisTaskInst.action";
+        }
+        $("#hisTaskInstGrid").datagrid("load", bindGridMeta2Form("hisTaskInstGrid", "form"));
+    }
+
+
+    //清空表单
+    function clearForm() {
+        $('#form').form('clear');
+    }
+
+$(function() {
+    queryGrid();
+})
+</script>
+</#body>

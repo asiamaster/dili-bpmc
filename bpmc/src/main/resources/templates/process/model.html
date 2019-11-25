@@ -1,0 +1,264 @@
+<#body>
+<style>
+    div.fileUpload {
+        display: inline-block;
+        width: 50px;
+        height: 20px;
+        top: 5px;
+        line-height: 20px;
+        position: relative;
+        overflow: hidden;
+    }
+    div.fileUpload input:hover {
+        cursor: pointer;
+    }
+    div.fileUpload input {
+        position: absolute;
+        left: 0px;
+        top: 0px;
+        zoom: 1;
+        filter: alpha(opacity=0);
+        opacity: 0;
+        font-size: 20px;
+        margin-left: -240px
+    }
+</style>
+
+    <div class="easyui-layout" fit="true">
+        <!-- ====================================== ================================================================================ -->
+        <!-- 上方布局 -->
+        <!-- ====================================================================================================================== -->
+        <div region="north" height="38" align="center">
+            <div id="nav" style="padding-left:15px;padding-top:10px;" align="left">
+                <#nav/>
+            </div>
+        </div>
+        <div region="center" style="width:100%;padding-top: 1px" height="auto">
+            <table class="easyui-datagrid" title="模型管理" id="modelGrid" fitColumns="true" fit="true" noheader="true"
+                   pagination="false" rownumbers="false" remoteSort="false" toolbar="#modelGridToolbar"
+                   loadMsg="数据加载中..." singleSelect="true" method="post" multiSort="false" sortName="id"
+                   align="center" striped="true" idField="id" data-options="onDblClickRow:editModel" >
+                <thead>
+                <tr>
+                    <th width="15%" data-options="field:'id',   sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
+                        模型ID
+                    </th>
+                    <th width="10%" data-options="field:'name',   sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
+                        模型名称
+                    </th>
+                    <th width="8%" data-options="field:'key',   sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
+                        KEY
+                    </th>
+                    <th width="8%" data-options="field:'category',   sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
+                        类别
+                    </th>
+                    <th width="5%" data-options="field:'version',   sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
+                        版本
+                    </th>
+                    <th width="12%" data-options="field:'createTime',  _provider:'datetimeProvider', sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
+                        创建时间
+                    </th>
+                    <th width="12%" data-options="field:'lastUpdateTime',  _provider:'datetimeProvider', sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
+                        上次修改时间
+                    </th>
+                    <th width="31%" data-options="field:'metaInfo',   sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
+                        META_INFO
+                    </th>
+                </tr>
+                </thead>
+            </table>
+            <div id="modelGridToolbar" style="padding: 2px 5px;">
+                <a href="#" class="easyui-linkbutton" iconCls="icon-add" onclick="openCreateModelDlg()" plain="true">新增</a>
+                <a href="#" class="easyui-linkbutton" iconCls="icon-edit" onclick="editModel()" plain="true">编辑</a>
+                <a href="#" class="easyui-linkbutton" iconCls="icon-remove" onclick="deleteModel()" plain="true">删除</a>
+                <a href="#" class="easyui-linkbutton" iconCls="icon-data" onclick="showModelImg()" plain="true">图片</a>
+                <a href="#" class="easyui-linkbutton" iconCls="icon-play" onclick="deploy()" plain="true">部署</a>
+                <a href="#" class="easyui-linkbutton" iconCls="icon-export" onclick="exportBpmn()" plain="true">导出</a>
+                <div class="fileUpload"><img src="${contextPath}/resources/easyui/css/themes/icons/up.png"></img>&nbsp;上传
+                    <input type="file" class="fileInput" name="bpmnXmlFile" id="bpmnXmlFile"
+                           data-url="${contextPath!}/modeler/uploadBpmnXml.action" multiple="multiple" value="" placeholder="" />
+                </div>
+            </div>
+
+
+        </div>
+        <!-- 图片隐藏框 -->
+        <div id="dlg" class="easyui-dialog" resizable="false" constrain="true" shadow="true" draggable="true" title="流程图" style="padding:20px" modal="true" border="thin" closed="true"
+             data-options="
+				iconCls: 'icon-save',
+				width:1366,
+				height: 640
+			">
+            <img id="deploymentImg" />
+        </div>
+        <!-- 创建模型隐藏框 -->
+        <div id="createModelDlg" class="easyui-dialog" resizable="false" constrain="true" shadow="true" draggable="true" title="新建模型" style="padding:20px" modal="true" border="thin" closed="true"
+             data-options="
+				iconCls: 'icon-ok',
+				width:380,
+				height: 380
+			">
+            <form id="form" class="easyui-form" method="post" fit="true">
+                <table width="330px">
+                    <tr style="height:40px;">
+                        <td>
+                            <input class="easyui-textbox" name="name" id="name" style="width:100%" labelWidth="48" labelAlign="right" data-options="label:'&lowast;名称:', required:true, validType:'length[2,40]'" />
+                        </td>
+                    </tr>
+                    <tr style="height:40px;">
+                        <td>
+                        <input class="easyui-textbox" name="key" id="key" style="width:100%" labelWidth="48" labelAlign="right" data-options="label:'&lowast;KEY:', required:true, validType:'length[2,40]'" />
+                        </td>
+                    </tr>
+                    <tr style="height:40px;">
+                        <td>
+                        <input class="easyui-textbox" name="category" id="category" style="width:100%" labelWidth="48" labelAlign="right" data-options="label:'类别:', validType:'length[0,40]'" />
+                        </td>
+                    </tr>
+                    <tr style="height:120px;">
+                        <td>
+                        <input class="easyui-textbox" name="description" id="description" style="width:100%;height:100px"  labelWidth="48" labelAlign="right" data-options="label:'描述:', multiline:true, validType:'length[0,255]'" />
+                        </td>
+                    </tr>
+                    <tr style="height:40px;">
+                        <td align="center">
+                        <a href="#" class="easyui-linkbutton" iconCls="icon-ok" id="createModelBtn"
+                           onclick="createModel()">创建</a>&nbsp;&nbsp;
+                        </td>
+                    </tr>
+                </table>
+            </form>
+        </div>
+    </div>
+
+<script>
+    /**
+     * 删除模型
+     */
+    function deleteModel() {
+        var selected = $("#modelGrid").datagrid("getSelected");
+        if (null == selected) {
+            swal('警告','请选中一条数据', 'warning');
+            return;
+        }
+        <#swalConfirm swalTitle="您确认想要删除记录吗？">
+        window.location.href = "${contextPath}/model/del.action?modelId="+selected.id;
+        </#swalConfirm>
+    }
+
+    /**
+     * 打开创建模型对话框
+     */
+    function openCreateModelDlg() {
+        $('#createModelDlg').dialog('open');
+        $('#createModelDlg').dialog('center');
+    }
+    /**
+     * 创建模型
+     */
+    function createModel() {
+        if(!$('#form').form("validate")){
+            return;
+        }
+        document.getElementById("form").action = '${contextPath!}/modeler/create.html?closeUrl=model/index.html';
+        document.getElementById("form").submit();
+    }
+
+    /**
+     * 修改模型
+     */
+    function editModel(){
+        var selected = $("#modelGrid").datagrid("getSelected");
+        if (null == selected) {
+            swal('警告','请选中一条数据', 'warning');
+            return;
+        }
+        window.location.href = "${contextPath}/modeler.html?closeUrl=model/index.html&modelId="+selected.id;
+    }
+
+    /**
+     * 查看模型图片
+     * @param deploymentId
+     * @param processInstanceName
+     */
+    function showModelImg(){
+        var selected = $("#modelGrid").datagrid("getSelected");
+        if (null == selected) {
+            swal('警告','请选中一条数据', 'warning');
+            return;
+        }
+        $('#dlg').dialog('open');
+        $('#dlg').dialog('center');
+        var href = '${contextPath}/modeler/img.action?modelId=' + selected.id;
+        $("#deploymentImg").attr("src", href);
+        $('#dlg').dialog('setTitle', "["+selected.name+"]流程图");
+    }
+
+    /**
+     * 部署模型
+     */
+    function deploy() {
+        var selected = $("#modelGrid").datagrid("getSelected");
+        if (null == selected) {
+            swal('警告','请选中一条数据', 'warning');
+            return;
+        }
+        <#swalConfirm swalTitle="您确认想要部署吗？">
+        window.location.href='${contextPath}/deployment/deploy.action?modelId='+selected.id;
+        </#swalConfirm>
+    }
+
+    /**
+     * 导出Bpmn模型
+     */
+    function exportBpmn() {
+        var selected = $("#modelGrid").datagrid("getSelected");
+        if (null == selected) {
+            swal('警告','请选中一条数据', 'warning');
+            return;
+        }
+        window.open('${contextPath}/modeler/export.action?modelId='+selected.id);
+    }
+
+    /**
+     * 初始化上传控件
+     */
+    function initFileUpload(){
+        $('#bpmnXmlFile').fileupload({
+            dataType : 'json',
+            done : function(e, res) {
+                if (res.result.code == 200) {
+                    window.location.reload();
+                }else{
+                    swal('错误',res.result.result, 'error');
+                }
+            },
+            add:function (e, data){//判断文件类型 var acceptFileTypes = /\/(pdf|xml)$/i;
+                var acceptFileTypes = /^xml$/i;
+                var name = data.originalFiles[0]["name"];
+                var index = name.lastIndexOf(".")+1;
+                var fileType = name.substring(index,name.length);
+                if(!acceptFileTypes.test(fileType)){
+                    swal('错误', '请上传xml文件!', 'error');
+                    return ;
+                }
+                var size = data.originalFiles[0]["size"];
+                // 1M限制
+                if(size > (1024*1024)){
+                    swal('错误', '上传文件超过最大限制(1MB)!', 'error');
+                    return ;
+                }
+                data.submit();
+            }
+        });
+    }
+
+$(function() {
+    <%if(has(models)){%>
+    $("#modelGrid").datagrid("loadData", ${models});
+    <%}%>
+    initFileUpload();
+})
+</script>
+<#imp-jquery-file-upload/>
+</#body>

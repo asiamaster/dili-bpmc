@@ -1,0 +1,141 @@
+<#body >
+<div class="easyui-layout" fit="true">
+    <!-- ====================================== ================================================================================ -->
+    <!-- 上方布局 -->
+    <!-- ====================================================================================================================== -->
+    <div region="north" height="38" align="center">
+        <div id="nav" style="padding-left:15px;padding-top:10px;" align="left">
+            <#nav/>
+        </div>
+    </div>
+    <div region="center" style="width:100%;padding-top: 1px" height="auto">
+        <table class="easyui-datagrid" title="流程定义管理" id="processDefinitionGrid" fitColumns="true" noheader="true"
+               pagination="false" rownumbers="false" remoteSort="false" toolbar="#processDefinitionGridToolbar"
+               loadMsg="数据加载中..." singleSelect="true" method="post" multiSort="false" sortName="id" fit="true"
+               align="center" striped="true" idField="id" data-options="" >
+            <thead>
+            <tr>
+                <th width="22%" data-options="field:'id',   sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
+                    编号
+                </th>
+                <th width="10%" data-options="field:'name',   sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
+                    名称
+                </th>
+                <th width="10%" data-options="field:'key',   sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
+                    KEY
+                </th>
+                <th width="7%" data-options="field:'version',   sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
+                    版本号
+                </th>
+                <th width="12%" data-options="field:'resourceName',   sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
+                    resourceName
+                </th>
+                <th width="18%" data-options="field:'category',   sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
+                    category
+                </th>
+                <th width="22%" data-options="field:'deploymentId',  sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
+                    部署ID
+                </th>
+            </tr>
+            </thead>
+        </table>
+        <div id="processDefinitionGridToolbar" style="padding: 2px 5px;">
+            <input class="easyui-textbox" style="width:20%" labelAlign="right" label="业务KEY" id="businessKey" name="businessKey" />
+            <input class="easyui-textbox" name="startParam" id="startParam" style="width:30%" labelAlign="right" label="启动参数" />
+            <a href="#" class="easyui-linkbutton" iconCls="icon-data" onclick="showProcessDefinitionImg()" plain="true">图片</a>
+            <a href="#" class="easyui-linkbutton" iconCls="icon-play" onclick="start()" plain="true">启动</a>
+            <a href="#" class="easyui-linkbutton" iconCls="icon-detail" onclick="formStart()" plain="true">表单启动</a>
+            <a href="#" class="easyui-linkbutton" iconCls="icon-remove" onclick="delPd()" plain="true">删除</a>
+            <a href="#" class="easyui-linkbutton" iconCls="icon-remove" onclick="clearPd()" plain="true">强制清空</a>
+        </div>
+        <!-- 隐藏编辑框 -->
+        <div id="dlg" class="easyui-dialog" resizable="false" constrain="true" shadow="true" draggable="true" title="流程图" style="padding:20px" modal="true" border="thin" closed="true"
+             data-options="
+				iconCls: 'icon-save',
+				width:1366,
+				height: 640
+			">
+            <img id="processDefinitionImg" />
+        </div>
+    </div>
+</div>
+
+<script>
+    /**
+     * 启动流程
+     */
+    function start() {
+        var selected = $("#processDefinitionGrid").datagrid("getSelected");
+        if (null == selected) {
+            swal('警告','请选中一条数据', 'warning');
+            return;
+        }
+        var businessKey = $("#businessKey").val();
+        <#swalConfirm swalTitle="您确认要启动流程吗？">
+        window.location.href = "${contextPath}/pd/start.action?processDefinitionId="+selected.id+"&businessKey="+businessKey;
+        </#swalConfirm>
+    }
+    /**
+     * 删除流程
+     */
+    function delPd() {
+        var selected = $("#processDefinitionGrid").datagrid("getSelected");
+        if (null == selected) {
+            swal('警告','请选中一条数据', 'warning');
+            return;
+        }
+    <#swalConfirm swalTitle="您确认要删除流程吗？">
+        window.location.href = "${contextPath}/pd/delete.action?deploymentId="+selected.deploymentId;
+    </#swalConfirm>
+    }
+    /**
+     * 强制清空流程
+     * 将删除任务、历史和流程实例
+     */
+    function clearPd() {
+        var selected = $("#processDefinitionGrid").datagrid("getSelected");
+        if (null == selected) {
+            swal('警告','请选中一条数据', 'warning');
+            return;
+        }
+    <#swalConfirm swalTitle="您确认要清空流程吗？<br>(将删除任务、历史和流程实例)">
+        window.location.href = "${contextPath}/pd/clear.action?deploymentId="+selected.deploymentId;
+    </#swalConfirm>
+    }
+
+    /**
+     * 启动表单流程
+     */
+    function formStart() {
+        var selected = $("#processDefinitionGrid").datagrid("getSelected");
+        if (null == selected) {
+            swal('警告','请选中一条数据', 'warning');
+            return;
+        }
+        window.open('${contextPath}/pd/startForm.html?processDefinitionId='+selected.id);
+    }
+    /**
+     * 查看部署图片
+     * @param deploymentId
+     * @param processInstanceName
+     */
+    function showProcessDefinitionImg(){
+        var selected = $("#processDefinitionGrid").datagrid("getSelected");
+        if (null == selected) {
+            swal('警告','请选中一条数据', 'warning');
+            return;
+        }
+        $('#dlg').dialog('open');
+        $('#dlg').dialog('center');
+        var href = '${contextPath}/deployment/img.action?deploymentId=' + selected.deploymentId;
+        $("#processDefinitionImg").attr("src", href);
+        $('#dlg').dialog('setTitle', "["+selected.name+"] 流程图");
+    }
+
+$(function() {
+    <%if(has(processDefinitions)){%>
+    $("#processDefinitionGrid").datagrid("loadData", ${processDefinitions});
+    <%}%>
+})
+</script>
+</#body>

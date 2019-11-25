@@ -1,0 +1,86 @@
+<#body head_title="任务页面">
+<h2><a href="${contextPath}/model/index.html">模型和部署</a> |
+    <a href="${contextPath}/pi/index.html">定义和实例</a> |
+    <span style="font-size: 21px;color: dodgerblue"> 任务管理</span>
+</h2>
+<h2>任务列表</h2>
+<hr>
+<table border="1" id="task-list">
+    <tr>
+        <td>任务编号</td>
+        <td>任务名称</td>
+        <td>父任务编号</td>
+        <td>拥有者</td>
+        <td>受托人</td>
+        <td>委托状态</td>
+        <td>流程实例id</td>
+        <td>流程定义id</td>
+        <td>创建时间</td>
+        <td>任务定义key</td>
+        <td>formKey</td>
+        <td>操作</td>
+    </tr>
+    <% for (task in tasks){ %>
+    <tr>
+        <td>${task.id}</td>
+        <td>${task.name}</td>
+        <td>${task.parentTaskId}</td>
+        <td>${task.owner}</td>
+        <td>${task.assignee}</td>
+        <td>${task.delegationState}</td>
+        <td>${task.processInstanceId}</td>
+        <td>${task.processDefinitionId}</td>
+        <td>${task.createTime, dateFormat="yyyy-MM-dd HH:mm:ss"}</td>
+        <td>${task.taskDefinitionKey}</td>
+        <td>${task.formKey}</td>
+        <td width="80px"><a href="#" onclick="taskForm('${task.processDefinitionId}', '${task.taskDefinitionKey}', '${task.id}', '${task.assignee}')">表单</a> |
+            <a href="#" onclick="execute('${task.processInstanceId}', '${task.id}')">执行</a></td>
+    </tr>
+    <%}%>
+    <tr>
+        <td colspan="12">
+            任务URL参数:<input type="text" id="param" size="150">
+        </td>
+    </tr>
+</table>
+
+<script>
+    function taskForm(processDefinitionId, taskDefinitionKey, taskId, assignee){
+        if(assignee == null){
+            swal('错误', '任务没有受托人!', 'error');
+            return;
+        }
+        window.open("${contextPath}/task/startForm.html?processDefinitionId="+processDefinitionId+"&taskDefinitionKey="+taskDefinitionKey+"&taskId="+taskId)
+    }
+
+    /**
+     * 任务流转
+     * @param processInstanceId 流程实例id
+     * @param taskId
+     */
+    function execute(processInstanceId, taskId){
+        var param = $("#param").val();
+        var url = "${contextPath}/task/claimAndComplete.action?processInstanceId="+processInstanceId+param;
+        $.ajax({
+            type: "POST",
+            url: url,
+            processData:true,
+            dataType: "json",
+            async : true,
+            success: function (data) {
+                if(data.success){
+                    window.location.reload(false);
+                }else{
+                    swal('错误',data.result, 'error');
+                }
+            },
+            error: function(){
+                swal('错误', '远程访问失败', 'error');
+            }
+        });
+    }
+$(function() {
+
+})
+</script>
+</#body>
