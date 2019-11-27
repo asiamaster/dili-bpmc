@@ -71,8 +71,9 @@
             return;
         }
         var businessKey = $("#businessKey").val();
+        var startParam = $("#startParam").val();
         <#swalConfirm swalTitle="您确认要启动流程吗？">
-        window.location.href = "${contextPath}/pd/start.action?processDefinitionId="+selected.id+"&businessKey="+businessKey;
+        window.location.href = "${contextPath}/pd/start.action?processDefinitionId="+selected.id+"&businessKey="+businessKey+"&"+startParam;
         </#swalConfirm>
     }
     /**

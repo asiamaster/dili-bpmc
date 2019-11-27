@@ -33,7 +33,7 @@
         </div>
     </div>
     <div region="center" style="width:100%;padding-top: 1px" height="auto">
-        <table class="easyui-datagrid" title="任务管理" id="taskGrid" fitColumns="true" fit="true" noheader="true" pageList="[50,100,200]"
+        <table class="easyui-datagrid" title="任务管理" id="taskGrid" fitColumns="true" fit="true" noheader="true" pageList="[30,50,100]"
                pagination="true" pageSize="50" pageNumber="1" pagePosition="top" rownumbers="false" remoteSort="false"
                loadMsg="数据加载中..." singleSelect="true" method="post" multiSort="false" sortName="id"
                align="center" striped="true" idField="id" data-options="" >
@@ -147,14 +147,14 @@
         $('#form').form('clear');
     }
 
-$(function() {
-    var pager = $("#taskGrid").datagrid('getPager');
-    pager.pagination({
-        <#controls_paginationOpts/>,
-        buttons:"#taskGridToolbar"
+    $(function() {
+        var pager = $("#taskGrid").datagrid('getPager');
+        pager.pagination({
+            <#controls_paginationOpts/>,
+            buttons:"#taskGridToolbar"
 
     });
-    queryGrid();
-})
+        queryGrid();
+    })
 </script>
 </#body>

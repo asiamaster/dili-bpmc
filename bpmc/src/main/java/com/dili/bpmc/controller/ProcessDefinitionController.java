@@ -89,14 +89,14 @@ public class ProcessDefinitionController {
      * @throws IOException
      */
     @RequestMapping(value = "/start.action", method = {RequestMethod.GET, RequestMethod.POST})
-    public void start(@RequestParam String processDefinitionId, @RequestParam(required = false) String businessKey, HttpServletRequest request, HttpServletResponse response) throws IOException {
+    public void start(@RequestParam String processDefinitionId, @RequestParam(required = false) String businessKey, @RequestParam(required = false) Map<String, Object> variables, HttpServletRequest request, HttpServletResponse response) throws IOException {
         UserTicket userTicket = SessionContext.getSessionContext().getUserTicket();
         if(userTicket == null){
             throw new NotLoginException();
         }
         //流程发起前设置发起人，记录在流程历史中
         identityService.setAuthenticatedUserId(userTicket.getId().toString());
-        ProcessInstance processInstance = runtimeService.startProcessInstanceById(processDefinitionId, businessKey);
+        ProcessInstance processInstance = runtimeService.startProcessInstanceById(processDefinitionId, businessKey, variables);
 //        ProcessInstanceDto processInstance = formService.submitStartFormData(processDefinitionId);
 //        根据流程发起人查询流程定义id
 //        System.out.println(historyService.createHistoricProcessInstanceQuery()

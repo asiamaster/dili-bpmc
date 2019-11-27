@@ -14,6 +14,18 @@
         .swal2-container {
             z-index: 9999999
         }
+        /** 我的任务 渐变色 */
+         .gradient-title{
+             /* Firefox 3.6+ */
+             background: -moz-linear-gradient(top, #fff, #e1e1e1);
+             /* Safari 4-5, Chrome 1-9 */
+             /* -webkit-gradient(,  [, ]?,  [, ]? [, ]*) */
+             background: -webkit-gradient(linear,top,from(#fff),to(#e1e1e1));
+             /* Safari 5.1+, Chrome 10+ */
+             background: -webkit-linear-gradient(top, #fff, #e1e1e1);
+             /* Opera 11.10+ */
+             background: -o-linear-gradient(top, #fff, #e1e1e1);
+         }
     </style>
     <%
     if(has(pageCss) && pageCss=="true"){

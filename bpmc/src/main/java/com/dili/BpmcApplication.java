@@ -15,7 +15,7 @@ import tk.mybatis.spring.annotation.MapperScan;
         org.activiti.spring.boot.SecurityAutoConfiguration.class
 })
 @ComponentScan(basePackages = { "com.dili.ss", "com.dili.bpmc", "com.dili.uap.sdk"})
-@RestfulScan({"com.dili.ss.activiti.rpc", "com.dili.uap.sdk.rpc"})
+@RestfulScan({"com.dili.ss.activiti.rpc", "com.dili.uap.sdk.rpc", "com.dili.bpmc.rpc"})
 @MapperScan(basePackages = {"com.dili.uap.dao", "com.dili.ss.activiti.dao", "com.dili.ss.dao"})
 @DTOScan(value={"com.dili.ss", "com.dili.uap", "com.dili.bpmc"})
 public class BpmcApplication {

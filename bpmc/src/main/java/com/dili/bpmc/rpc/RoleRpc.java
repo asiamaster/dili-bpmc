@@ -12,7 +12,7 @@ import java.util.List;
 public interface RoleRpc {
 
 	@POST("/roleApi/listByUser.api")
-	BaseOutput<List<Role>> listByUser(@ReqParam("userId") Long userId, @ReqParam("userName") String userName);
+	BaseOutput<List<Role>> listByUser(@ReqParam(value = "userId", required = false) Long userId, @ReqParam(value = "userName", required = false) String userName);
 
 
 }
