@@ -76,7 +76,7 @@
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
-                <!-- filtering为true的时候，这时只会排队<excludes>中指定的文件，-->
+                <!-- filtering为true的时候，这时只会排除<excludes>中指定的文件 -->
                 <filtering>true</filtering>
                 <excludes>
                     <exclude>**/*.woff</exclude>

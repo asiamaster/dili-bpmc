@@ -580,7 +580,6 @@ public class TaskController {
         //查询并设置任务所属流程名称
         ProcessDefinition processDefinition =repositoryService.createProcessDefinitionQuery().processDefinitionId(task.getProcessDefinitionId()).singleResult();
         request.setAttribute("processDefinitionName", processDefinition.getName());
-
     }
 
     /**
