@@ -1,8 +1,10 @@
 <#body head_title="任务页面">
 <style>
+    /*设置表格行高*/
     .datagrid-row {
         height: 48px;
     }
+    /*选中tab效果*/
     .tab-selected{
         font-size:18px;
         color:#007dc3;
@@ -15,6 +17,12 @@
         color:#8e8e8e;
         text-decoration:none;
     }
+    /*菜单字体*/
+    .menu-text{
+        font-size: 14px;
+        padding-left:10px;
+        float:left;
+    }
 </style>
 <div class="easyui-layout" fit="true" >
     <!-- ====================================== ================================================================================ -->
@@ -23,10 +31,10 @@
     <div region="north" style="border-bottom: 1px solid #ababab;" align="center">
         <!-- =========================================================表单========================================================= -->
         <div class="easyui-panel gradient-title" style="width:100%;padding-top:10px;padding-bottom: 10px;" align="left" >
-            <a <%if(category=='inbox'){%>class="tab-selected"<%}else{%>class="tab-unselected"<%}%> <%if(inboxCount>0){%>href="${contextPath}/task/tasks.html?category=inbox"<%}%> style="margin-left: 40px;">待办任务[${inboxCount}]</a>
-            <a <%if(category=='tasks'){%>class="tab-selected"<%}else{%>class="tab-unselected"<%}%> <%if(tasksCount>0){%>href="${contextPath}/task/tasks.html?category=tasks"<%}%> style="margin-left: 18px;">我的任务[${tasksCount}]</a>
-            <a <%if(category=='queued'){%>class="tab-selected"<%}else{%>class="tab-unselected"<%}%> <%if(queuedCount>0){%>href="${contextPath}/task/tasks.html?category=queued"<%}%> style="margin-left: 18px;">队列[${queuedCount}]</a>
-            <a <%if(category=='involved'){%>class="tab-selected"<%}else{%>class="tab-unselected"<%}%> <%if(involvedCount>0){%>href="${contextPath}/task/tasks.html?category=involved"<%}%> style="margin-left: 18px;">受邀[${involvedCount}]</a>
+            <a <%if(category=='inbox'){%>class="tab-selected"<%}else{%>class="tab-unselected"<%}%> <%if(inboxCount>0){%>href="${contextPath}/task/taskCenter.html?category=inbox"<%}%> style="margin-left: 40px;">待办任务[${inboxCount}]</a>
+            <a <%if(category=='tasks'){%>class="tab-selected"<%}else{%>class="tab-unselected"<%}%> <%if(tasksCount>0){%>href="${contextPath}/task/taskCenter.html?category=tasks"<%}%> style="margin-left: 18px;">我的任务[${tasksCount}]</a>
+            <a id="queuedTab" <%if(category=='queued'){%>class="tab-selected"<%}else{%>class="tab-unselected"<%}%> <%if(queuedCount>0){%>href="${contextPath}/task/taskCenter.html?category=queued"<%}%> style="margin-left: 18px;">队列[${queuedCount}]</a>
+            <a <%if(category=='involved'){%>class="tab-selected"<%}else{%>class="tab-unselected"<%}%> <%if(involvedCount>0){%>href="${contextPath}/task/taskCenter.html?category=involved"<%}%> style="margin-left: 18px;">受邀[${involvedCount}]</a>
         </div>
     </div>
     <div region="west" style="width:260px;padding-top: 1px;" height="auto">
@@ -41,46 +49,152 @@
     </div>
     <div region="center" style="float:left;width:100%;padding-top: 1px;" height="auto">
         <% if(has(task)){%>
-        <div style="margin: 20px;position: relative; overflow: hidden; height: 50px;">
-            <div style="overflow: hidden; padding-left: 0px; padding-top: 0px; position: absolute; left: 0px; top: 0px; width: 49px; height: 50px;">
-                <img style="vertical-align: middle;" src="${contextPath}/resources/images/task-50.png"/>&nbsp;&nbsp;
-            </div>
-            <div style="height: 27px; overflow: hidden; padding-left: 0px; padding-top: 0px; position: absolute; left: 61px; top: 0px; width: 845px;">
-                <span style="vertical-align: top; color:#007dc3;font-size: 20px;font-family: 'Microsoft YaHei';font-weight: bold;">${task.name}</span>
-            </div>
-            <div style="height: 18px; overflow: hidden; padding-left: 0px; padding-top: 0px; position: absolute; left: 61px; top: 32px; width: 845px;">
-                <div style="float: left;" title="${task.priority}">
-                    <img style="vertical-align: middle;" src="${contextPath}/resources/images/priority-medium-16.png"/>
-                    <span id="taskPriorityDesc" style="vertical-align: middle;">${task.priority}</span>&nbsp;
+        <div style="margin: 25px;">
+            <!-- 任务信息 -->
+            <div style="position: relative; overflow: hidden; height: 70px;border-bottom: 1px solid #CCC;">
+                <div style="overflow: hidden; padding-left: 0px; padding-top: 0px; position: absolute; left: 0px; top: 0px; width: 49px; height: 50px;">
+                    <img style="vertical-align: middle;" src="${contextPath}/resources/images/task-50.png"/>&nbsp;&nbsp;
                 </div>
-                <div title="${task.createTime, 'yyyy-MM-dd HH:mm:ss'}">
-                    <img style="vertical-align: middle;" src="${contextPath}/resources/images/time.png"/>
-                    <span style="vertical-align: middle;">创建于<span id="taskTimeDesc">${task.createTime, 'yyyy-MM-dd HH:mm:ss'}</span></span>
+                <div style="height: 27px; overflow: hidden; padding-left: 0px; padding-top: 0px; position: absolute; left: 61px; top: 0px; width: 845px;">
+                    <span style="vertical-align: top; color:#007dc3;font-size: 20px;font-family: 'Microsoft YaHei';font-weight: bold;">${task.name}</span>
+                </div>
+                <div style="height: 18px; overflow: hidden; padding-left: 0px; padding-top: 0px; position: absolute; left: 61px; top: 32px; width: 845px;">
+                    <div style="float: left;" title="${task.priority}">
+                        <img style="vertical-align: middle;" src="${contextPath}/resources/images/priority-medium-16.png"/>
+                        <span id="taskPriorityDesc" style="vertical-align: middle;">${task.priority}</span>&nbsp;
+                    </div>
+                    <div title="${task.createTime, 'yyyy-MM-dd HH:mm:ss'}">
+                        <img style="vertical-align: middle;" src="${contextPath}/resources/images/time.png"/>
+                        <span style="vertical-align: middle;">创建于<span id="taskTimeDesc">${task.createTime, 'yyyy-MM-dd HH:mm:ss'}</span></span>
+                    </div>
+                </div>
+            </div>
+            <!-- 任务描述和所属流程 -->
+            <div style="position: relative; overflow: hidden; height: 100px;border-bottom: 1px solid #CCC;">
+                <div style="margin-top: 16px;">
+                    <%if(task.assignee == null){%>
+                    <a href="#" onclick="claimTask();" class="easyui-linkbutton" data-options="">签收</a>
+                    <%}%>
+                    <span style="position: relative; top:0px;height: 50px;">${task.description}</span>
+                </div>
+                <div style="margin-top: 16px;">
+                <a href="#" onclick="showProgress();" style="text-decoration: none;color:darkred">任务属于流程:'${processDefinitionName}'</a>
+                </div>
+            </div>
+            <!-- 参与人 -->
+            <div style="position: relative; overflow: hidden; height: 80px;border-bottom: 1px solid #CCC;">
+                <div style="overflow: hidden; padding-left: 0px; padding-top: 0px; position: absolute; left: 0px; top: 0px; width: 800px; ">
+                    <div style="vertical-align: top; color:#007dc3;font-size: 20px;font-family: 'Microsoft YaHei';padding-top:10px;padding-bottom: 10px;">参与人</div>
+                    <div style="float:left;">
+                    <%if(task.owner==null){%>
+                        无所属人
+                    <%}else{%>
+                        所属人: ${task.~ownerName}
+                    <%}%>
+                    </div>
+                    <div style="position: absolute;left:200px;">
+                        <%if(task.assignee==null){%>
+                        无办理人
+                        <%}else{%>
+                        办理人: ${task.~assigneeName}
+                        <%}%>
+                    </div>
+                </div>
+            </div>
+
+            <div style="position: relative; overflow: hidden;" >
+                <div style="vertical-align: top; font-weight:bold;font-family: 'Microsoft YaHei';padding-top:10px;padding-bottom: 10px;">请填写下面的表单后完成任务:</div>
+                <div class="easyui-panel" data-options="href:'${contextPath}/actForm/dynamicForm.html?taskId=${task.id}&formKey=${task.formKey}<%if(!has(isAssignee)){%>&cover=true<%}%>'">
+
                 </div>
             </div>
         </div>
-        <hr/>
-        <div style="margin: 20px;position: relative; overflow: hidden; height: 50px;">
-            <%if(task.assignee == null){%>
-            <a href="#" onclick="claimTask();" class="easyui-linkbutton" data-options="">签收</a>
-            <%}%>
-            <span>${task.description}</span>
-            <br>
-            <span>任务属于流程:'${processDefinitionName}'</span>
-        </div>
+            <!-- 隐藏流程图框 -->
+            <div id="dlg" class="easyui-dialog" resizable="true" constrain="true" shadow="true" draggable="true" title="流程图" style="padding:10px" modal="false" closed="true" border="true"
+                 data-options="
+                    iconCls: 'icon-save',
+                    width:1366,
+                    height: 640
+                ">
+                <img id="processInstanceImg" />
+            </div>
         <%}%>
     </div>
 </div>
+<!-- 队列菜单 -->
+<div id="mm" class="easyui-menu" data-options="noline:true,hideOnUnhover:false" style="width:120px;">
+    <%for(group in groupMap){%>
+    <div href="${contextPath}/task/taskCenter.html?category=queued&groupId=${group.key}">${group.value}</div>
+    <%}%>
+</div>
+
 
 <script>
+    <% if(has(task)){%>
+    /**
+     * 查看进度图片
+     * @param processInstanceId
+     * @param processDefinitionId
+     * @param processInstanceName
+     */
+    function showProgress(){
+        $('#dlg').dialog('open');
+        $('#dlg').dialog('center');
+        var href = "${contextPath}/pi/progress.action?processInstanceId=${task.processInstanceId}&processDefinitionId=${task.processDefinitionId}&"+Math.random();
+        $("#processInstanceImg").attr("src", href);
+        $('#dlg').dialog('setTitle', "${processDefinitionName}");
+    }
+
+    /**
+     * 申领任务
+     */
+    function claimTask() {
+        $.ajax({
+            type: "POST",
+            url: "${contextPath}/task/claim.action",
+            data: {taskId:"${task.id}"},
+            processData:true,
+            dataType: "json",
+            async : true,
+            success: function (data) {
+                if(data.success){
+                    location.href="${contextPath}/task/taskCenter.html?category=inbox";
+                }else{
+                    swal('错误',data.message, 'error');
+                }
+            },
+            error: function(){
+                swal('错误', '远程访问失败', 'error');
+            }
+        });
+    }
+
+    /**
+     * 显示任务详情
+     */
+    function showTask(rowIndex, rowData) {
+        location.href="${contextPath}/task/taskCenter.html?taskId="+rowData.id+"&category=${category}";
+    }
+
+    /**
+     * 任务列表格式化器
+     */
+    function fmt(value, row, index){
+        //选中当前任务
+        if(row.id=='${task.id}'){
+            return "<img style=\"vertical-align: middle;\" src=\"${contextPath}/resources/images/task-22.png\"/>&nbsp;&nbsp;<B style=\"color: #007dc3;\">"+value+"</B>";
+        }else{
+            return "<img style=\"vertical-align: middle;\" src=\"${contextPath}/resources/images/task-22.png\"/>&nbsp;&nbsp;<B>"+value+"</B>";
+        }
+    }
 
     /**
      * 处理时间描述
      */
-    function handlePublishTimeDesc(post_modified){
+    function handlePublishTimeDesc(postModified){
         // 拿到当前时间戳和发布时的时间戳，然后得出时间戳差
         var curTime = new Date();
-        var postTime = new Date(post_modified);
+        var postTime = new Date(postModified);
         var timeDiff = curTime.getTime() - postTime.getTime();
 
         // 单位换算
@@ -97,7 +211,7 @@
 
         // 最后判断时间差到底是属于哪个区间，然后return
         if(exceedWeek > 0){
-            return post_modified;
+            return postModified;
         }else{
             if(exceedDay < 7 && exceedDay > 0){
                 return exceedDay + '天前';
@@ -123,51 +237,24 @@
             return "高";
         }
     }
-
-    /**
-     * 申领任务
-     */
-    function claimTask() {
-        $.ajax({
-            type: "POST",
-            url: "${contextPath}/task/claim.action",
-            data: {taskId:"${task.id}"},
-            processData:true,
-            dataType: "json",
-            async : true,
-            success: function (data) {
-                if(data.success){
-                    location.href="${contextPath}/task/tasks.html?category=${category}";
-                }else{
-                    swal('错误',data.message, 'error');
-                }
-            },
-            error: function(){
-                swal('错误', '远程访问失败', 'error');
-            }
-        });
-
-    }
-    /**
-     * 显示任务详情
-     */
-    function showTask(rowIndex, rowData) {
-        location.href="${contextPath}/task/tasks.html?taskId="+rowData.id+"&category=${category}";
-    }
-    /**
-     * 任务列表格式化器
-     */
-    function fmt(value,row,index){
-        //选中当前任务
-        if(row.id=='${task.id}'){
-            return "<img style=\"vertical-align: middle;\" src=\"${contextPath}/resources/images/task-22.png\"/>&nbsp;&nbsp;<B style=\"color: #007dc3;\">"+value+"</B>";
-        }else{
-            return "<img style=\"vertical-align: middle;\" src=\"${contextPath}/resources/images/task-22.png\"/>&nbsp;&nbsp;<B>"+value+"</B>";
-        }
-    }
+    <%}%>
     $(function() {
+    <% if(has(task)){%>
+        //处理任务时间描述
         $("#taskTimeDesc").html(handlePublishTimeDesc("${task.createTime, 'yyyy-MM-dd HH:mm:ss'}"));
+        //处理任务优先级显示
         $("#taskPriorityDesc").html(handlePriority(${task.priority}));
+    <%}%>
+        //绑定队列tag右键菜单
+        $("#queuedTab").bind('contextmenu',function(e){
+            e.preventDefault();
+            $('#mm').menu('show', {
+                left: e.pageX,
+                top: e.pageY
+            });
+        });
     })
+
 </script>
+
 </#body>

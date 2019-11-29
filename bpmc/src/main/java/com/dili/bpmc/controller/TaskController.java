@@ -19,6 +19,7 @@ import com.dili.uap.sdk.exception.NotLoginException;
 import com.dili.uap.sdk.session.SessionContext;
 import org.activiti.engine.*;
 import org.activiti.engine.form.TaskFormData;
+import org.activiti.engine.history.HistoricProcessInstance;
 import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.engine.runtime.Execution;
 import org.activiti.engine.task.DelegationState;
@@ -94,104 +95,14 @@ public class TaskController {
      * @param taskId 任务id， 选填，用于显示指定任务详情
      * @return
      */
-    @RequestMapping(value = "/tasks.html", method = {RequestMethod.GET, RequestMethod.POST})
-    public String tasks(@RequestParam(required = false) String taskId,
+    @RequestMapping(value = "/taskCenter.html", method = {RequestMethod.GET, RequestMethod.POST})
+    public String taskCenter(@RequestParam(required = false) String taskId,
                         @RequestParam(defaultValue = "inbox") String category,
                         @RequestParam(required = false) String groupId,
                         HttpServletRequest request) {
-        UserTicket userTicket = SessionContext.getSessionContext().getUserTicket();
-        if(userTicket == null){
-            throw new NotLoginException();
-        }
-        handleTaskCategory(category, userTicket.getId().toString(), taskId, groupId, request);
+
+        handleTaskCategory(category, taskId, groupId, request);
         return "process/taskCenter";
-    }
-
-    /**
-     * 统一处理不同类别的任务
-     * @param category
-     * @param userId
-     */
-    private void handleTaskCategory(String category, String userId, String taskId, String groupId, HttpServletRequest request){
-        //待办任务
-//        指派给当前登录用户的任务
-        long inboxCount = taskService.createTaskQuery().taskAssignee(userId).count();
-        //我的任务
-//        属主的任务
-        long tasksCount = taskService.createTaskQuery().taskOwner(userId).count();
-        BaseOutput<List<Role>> rolesOutput = roleRpc.listByUser(Long.valueOf(userId), null);
-        if(!rolesOutput.isSuccess()){
-            throw new AppException("远程查询角色失败");
-        }
-        //队列任务
-//        候选用户组下的任务
-        long queuedCount = 0;
-        List<Role> roles = rolesOutput.getData();
-        for(Role role : roles) {
-            queuedCount += taskService.createTaskQuery().taskCandidateGroup(role.getId().toString()).count();
-        }
-        //受邀任务，这里和Activiti-explorer不同，只处理候选用户任务
-        long involvedCount = taskService.createTaskQuery().taskCandidateUser(userId).count();
-
-        //设置标题部分显示的任务数
-        request.setAttribute("inboxCount", inboxCount);
-        request.setAttribute("tasksCount", tasksCount);
-        request.setAttribute("queuedCount", queuedCount);
-        request.setAttribute("involvedCount", involvedCount);
-
-        //查询任务列表，用于左侧任务列表显示
-        String[] groupIds = new String[roles.size()];
-        for(int i=0; i<roles.size(); i++) {
-            groupIds[i] = roles.get(i).getId().toString();
-        }
-
-        //查询任务列表，用于左侧任务列表显示
-        //判断有groupId，并且当前用户也有该组权限
-        List<Task> tasks = containsGroupId(groupIds, groupId) ? listTaskByCategory(category, userId, groupId) : listTaskByCategory(category, userId, groupIds);
-        //设置当前显示的任务，用于在点击时直接跳转到该任务
-        Task task = null;
-        if(!CollectionUtils.isEmpty(tasks)) {
-            if (StringUtils.isBlank(taskId)) {
-                task = tasks.get(0);
-            } else {
-                for (Task t : tasks) {
-                    if (taskId.equals(t.getId())){
-                        task = t;
-                        break;
-                    }
-                }
-            }
-        }
-        if(task == null){
-            return;
-        }
-        //设置中间部分的任务详情
-        request.setAttribute("task", task);
-        //设置左侧任务列表
-        request.setAttribute("tasks", tasks);
-        //查询并设置任务所属流程名称
-        ProcessDefinition processDefinition =repositoryService.createProcessDefinitionQuery().processDefinitionId(task.getProcessDefinitionId()).singleResult();
-        request.setAttribute("processDefinitionName", processDefinition.getName());
-        //设置选择类别，用于高亮显示被选中的类别
-        request.setAttribute("category", category);
-    }
-
-    /**
-     * 判断是否包含组id
-     * @param groupIds
-     * @param groupId
-     * @return
-     */
-    private boolean containsGroupId(String[] groupIds, String groupId){
-        if(StringUtils.isBlank(groupId)){
-            return false;
-        }
-        for(String s : groupIds){
-            if(s.equals(groupId)){
-                return true;
-            }
-        }
-        return false;
     }
 
     /**
@@ -227,31 +138,6 @@ public class TaskController {
         return JSON.toJSONString(tasks, proFileter, SerializerFeature.IgnoreErrorGetter);
     }
 
-    /**
-     * 根据类别和用户查询任务列表
-     * @param category
-     * @param userId
-     * @param groupIds 用户组id列表，用于类别是任务队列时。
-     * @return
-     */
-    private List<Task> listTaskByCategory(String category, String userId, String... groupIds){
-        TaskQuery taskQuery = taskService.createTaskQuery();
-        List<Task> tasks = new ArrayList<>();
-        if(TaskCategory.INBOX.getCode().equals(category)){
-            tasks = taskQuery.taskAssignee(userId).list();
-        }else if(TaskCategory.TASKS.getCode().equals(category)){
-            tasks = taskQuery.taskOwner(userId).list();
-        }else if(TaskCategory.QUEUED.getCode().equals(category)){
-            if(groupIds != null) {
-                for(String groupId : groupIds) {
-                    tasks.addAll(taskQuery.taskCandidateGroup(groupId).list());
-                }
-            }
-        }else if(TaskCategory.INVOLVED.getCode().equals(category)){
-            tasks = taskQuery.taskCandidateUser(userId).list();
-        }
-        return tasks;
-    }
     /**
      * 查询流程实例列表
      * @param param
@@ -302,11 +188,11 @@ public class TaskController {
         }
         attr.addAttribute("formKey", formKey);
         attr.addAttribute("taskId", taskId);
-        return "redirect:"+request.getContextPath()+"/actControl/dynamicForm.html";
+        return "redirect:"+request.getContextPath()+"/actForm/dynamicForm.html";
     }
 
     /**
-     * 申领任务
+     * 申领(签收)任务
      * @param userId    申领人，为空则默认为当前登录用户
      * @param taskId    任务id
      * @param request
@@ -603,5 +489,141 @@ public class TaskController {
             e.printStackTrace();
             return BaseOutput.success("提交表单失败");
         }
+    }
+
+    /**
+     * 统一处理不同类别的任务
+     * @param category  任务类别
+     * @param taskId 任务id
+     * @param groupId 受邀用户组
+     */
+    private void handleTaskCategory(String category, String taskId, String groupId, HttpServletRequest request){
+        UserTicket userTicket = SessionContext.getSessionContext().getUserTicket();
+        if(userTicket == null){
+            throw new NotLoginException();
+        }
+        //当前用户为办理人
+        String userId = userTicket.getId().toString();
+        //待办任务
+//        指派给当前登录用户的任务
+        long inboxCount = taskService.createTaskQuery().taskAssignee(userId).count();
+        //我的任务
+//        属主的任务
+        long tasksCount = taskService.createTaskQuery().taskOwner(userId).count();
+        BaseOutput<List<Role>> rolesOutput = roleRpc.listByUser(Long.valueOf(userId), null);
+        if(!rolesOutput.isSuccess()){
+            throw new AppException("远程查询角色失败");
+        }
+        //队列任务
+//        候选用户组下的任务
+        long queuedCount = 0;
+        List<Role> roles = rolesOutput.getData();
+
+        //记录当前用户的所有用户组，用于查询左侧任务列表显示
+        String[] groupIds = new String[roles.size()];
+        for(int i=0; i<roles.size(); i++) {
+            Role role = roles.get(i);
+            groupIds[i] = role.getId().toString();
+        }
+        //用户组信息，用于队列右键菜单显示
+        Map<String, String> groupMap = new HashMap<>(roles.size());
+        //统计每个用户组的任务数
+        for(Role role : roles) {
+            long count = taskService.createTaskQuery().taskCandidateGroup(role.getId().toString()).count();
+            queuedCount += count;
+            groupMap.put(role.getId().toString(), new StringBuilder().append(role.getRoleName()).append("[").append(count).append("]").toString());
+        }
+        request.setAttribute("groupMap", groupMap);
+        //受邀任务，这里和Activiti-explorer不同，只处理候选用户任务
+        long involvedCount = taskService.createTaskQuery().taskCandidateUser(userId).count();
+
+        //设置标题部分显示的任务数
+        request.setAttribute("inboxCount", inboxCount);
+        request.setAttribute("tasksCount", tasksCount);
+        request.setAttribute("queuedCount", queuedCount);
+        request.setAttribute("involvedCount", involvedCount);
+
+
+        //查询任务列表，用于左侧任务列表显示
+        //判断有groupId，并且当前用户也有该组权限, 没有groupId则列出当前用户组下所有任务
+        List<Task> tasks = containsGroupId(groupIds, groupId) ? listTaskByCategory(category, userId, groupId) : listTaskByCategory(category, userId, groupIds);
+        //设置当前显示的任务，用于在点击时直接跳转到该任务
+        Task task = null;
+        if(!CollectionUtils.isEmpty(tasks)) {
+            if (StringUtils.isBlank(taskId)) {
+                task = tasks.get(0);
+            } else {
+                for (Task t : tasks) {
+                    if (taskId.equals(t.getId())){
+                        task = t;
+                        break;
+                    }
+                }
+            }
+        }
+        //设置选择类别，用于高亮显示被选中的类别
+        request.setAttribute("category", category);
+        if(task == null){
+            return;
+        }
+        //设置流程发起人(这个会稍微影响性能，暂时不开放)
+//        HistoricProcessInstance historicProcessInstance = historyService.createHistoricProcessInstanceQuery().processInstanceId(task.getProcessInstanceId()).singleResult();
+//        request.setAttribute("startUserId", historicProcessInstance.getStartUserId());
+        //判断当前用户是否是办理人，如果不是则需要屏蔽任务表单
+        if(userId.equals(task.getAssignee())){
+            request.setAttribute("isAssignee", true);
+        }
+        //设置中间部分的任务详情
+        request.setAttribute("task", task);
+        //设置左侧任务列表
+        request.setAttribute("tasks", tasks);
+        //查询并设置任务所属流程名称
+        ProcessDefinition processDefinition =repositoryService.createProcessDefinitionQuery().processDefinitionId(task.getProcessDefinitionId()).singleResult();
+        request.setAttribute("processDefinitionName", processDefinition.getName());
+
+    }
+
+    /**
+     * 判断是否包含组id
+     * @param groupIds
+     * @param groupId
+     * @return
+     */
+    private boolean containsGroupId(String[] groupIds, String groupId){
+        if(StringUtils.isBlank(groupId)){
+            return false;
+        }
+        for(String s : groupIds){
+            if(s.equals(groupId)){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 根据类别和用户查询任务列表
+     * @param category
+     * @param userId
+     * @param groupIds 用户组id列表，用于类别是任务队列时。
+     * @return
+     */
+    private List<Task> listTaskByCategory(String category, String userId, String... groupIds){
+        TaskQuery taskQuery = taskService.createTaskQuery();
+        List<Task> tasks = new ArrayList<>();
+        if(TaskCategory.INBOX.getCode().equals(category)){
+            tasks = taskQuery.taskAssignee(userId).list();
+        }else if(TaskCategory.TASKS.getCode().equals(category)){
+            tasks = taskQuery.taskOwner(userId).list();
+        }else if(TaskCategory.QUEUED.getCode().equals(category)){
+            if(groupIds != null) {
+                for(String groupId : groupIds) {
+                    tasks.addAll(taskQuery.taskCandidateGroup(groupId).list());
+                }
+            }
+        }else if(TaskCategory.INVOLVED.getCode().equals(category)){
+            tasks = taskQuery.taskCandidateUser(userId).list();
+        }
+        return tasks;
     }
 }

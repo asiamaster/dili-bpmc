@@ -95,6 +95,8 @@ public class ProcessDefinitionController {
             throw new NotLoginException();
         }
         //流程发起前设置发起人，记录在流程历史中
+//        在流程开始之前设置，会自动在表ACT_HI_PROCINST 中的START_USER_ID_中设置用户ID：
+//        用来设置启动流程的人员ID，引擎会自动把用户ID保存到activiti:initiator中
         identityService.setAuthenticatedUserId(userTicket.getId().toString());
         ProcessInstance processInstance = runtimeService.startProcessInstanceById(processDefinitionId, businessKey, variables);
 //        ProcessInstanceDto processInstance = formService.submitStartFormData(processDefinitionId);
@@ -153,7 +155,7 @@ public class ProcessDefinitionController {
         }
         attr.addAttribute("formKey", formKey);
         attr.addAttribute("processDefinitionId", processDefinitionId);
-        return "redirect:"+request.getContextPath()+"/actControl/dynamicForm.html";
+        return "redirect:"+request.getContextPath()+"/actForm/dynamicForm.html";
     }
 
     /**
