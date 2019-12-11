@@ -27,17 +27,6 @@
              background: -o-linear-gradient(top, #fff, #e1e1e1);
          }
     </style>
-    <%
-    if(has(pageCss) && pageCss=="true"){
-    %>
-    <#pageCss/>
-    <%
-    }
-    %>
-    
-    <% if(has(pageJs) && pageJs=="true"){%>
-    <#pageJs/>
-    <%}%>
     <script type="text/javascript">
         var contextPath = '${contextPath}';
     </script>

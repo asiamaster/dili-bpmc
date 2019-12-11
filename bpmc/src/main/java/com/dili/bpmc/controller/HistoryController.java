@@ -55,6 +55,7 @@ public class HistoryController {
      */
     @RequestMapping(value = "/hisProcInst.html", method = {RequestMethod.GET})
     public String hisProcInst(HttpServletRequest request) {
+//        request.setAttribute("total", historyService.createHistoricProcessInstanceQuery().count());
         return "process/hisProcInst";
     }
 
@@ -66,6 +67,7 @@ public class HistoryController {
      */
     @RequestMapping(value = "/hisActInst.html", method = {RequestMethod.GET})
     public String hisActInst(HttpServletRequest request) {
+//        request.setAttribute("total", historyService.createHistoricActivityInstanceQuery().count());
         return "process/hisActInst";
     }
 
@@ -76,6 +78,7 @@ public class HistoryController {
      */
     @RequestMapping(value = "/hisTaskInst.html", method = {RequestMethod.GET})
     public String hisTaskInst(HttpServletRequest request) {
+//        request.setAttribute("total", historyService.createHistoricTaskInstanceQuery().count());
         return "process/hisTaskInst";
     }
 
@@ -86,6 +89,7 @@ public class HistoryController {
      */
     @RequestMapping(value = "/hisVarInst.html", method = {RequestMethod.GET})
     public String hisVarInst(HttpServletRequest request) {
+//        request.setAttribute("total", historyService.createHistoricVariableInstanceQuery().count());
         return "process/hisVarInst";
     }
 

@@ -29,11 +29,11 @@
             </form>
         </div>
     </div>
-    <div region="center" style="width:100%;padding-top: 1px" height="auto">
-        <table class="easyui-datagrid" title="历史变量" id="hisVarInstGrid" fitColumns="true" fit="true" noheader="true"
+    <div region="center" style="width:100%;" height="auto">
+        <table class="easyui-datagrid" title="ACT_HI_VARINST" id="hisVarInstGrid" fitColumns="true" fit="true" noheader="false"
                pageSize="50" pageNumber="1" pagePosition="top" rownumbers="true" remoteSort="false"
                loadMsg="数据加载中..." singleSelect="true" method="post" multiSort="false" sortName="id"
-               align="center" striped="true" idField="id" data-options="view:scrollview, autoRowHeight:false" >
+               align="center" striped="true" idField="id" data-options="view:scrollview, autoRowHeight:false,onLoadSuccess:updateTotal" >
             <thead>
             <tr>
                 <th width="220" data-options="field:'id',   sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
@@ -76,6 +76,13 @@
         $("#hisVarInstGrid").datagrid("load", bindGridMeta2Form("hisVarInstGrid", "form"));
     }
 
+    /**
+     * 表格数据加载成功后修改表格标题中的总计数
+     * @param data
+     */
+    function updateTotal(data) {
+        $(".panel-title").html("ACT_HI_TASKINST(" + data.total + ")");
+    }
 
     //清空表单
     function clearForm() {

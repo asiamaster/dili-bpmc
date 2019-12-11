@@ -3,15 +3,17 @@ package com.dili.bpmc.controller;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
-import com.alibaba.fastjson.serializer.PropertyFilter;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.dili.bpmc.consts.TaskCategory;
-import com.dili.bpmc.domain.TaskDto;
 import com.dili.bpmc.rpc.RoleRpc;
+import com.dili.bpmc.sdk.domain.ActForm;
+import com.dili.bpmc.sdk.dto.TaskDto;
+import com.dili.bpmc.service.ActFormService;
 import com.dili.ss.activiti.service.ActivitiService;
 import com.dili.ss.domain.BaseOutput;
 import com.dili.ss.domain.EasyuiPageOutput;
 import com.dili.ss.exception.AppException;
+import com.dili.ss.exception.ParamErrorException;
 import com.dili.ss.metadata.ValueProviderUtils;
 import com.dili.uap.sdk.domain.Role;
 import com.dili.uap.sdk.domain.UserTicket;
@@ -19,7 +21,6 @@ import com.dili.uap.sdk.exception.NotLoginException;
 import com.dili.uap.sdk.session.SessionContext;
 import org.activiti.engine.*;
 import org.activiti.engine.form.TaskFormData;
-import org.activiti.engine.history.HistoricProcessInstance;
 import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.engine.runtime.Execution;
 import org.activiti.engine.task.DelegationState;
@@ -67,7 +68,10 @@ public class TaskController {
     @Autowired
     private ActivitiService activitiService;
     @Autowired
+    private ActFormService actFormService;
+    @Autowired
     private RoleRpc roleRpc;
+
     private final String INDEX = "/task/index.html";
 
     /**
@@ -100,46 +104,45 @@ public class TaskController {
                         @RequestParam(defaultValue = "inbox") String category,
                         @RequestParam(required = false) String groupId,
                         HttpServletRequest request) {
-
         handleTaskCategory(category, taskId, groupId, request);
         return "process/taskCenter";
     }
 
-    /**
-     * 查询任务列表
-     * @param userId 用户ID
-     * @param category 页面类型(inbox(默认), tasks, queued, involved和archived)
-     * @param groupId 用户组ID
-     * @param taskId 用于右侧任务详情面板显示指定的任务，选填，默认为第一个任务
-     * @return
-     * @throws Exception
-     */
-    @RequestMapping(value="/taskList.action", method = {RequestMethod.GET, RequestMethod.POST})
-    public @ResponseBody String taskList(@RequestParam String category, @RequestParam(required = false) String userId, @RequestParam(required = false) String groupId, @RequestParam(required = false) String taskId) throws Exception {
-        //如果没有userId参数，则使用当前登录的用户
-        if(StringUtils.isBlank(userId)){
-            UserTicket userTicket = SessionContext.getSessionContext().getUserTicket();
-            if(userTicket == null){
-                throw new NotLoginException();
-            }
-            userId = userTicket.getId().toString();
-        }
-        //查询任务列表，用于左侧任务列表显示
-        List<Task> tasks = listTaskByCategory(category, userId, groupId);
-        PropertyFilter proFileter = new PropertyFilter() {
-            @Override
-            public boolean apply(Object object, String name, Object value) {
-                if("id".equalsIgnoreCase(name) || "name".equalsIgnoreCase(name)){
-                    return true;
-                }
-                return false;
-            }
-        };
-        return JSON.toJSONString(tasks, proFileter, SerializerFeature.IgnoreErrorGetter);
-    }
+//    /**
+//     * 查询任务列表
+//     * @param userId 用户ID
+//     * @param category 页面类型(inbox(默认), tasks, queued, involved和archived)
+//     * @param groupId 用户组ID
+//     * @param taskId 用于右侧任务详情面板显示指定的任务，选填，默认为第一个任务
+//     * @return
+//     * @throws Exception
+//     */
+//    @RequestMapping(value="/taskList.action", method = {RequestMethod.GET, RequestMethod.POST})
+//    public @ResponseBody String taskList(@RequestParam String category, @RequestParam(required = false) String userId, @RequestParam(required = false) String groupId, @RequestParam(required = false) String taskId) throws Exception {
+//        //如果没有userId参数，则使用当前登录的用户
+//        if(StringUtils.isBlank(userId)){
+//            UserTicket userTicket = SessionContext.getSessionContext().getUserTicket();
+//            if(userTicket == null){
+//                throw new NotLoginException();
+//            }
+//            userId = userTicket.getId().toString();
+//        }
+//        //查询任务列表，用于左侧任务列表显示
+//        List<Task> tasks = listTaskByCategory(category, userId, groupId);
+//        PropertyFilter proFileter = new PropertyFilter() {
+//            @Override
+//            public boolean apply(Object object, String name, Object value) {
+//                if("id".equalsIgnoreCase(name) || "name".equalsIgnoreCase(name)){
+//                    return true;
+//                }
+//                return false;
+//            }
+//        };
+//        return JSON.toJSONString(tasks, proFileter, SerializerFeature.IgnoreErrorGetter);
+//    }
 
     /**
-     * 查询流程实例列表
+     * 查询任务列表
      * @param param
      * @return
      * @throws Exception
@@ -264,7 +267,6 @@ public class TaskController {
         userId =  userTicket.getId().toString();
         // 当前用户申领任务
         taskService.claim(taskId, userId);
-        taskService.setVariable(taskId, "taskId", taskId);
         // 完成任务
         taskService.complete(taskId, variables);
         return BaseOutput.success();
@@ -280,17 +282,6 @@ public class TaskController {
      */
     @RequestMapping(value = "/complete.action", method = {RequestMethod.GET})
     public BaseOutput<String> complete(@RequestParam String taskId, @RequestParam Map variables, HttpServletRequest request, HttpServletResponse response) throws IOException {
-//        TaskDto task = taskService.createTaskQuery().taskId(taskId).singleResult();
-//        if(task == null){
-//            System.out.println("任务不存在");
-//            response.sendRedirect(request.getContextPath() + INDEX);
-//            return;
-//        }
-//        if(StringUtils.isBlank(task.getAssignee())){
-//            System.out.println("任务还未认领");
-//            response.sendRedirect(request.getContextPath() + INDEX);
-//            return;
-//        }
         taskService.complete(taskId, variables);
         return BaseOutput.success();
     }
@@ -401,12 +392,7 @@ public class TaskController {
         if(executions == null || executions.isEmpty()){
             return BaseOutput.failure("信号["+signalId+"]发送失败");
         }
-        Map<String, Object> param = new HashMap<>();
-        param.put("key1", "value1");
-        param.put("key2", "value2");
         for(Execution execution : executions) {
-            param.put(execution.getId(), execution.getActivityId());
-            runtimeService.setVariablesLocal(execution.getId(), param);
             runtimeService.signal(execution.getId(), variables);
         }
         return BaseOutput.success("信号["+signalId+"]发送成功");
@@ -543,7 +529,6 @@ public class TaskController {
         request.setAttribute("queuedCount", queuedCount);
         request.setAttribute("involvedCount", involvedCount);
 
-
         //查询任务列表，用于左侧任务列表显示
         //判断有groupId，并且当前用户也有该组权限, 没有groupId则列出当前用户组下所有任务
         List<Task> tasks = containsGroupId(groupIds, groupId) ? listTaskByCategory(category, userId, groupId) : listTaskByCategory(category, userId, groupIds);
@@ -566,6 +551,12 @@ public class TaskController {
         if(task == null){
             return;
         }
+        //表单key，用于显示任务内容
+        String formKey = task.getFormKey();
+        ActForm actForm = actFormService.getByKey(formKey);
+        if(actForm == null){
+            throw new ParamErrorException("任务表单["+formKey+"]不存在");
+        }
         //设置流程发起人(这个会稍微影响性能，暂时不开放)
 //        HistoricProcessInstance historicProcessInstance = historyService.createHistoricProcessInstanceQuery().processInstanceId(task.getProcessInstanceId()).singleResult();
 //        request.setAttribute("startUserId", historicProcessInstance.getStartUserId());
@@ -573,6 +564,8 @@ public class TaskController {
         if(userId.equals(task.getAssignee())){
             request.setAttribute("isAssignee", true);
         }
+
+        request.setAttribute("actForm", actForm);
         //设置中间部分的任务详情
         request.setAttribute("task", task);
         //设置左侧任务列表

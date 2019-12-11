@@ -144,11 +144,10 @@ public class ProcessDefinitionController {
      * 开始节点表单页面
      * @param processDefinitionId
      * @param request
-     * @param response
      * @throws IOException
      */
     @RequestMapping(value = "/startForm.html", method = {RequestMethod.GET, RequestMethod.POST})
-    public String startForm(@RequestParam String processDefinitionId, HttpServletRequest request, HttpServletResponse response, RedirectAttributes attr) throws IOException {
+    public String startForm(@RequestParam String processDefinitionId, HttpServletRequest request, RedirectAttributes attr) {
         String formKey = formService.getStartFormKey(processDefinitionId);
         if(StringUtils.isBlank(formKey)){
             throw new RuntimeException("流程定义["+processDefinitionId+"]没有开始表单");

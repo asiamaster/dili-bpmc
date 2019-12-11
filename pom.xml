@@ -13,7 +13,8 @@
 
 	<modules>
 		<module>bpmc</module>
-		<!--<module>activiti-demo</module>-->
+		<module>bpmc-sdk</module>
+		<module>bpmd</module>
 	</modules>
 
 	<properties>
@@ -37,7 +38,7 @@
 		<springloaded.version>1.2.8.RELEASE</springloaded.version>
 		<mapper.version>3.3.9</mapper.version>
 		<mysql.version>5.1.38</mysql.version>
-		<sharp-sword.version>2.5.0-SNAPSHOT</sharp-sword.version>
+		<sharp-sword.version>3.5.2-SNAPSHOT</sharp-sword.version>
 	</properties>
 
 	<!-- 注意： 这里必须要添加， 否者各种依赖有问题  -->
@@ -153,24 +154,9 @@
 				</configuration>
 				<dependencies>
 					<dependency>
-						<groupId>mysql</groupId>
-						<artifactId>mysql-connector-java</artifactId>
-						<version>${mysql.version}</version>
-					</dependency>
-					<dependency>
-						<groupId>tk.mybatis</groupId>
-						<artifactId>mapper</artifactId>
-						<version>${mapper.version}</version>
-					</dependency>
-					<dependency>
 						<groupId>com.dili</groupId>
-						<artifactId>sharp-sword</artifactId>
+						<artifactId>ss-mbg</artifactId>
 						<version>${sharp-sword.version}</version>
-					</dependency>
-					<dependency>
-						<groupId>com.ibeetl</groupId>
-						<artifactId>beetl</artifactId>
-						<version>2.9.9</version>
 					</dependency>
 				</dependencies>
 			</plugin>

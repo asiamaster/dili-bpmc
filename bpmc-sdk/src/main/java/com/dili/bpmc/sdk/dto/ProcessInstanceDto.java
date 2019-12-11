@@ -1,4 +1,4 @@
-package com.dili.bpmc.domain;
+package com.dili.bpmc.sdk.dto;
 
 /**
  * 任务查询对象

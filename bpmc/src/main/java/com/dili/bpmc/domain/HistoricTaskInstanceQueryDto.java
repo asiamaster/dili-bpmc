@@ -1,5 +1,7 @@
 package com.dili.bpmc.domain;
 
+import com.dili.bpmc.sdk.dto.TaskDto;
+
 /**
  * 历史任务实例查询对象
  *  @Author: WangMi

@@ -3,7 +3,9 @@ package com.dili.bpmc.controller;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.dili.ss.activiti.service.ActivitiService;
+import com.dili.ss.constant.ResultCode;
 import com.dili.ss.domain.BaseOutput;
+import com.dili.ss.exception.BusinessException;
 import org.activiti.engine.*;
 import org.activiti.engine.repository.Deployment;
 import org.apache.commons.io.IOUtils;
@@ -111,12 +113,12 @@ public class DeploymentController {
      * @throws Exception
      */
     @RequestMapping(value = "/deploy.action", method = {RequestMethod.GET})
-    public void deploy(@RequestParam("modelId")String modelId, HttpServletRequest request, HttpServletResponse response) throws IOException {
+    public void deploy(@RequestParam("modelId")String modelId, HttpServletRequest request, HttpServletResponse response) throws IOException, BusinessException {
         try {
             activitiService.deployByModelId(modelId);
         }catch (ActivitiException e){
             log.warn(e.getMessage());
-            response.getWriter().write(e.getMessage());
+            throw new BusinessException(ResultCode.DATA_ERROR, e.getMessage());
         }
         response.sendRedirect(request.getContextPath() + INDEX);
     }

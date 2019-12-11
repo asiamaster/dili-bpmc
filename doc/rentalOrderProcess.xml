@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:activiti="http://activiti.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://www.w3.org/1999/XPath" targetNamespace="http://www.activiti.org/processdef">
+  <message id="deleteRentalOrderMessage" name="deleteRentalOrderMsg"></message>
+  <message id="invalidRentalOrderMessage" name="invalidRentalOrderMsg"></message>
+  <process id="rentalOrderProcess" name="租赁单流程" isExecutable="true">
+    <documentation>租赁订单流程演示</documentation>
+    <startEvent id="createRentalOrder" name="创建租赁单">
+      <documentation>创建租赁订单</documentation>
+    </startEvent>
+    <userTask id="submitRentalOrder" name="提交租赁单" activiti:candidateGroups="19,20" activiti:formKey="submitRentalOrderForm" activiti:priority="10">
+      <documentation>提交租赁订单</documentation>
+    </userTask>
+    <sequenceFlow id="sid-833E2023-465D-4A02-80CC-0A9F5871FA41" sourceRef="createRentalOrder" targetRef="submitRentalOrder"></sequenceFlow>
+    <userTask id="settlementRentalOrder" name="缴费" activiti:candidateUsers="1" activiti:candidateGroups="19,20" activiti:formKey="settlementRentalOrderForm" activiti:priority="80">
+      <documentation>租赁单缴费</documentation>
+    </userTask>
+    <sequenceFlow id="sid-A19DB0C3-0DCF-4E36-B6B2-06A7A316570A" sourceRef="submitRentalOrder" targetRef="settlementRentalOrder"></sequenceFlow>
+    <intermediateCatchEvent id="validateTimer" name="订单生效定义器">
+      <documentation>订单生效定义器</documentation>
+      <timerEventDefinition>
+        <timeDate>${effectiveTime}</timeDate>
+      </timerEventDefinition>
+    </intermediateCatchEvent>
+    <sequenceFlow id="sid-67B115E5-92FD-4F29-ABF8-E938346137EA" sourceRef="settlementRentalOrder" targetRef="validateTimer"></sequenceFlow>
+    <serviceTask id="takeRentalOrderEffect" name="租赁单生效" activiti:delegateExpression="${rentalOrderEffectService}">
+      <documentation>使租赁订单生效</documentation>
+    </serviceTask>
+    <sequenceFlow id="sid-981470C8-088B-444D-8578-1566200098BA" sourceRef="validateTimer" targetRef="takeRentalOrderEffect"></sequenceFlow>
+    <endEvent id="endRentalOrder" name="结束租赁单流程">
+      <documentation>租赁订单流程结束</documentation>
+      <terminateEventDefinition></terminateEventDefinition>
+    </endEvent>
+    <sequenceFlow id="sid-A89805B9-530A-4482-B78F-9895A0991220" sourceRef="takeRentalOrderEffect" targetRef="endRentalOrder"></sequenceFlow>
+    <endEvent id="deleteRentalOrderTerminate">
+      <terminateEventDefinition></terminateEventDefinition>
+    </endEvent>
+    <endEvent id="invalidateRentalOrderTerminate">
+      <terminateEventDefinition></terminateEventDefinition>
+    </endEvent>
+    <sequenceFlow id="sid-B6EB70B7-F3C9-4C38-B6B7-B0710AB65595" sourceRef="invalidateRentalOrder" targetRef="invalidateRentalOrderTerminate"></sequenceFlow>
+    <sequenceFlow id="sid-31B1F0AB-1A94-4B07-AA92-8C3FABBD2EA8" sourceRef="deleteRentalOrder" targetRef="deleteRentalOrderTerminate"></sequenceFlow>
+    <boundaryEvent id="deleteRentalOrder" name="删除租赁单" attachedToRef="submitRentalOrder" cancelActivity="true">
+      <documentation>删除租赁订单，结束流程</documentation>
+      <messageEventDefinition messageRef="deleteRentalOrderMessage"></messageEventDefinition>
+    </boundaryEvent>
+    <boundaryEvent id="invalidateRentalOrder" name="租赁单作废" attachedToRef="settlementRentalOrder" cancelActivity="true">
+      <documentation>租赁订单作废，结束流程</documentation>
+      <messageEventDefinition messageRef="invalidRentalOrderMessage"></messageEventDefinition>
+    </boundaryEvent>
+  </process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_rentalOrderProcess">
+    <bpmndi:BPMNPlane bpmnElement="rentalOrderProcess" id="BPMNPlane_rentalOrderProcess">
+      <bpmndi:BPMNShape bpmnElement="createRentalOrder" id="BPMNShape_createRentalOrder">
+        <omgdc:Bounds height="30.0" width="30.0" x="90.0" y="130.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="submitRentalOrder" id="BPMNShape_submitRentalOrder">
+        <omgdc:Bounds height="80.0" width="100.0" x="225.0" y="105.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="settlementRentalOrder" id="BPMNShape_settlementRentalOrder">
+        <omgdc:Bounds height="80.0" width="100.0" x="450.0" y="102.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="validateTimer" id="BPMNShape_validateTimer">
+        <omgdc:Bounds height="31.0" width="31.0" x="675.9375" y="126.5"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="takeRentalOrderEffect" id="BPMNShape_takeRentalOrderEffect">
+        <omgdc:Bounds height="80.0" width="100.0" x="808.4375" y="102.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="endRentalOrder" id="BPMNShape_endRentalOrder">
+        <omgdc:Bounds height="28.0" width="28.0" x="1007.4375" y="128.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="deleteRentalOrderTerminate" id="BPMNShape_deleteRentalOrderTerminate">
+        <omgdc:Bounds height="28.0" width="28.0" x="261.0" y="276.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="invalidateRentalOrderTerminate" id="BPMNShape_invalidateRentalOrderTerminate">
+        <omgdc:Bounds height="28.0" width="28.0" x="486.0" y="276.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="deleteRentalOrder" id="BPMNShape_deleteRentalOrder">
+        <omgdc:Bounds height="30.0" width="30.0" x="260.4814876253994" y="170.62004694278417"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="invalidateRentalOrder" id="BPMNShape_invalidateRentalOrder">
+        <omgdc:Bounds height="30.0" width="29.999999999999943" x="484.3169118783275" y="167.59495123082453"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge bpmnElement="sid-981470C8-088B-444D-8578-1566200098BA" id="BPMNEdge_sid-981470C8-088B-444D-8578-1566200098BA">
+        <omgdi:waypoint x="707.9374278562717" y="142.45195216859977"></omgdi:waypoint>
+        <omgdi:waypoint x="808.4375" y="142.15015015015015"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="sid-833E2023-465D-4A02-80CC-0A9F5871FA41" id="BPMNEdge_sid-833E2023-465D-4A02-80CC-0A9F5871FA41">
+        <omgdi:waypoint x="120.0" y="145.0"></omgdi:waypoint>
+        <omgdi:waypoint x="225.0" y="145.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="sid-67B115E5-92FD-4F29-ABF8-E938346137EA" id="BPMNEdge_sid-67B115E5-92FD-4F29-ABF8-E938346137EA">
+        <omgdi:waypoint x="550.0" y="142.0"></omgdi:waypoint>
+        <omgdi:waypoint x="675.9375" y="142.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="sid-A19DB0C3-0DCF-4E36-B6B2-06A7A316570A" id="BPMNEdge_sid-A19DB0C3-0DCF-4E36-B6B2-06A7A316570A">
+        <omgdi:waypoint x="325.0" y="144.33333333333331"></omgdi:waypoint>
+        <omgdi:waypoint x="450.0" y="142.66666666666669"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="sid-B6EB70B7-F3C9-4C38-B6B7-B0710AB65595" id="BPMNEdge_sid-B6EB70B7-F3C9-4C38-B6B7-B0710AB65595">
+        <omgdi:waypoint x="499.41230883334805" y="197.59464787512277"></omgdi:waypoint>
+        <omgdi:waypoint x="499.91096284198085" y="276.0002831319883"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="sid-A89805B9-530A-4482-B78F-9895A0991220" id="BPMNEdge_sid-A89805B9-530A-4482-B78F-9895A0991220">
+        <omgdi:waypoint x="908.4375" y="142.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1007.4375" y="142.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="sid-31B1F0AB-1A94-4B07-AA92-8C3FABBD2EA8" id="BPMNEdge_sid-31B1F0AB-1A94-4B07-AA92-8C3FABBD2EA8">
+        <omgdi:waypoint x="275.4122958186247" y="200.61988735839776"></omgdi:waypoint>
+        <omgdi:waypoint x="275.0645790196564" y="276.0001489454273"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</definitions>

@@ -1,4 +1,5 @@
 <#body head_title="任务页面">
+
 <style>
     /*设置表格行高*/
     .datagrid-row {
@@ -6,6 +7,7 @@
     }
     /*选中tab效果*/
     .tab-selected{
+        font-weight: bold;
         font-size:18px;
         color:#007dc3;
         display:inline;
@@ -26,7 +28,7 @@
 </style>
 <div class="easyui-layout" fit="true" >
     <!-- ====================================== ================================================================================ -->
-    <!-- 上方布局 -->
+    <!-- 北侧布局 -->
     <!-- ====================================================================================================================== -->
     <div region="north" style="border-bottom: 1px solid #ababab;" align="center">
         <!-- =========================================================表单========================================================= -->
@@ -37,6 +39,7 @@
             <a <%if(category=='involved'){%>class="tab-selected"<%}else{%>class="tab-unselected"<%}%> <%if(involvedCount>0){%>href="${contextPath}/task/taskCenter.html?category=involved"<%}%> style="margin-left: 18px;">受邀[${involvedCount}]</a>
         </div>
     </div>
+    <!-- 西侧布局 -->
     <div region="west" style="width:260px;padding-top: 1px;" height="auto">
         <% if(has(task)){%>
         <ul class="easyui-datalist" title="流程列表" lines="true" noheader="true" valueField="id" textField="name" loadMsg="数据加载中..."
@@ -47,8 +50,11 @@
         </ul>
         <%}%>
     </div>
-    <div region="center" style="float:left;width:100%;padding-top: 1px;" height="auto">
-        <% if(has(task)){%>
+    <!-- 中央布局 -->
+    <div region="center" id="centerRegion" style="float:left;width:100%;padding-top: 1px;" height="auto">
+        <% //定义表单页面
+            var url;
+        if(has(task)){%>
         <div style="margin: 25px;">
             <!-- 任务信息 -->
             <div style="position: relative; overflow: hidden; height: 70px;border-bottom: 1px solid #CCC;">
@@ -103,11 +109,25 @@
                     </div>
                 </div>
             </div>
-
+            <div style="vertical-align: top; font-weight:bold;font-family: 'Microsoft YaHei';padding-top:10px;padding-bottom: 10px;">请填写下面的表单后完成任务:<img align="right" onclick="maximize()" src="${contextPath}/resources/images/maximize-16.png"/></div>
+            <!-- 任务详情 -->
             <div style="position: relative; overflow: hidden;" >
-                <div style="vertical-align: top; font-weight:bold;font-family: 'Microsoft YaHei';padding-top:10px;padding-bottom: 10px;">请填写下面的表单后完成任务:</div>
-                <div class="easyui-panel" data-options="href:'${contextPath}/actForm/dynamicForm.html?taskId=${task.id}&formKey=${task.formKey}<%if(!has(isAssignee)){%>&cover=true<%}%>'">
 
+                <%
+                url = actForm.taskUrl + "?taskId=" + task.id + "&formKey=" + task.formKey;
+                //没有办理人则遮照
+                if(!has(isAssignee)) {
+                    //beetl不支持+=，艹
+                    url = url + "&cover=true";
+                }
+                //站内页面，使用href，站外页面(http开头)使用iframe
+                if(strutil.startWith(actForm.taskUrl, "http")){
+                var content = "<iframe id=\"actFormFrame\" src=\"" + url + "\" frameborder=\"0\" height=\"100%\" width=\"100%\" scrolling=\"yes\"></iframe>";
+                %>
+                ${content}
+                <%}else{//站内页面%>
+                <div class="easyui-panel" style="width: 100%;" data-options="href:'${contextPath}${url}'" >
+                <%}%>
                 </div>
             </div>
         </div>
@@ -132,7 +152,21 @@
 
 
 <script>
+    //监听子页面的toLogin事件消息
+    window.addEventListener('message',function(e){
+        var data = e.data;
+        var origin = e.origin;
+        window.location.href=data;
+    },false);
+
     <% if(has(task)){%>
+        /**
+         * 打开任务页面
+         */
+        function maximize() {
+            //window.open("${url}");
+            window.location.href = '${url}';
+        }
     /**
      * 查看进度图片
      * @param processInstanceId
@@ -160,9 +194,9 @@
             async : true,
             success: function (data) {
                 if(data.success){
-                    location.href="${contextPath}/task/taskCenter.html?category=inbox";
+                    location.href="${contextPath}/task/taskCenter.html?category=inbox&taskId=${task.id}";
                 }else{
-                    swal('错误',data.message, 'error');
+                    swal('错误', data.message, 'error');
                 }
             },
             error: function(){
@@ -184,9 +218,9 @@
     function fmt(value, row, index){
         //选中当前任务
         if(row.id=='${task.id}'){
-            return "<img style=\"vertical-align: middle;\" src=\"${contextPath}/resources/images/task-22.png\"/>&nbsp;&nbsp;<B style=\"color: #007dc3;\">"+value+"</B>";
+            return "<img style=\"vertical-align: middle;\" src=\"${contextPath}/resources/images/task-22.png\"/>&nbsp;&nbsp;<B style=\"color: #007dc3;font-family: 'Microsoft YaHei';\">"+value+"</B>";
         }else{
-            return "<img style=\"vertical-align: middle;\" src=\"${contextPath}/resources/images/task-22.png\"/>&nbsp;&nbsp;<B>"+value+"</B>";
+            return "<img style=\"vertical-align: middle;\" src=\"${contextPath}/resources/images/task-22.png\"/>&nbsp;&nbsp;"+value;
         }
     }
 
@@ -239,22 +273,29 @@
             return "高";
         }
     }
-    <%}%>
+    <%}//end of has task%>
     $(function() {
-    <% if(has(task)){%>
-        //处理任务时间描述
-        $("#taskTimeDesc").html(handlePublishTimeDesc("${task.createTime, 'yyyy-MM-dd HH:mm:ss'}"));
-        //处理任务优先级显示
-        $("#taskPriorityDesc").html(handlePriority(${task.priority}));
-    <%}%>
+        <% if(has(task)){%>
+            //处理任务时间描述
+            $("#taskTimeDesc").html(handlePublishTimeDesc("${task.createTime, 'yyyy-MM-dd HH:mm:ss'}"));
+            //处理任务优先级显示
+            $("#taskPriorityDesc").html(handlePriority(${task.priority}));
+            //iframe自适应高度
+            var iframe = document.getElementById("actFormFrame");
+            //中央区域的高度减去上任务基本属性的高度
+            if(iframe) {
+                iframe.height = $("#centerRegion").height() - 345;
+            }
+        <%}%>
         //绑定队列tag右键菜单
-        $("#queuedTab").bind('contextmenu',function(e){
+        $("#queuedTab").bind('contextmenu', function(e){
             e.preventDefault();
             $('#mm').menu('show', {
                 left: e.pageX,
                 top: e.pageY
             });
         });
+
     })
 
 </script>
