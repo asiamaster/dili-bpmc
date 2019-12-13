@@ -18,7 +18,7 @@
     <intermediateCatchEvent id="validateTimer" name="订单生效定义器">
       <documentation>订单生效定义器</documentation>
       <timerEventDefinition>
-        <timeDate>${effectiveTime}</timeDate>
+        <timeDate>${fireTime}</timeDate>
       </timerEventDefinition>
     </intermediateCatchEvent>
     <sequenceFlow id="sid-67B115E5-92FD-4F29-ABF8-E938346137EA" sourceRef="settlementRentalOrder" targetRef="validateTimer"></sequenceFlow>

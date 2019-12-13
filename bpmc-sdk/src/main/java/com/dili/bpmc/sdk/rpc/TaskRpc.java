@@ -73,7 +73,7 @@ public interface TaskRpc {
 
 	/**
 	 * 根据任务id查询任务
-	 * @param taskId
+	 * @param taskId，必填
 	 * @return
 	 */
 	@GET("/api/task/getById")

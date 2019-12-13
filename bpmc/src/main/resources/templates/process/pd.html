@@ -12,7 +12,7 @@
         <table class="easyui-datagrid" title="流程定义管理" id="processDefinitionGrid" fitColumns="true" noheader="true"
                pagination="false" rownumbers="false" remoteSort="false" toolbar="#processDefinitionGridToolbar"
                loadMsg="数据加载中..." singleSelect="true" method="post" multiSort="false" sortName="id" fit="true"
-               align="center" striped="true" idField="id" data-options="" >
+               align="center" striped="true" idField="id" data-options="onDblClickRow:showProcessDefinitionImg" >
             <thead>
             <tr>
                 <th width="22%" data-options="field:'id',   sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">

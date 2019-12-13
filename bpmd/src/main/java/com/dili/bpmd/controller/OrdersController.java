@@ -69,6 +69,7 @@ public class OrdersController {
             throw new BusinessException(ResultCode.DATA_ERROR, output.getMessage());
         }
         List<TaskMapping> taskMappings = output.getData();
+        //没有进行中的任务或任务已结束
         if(CollectionUtils.isEmpty(taskMappings)){
             throw new BusinessException(ResultCode.DATA_ERROR, "未找到进行中的任务");
         }
@@ -77,6 +78,7 @@ public class OrdersController {
         TaskMapping taskMapping = taskMappings.get(0);
         String formKey = taskMapping.getFormKey();
         BaseOutput<ActForm> actFormOutput = formRpc.getByKey(formKey);
+        //没有已注册的表单配置
         if(!actFormOutput.isSuccess()){
             throw new BusinessException(ResultCode.DATA_ERROR, output.getMessage());
         }
@@ -96,6 +98,49 @@ public class OrdersController {
         return new StringBuilder().append("redirect:").append(actForm.getTaskUrl()).append("?cover=false&taskId=").append(taskMapping.getId()).append("&businessKey=").append(code).toString();
     }
 
+    /**
+     * 根据业务号验证任务
+     * 判断任务是否被签收
+     * 同时要验证任务是否存在, 是否有已注册的表单，并且当前用户已登录
+     * @param businessKey  订单号
+     * @param modelMap
+     * @return
+     */
+    @RequestMapping(value="/validateBusinessKey.action", method = {RequestMethod.GET, RequestMethod.POST})
+    @ResponseBody
+    public BaseOutput<String> isClaim(@RequestParam String businessKey, ModelMap modelMap) {
+        //根据业务号查询任务
+        TaskDto taskDto = DTOUtils.newInstance(TaskDto.class);
+        taskDto.setProcessInstanceBusinessKey(businessKey);
+        BaseOutput<List<TaskMapping>> output = taskRpc.list(taskDto);
+        if(!output.isSuccess()){
+            return BaseOutput.failure(output.getMessage());
+        }
+        List<TaskMapping> taskMappings = output.getData();
+        //没有进行中的任务或任务已结束
+        if(CollectionUtils.isEmpty(taskMappings)){
+            return BaseOutput.failure("未找到进行中的任务");
+        }
+        //默认没有并发流程，所以取第一个任务
+        //如果有并发流程，需使用TaskDefKey来确认流程节点
+        TaskMapping taskMapping = taskMappings.get(0);
+        String formKey = taskMapping.getFormKey();
+        BaseOutput<ActForm> actFormOutput = formRpc.getByKey(formKey);
+        //没有已注册的表单配置
+        if(!actFormOutput.isSuccess()){
+            return BaseOutput.failure(output.getMessage());
+        }
+        ActForm actForm = actFormOutput.getData();
+        if(actForm == null){
+            return BaseOutput.failure("任务表单["+formKey+"]不存在");
+        }
+        //自动签收任务
+        UserTicket userTicket = SessionContext.getSessionContext().getUserTicket();
+        if(userTicket == null){
+            return BaseOutput.failure("用户未登录");
+        }
+        return taskRpc.claim(taskMapping.getId(), userTicket.getId().toString());
+    }
     /**
      * 创建订单页面
      * @param modelMap
@@ -128,9 +173,9 @@ public class OrdersController {
     @ResponseBody
     public BaseOutput<String> delete(@RequestParam Long id) {
         try {
-            ordersService.logicDelete(id);
-            return BaseOutput.success();
-        } catch (BusinessException e) {
+            return ordersService.logicDelete(id);
+//            这里必须手动捕获远程调用主动抛出的异常，因为远程调用本身可能直接抛出异常
+        } catch (Exception e) {
             return BaseOutput.failure(e.getMessage());
         }
     }
@@ -144,8 +189,7 @@ public class OrdersController {
     @ResponseBody
     public BaseOutput<String> cancel(@RequestParam Long id) {
         try {
-            ordersService.cancel(id);
-            return BaseOutput.success();
+            return ordersService.cancel(id);
         } catch (BusinessException e) {
             return BaseOutput.failure(e.getMessage());
         }
@@ -160,8 +204,7 @@ public class OrdersController {
     @ResponseBody
     public BaseOutput<String> invalidate(@RequestParam Long id) {
         try {
-            ordersService.invalidate(id);
-            return BaseOutput.success();
+            return ordersService.invalidate(id);
         } catch (BusinessException e) {
             return BaseOutput.failure(e.getMessage());
         }
@@ -170,6 +213,7 @@ public class OrdersController {
     /**
      * 提交订单页面
      * @param modelMap
+     * @param cover 用于是否
      * @return
      */
     @BpmTask(formKey = "submitRentalOrderForm", defKey = "submitRentalOrder")

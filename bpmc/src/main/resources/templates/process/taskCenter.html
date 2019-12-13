@@ -25,6 +25,11 @@
         padding-left:10px;
         float:left;
     }
+    /*最大化图标样式*/
+    .maximize:hover{
+        transform: scale(1.1);
+        cursor:pointer;
+    }
 </style>
 <div class="easyui-layout" fit="true" >
     <!-- ====================================== ================================================================================ -->
@@ -109,7 +114,7 @@
                     </div>
                 </div>
             </div>
-            <div style="vertical-align: top; font-weight:bold;font-family: 'Microsoft YaHei';padding-top:10px;padding-bottom: 10px;">请填写下面的表单后完成任务:<img align="right" onclick="maximize()" src="${contextPath}/resources/images/maximize-16.png"/></div>
+            <div style="vertical-align: top; font-weight:bold;font-family: 'Microsoft YaHei';padding-top:10px;padding-bottom: 10px;">请填写下面的表单后完成任务:<img align="right" onclick="maximize()" class="maximize" src="${contextPath}/resources/images/maximize-16.png"/></div>
             <!-- 任务详情 -->
             <div style="position: relative; overflow: hidden;" >
 

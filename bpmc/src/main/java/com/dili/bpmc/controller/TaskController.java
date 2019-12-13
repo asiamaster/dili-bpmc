@@ -164,7 +164,7 @@ public class TaskController {
             taskQuery.taskId(param.getTaskId());
         }
         int firstResult = (param.getPage()-1)*param.getRows();
-        List list = taskQuery.listPage(firstResult, param.getRows());
+        List list = taskQuery.orderByTaskCreateTime().desc().listPage(firstResult, param.getRows());
         List results = ValueProviderUtils.buildDataByProvider(param, list);
         easyuiPageOutput.setRows(results);
         Long total = taskQuery.count();
@@ -601,7 +601,7 @@ public class TaskController {
      * @return
      */
     private List<Task> listTaskByCategory(String category, String userId, String... groupIds){
-        TaskQuery taskQuery = taskService.createTaskQuery();
+        TaskQuery taskQuery = taskService.createTaskQuery().orderByTaskCreateTime().desc();
         List<Task> tasks = new ArrayList<>();
         if(TaskCategory.INBOX.getCode().equals(category)){
             tasks = taskQuery.taskAssignee(userId).list();

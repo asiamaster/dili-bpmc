@@ -52,13 +52,16 @@ public class OrdersServiceImpl extends BaseServiceImpl<Orders, Long> implements 
     }
 
     @Override
+    @Transactional
     public BaseOutput create(Orders orders) {
         UserTicket userTicket = SessionContext.getSessionContext().getUserTicket();
         if (userTicket == null) {
             throw new NotLoginException();
         }
+        //流程启动参数设置
         Map<String, Object> variables = new HashMap<>(1);
         variables.put(BpmConsts.ORDER_CODE_KEY, orders.getCode());
+        //启动流程
         BaseOutput<ProcessInstanceMapping> processInstanceOutput = runtimeRpc.startProcessInstanceByKey(BpmConsts.PROCESS_DEFINITION_KEY, orders.getCode(), userTicket.getId().toString(), variables);
         if(!processInstanceOutput.isSuccess()){
             throw new AppException(processInstanceOutput.getMessage());
@@ -67,11 +70,13 @@ public class OrdersServiceImpl extends BaseServiceImpl<Orders, Long> implements 
         orders.setProcessDefinitionId(processInstance.getProcessDefinitionId());
         orders.setProcessInstanceId(processInstance.getProcessInstanceId());
         orders.setState(OrderState.Create.getCode());
+        //创建订单，记录流程实例id和流程定义id
         insertSelective(orders);
         return BaseOutput.success("新增成功");
     }
 
     @Override
+    @Transactional
     public BaseOutput submit(String code, String taskId) {
         Orders orders = DTOUtils.newInstance(Orders.class);
         orders.setState(OrderState.Submit.getCode());
@@ -80,6 +85,7 @@ public class OrdersServiceImpl extends BaseServiceImpl<Orders, Long> implements 
     }
 
     @Override
+    @Transactional
     public BaseOutput settle(String code, Date effectiveTime, Date deadTime, String taskId) {
         Orders orders = DTOUtils.newInstance(Orders.class);
         orders.setState(OrderState.Payed.getCode());
@@ -88,11 +94,13 @@ public class OrdersServiceImpl extends BaseServiceImpl<Orders, Long> implements 
         updateSelectiveByCode(code, orders);
         Map<String, Object> variables = new HashMap<>(2);
         variables.put(BpmConsts.ORDER_CODE_KEY, code);
-        variables.put("fireTime", DateUtils.getISO8601TimeDate(effectiveTime));
+        //设置ISO8601格式的订单生效时间，用于流程中的定时器
+        variables.put(BpmConsts.FIRE_TIME, DateUtils.getISO8601TimeDate(effectiveTime));
         return taskRpc.complete(taskId, variables);
     }
 
     @Override
+    @Transactional
     public BaseOutput valid(String code) {
         Orders orders = DTOUtils.newInstance(Orders.class);
         orders.setState(OrderState.Valid.getCode());
@@ -102,58 +110,59 @@ public class OrdersServiceImpl extends BaseServiceImpl<Orders, Long> implements 
 
     @Override
     @Transactional
-    public void logicDelete(Long id) throws BusinessException {
+    public BaseOutput logicDelete(Long id) {
         Orders orders = DTOUtils.newInstance(Orders.class);
         orders.setYn(false);
         orders.setId(id);
         updateSelective(orders);
         orders = get(id);
         //发送消息通知流程
-        BaseOutput<String> output = taskRpc.messageEventReceived("deleteRentalOrderMsg", orders.getProcessInstanceId(), null);
-        if(!output.isSuccess()){
-            throw new BusinessException(ResultCode.DATA_ERROR, output.getMessage());
-        }
+        return taskRpc.messageEventReceived("deleteRentalOrderMsg", orders.getProcessInstanceId(), null);
+        //
+//        if(!output.isSuccess()){
+//            throw new BusinessException(ResultCode.DATA_ERROR, output.getMessage());
+//        }
     }
 
     @Override
     @Transactional
-    public void invalidate(Long id) throws BusinessException {
+    public BaseOutput invalidate(Long id) {
         Orders orders = DTOUtils.newInstance(Orders.class);
         orders.setState(OrderState.Invalid.getCode());
         orders.setId(id);
         updateSelective(orders);
         orders = get(id);
         //发送消息通知流程
-        BaseOutput<String> output = taskRpc.messageEventReceived("invalidRentalOrderMsg", orders.getProcessInstanceId(), null);
-        if(!output.isSuccess()){
-            throw new BusinessException(ResultCode.DATA_ERROR, output.getMessage());
-        }
+        return taskRpc.messageEventReceived("invalidRentalOrderMsg", orders.getProcessInstanceId(), null);
+//        if(!output.isSuccess()){
+//            throw new BusinessException(ResultCode.DATA_ERROR, output.getMessage());
+//        }
     }
 
     @Override
     @Transactional
-    public void cancel(Long id) throws BusinessException {
+    public BaseOutput cancel(Long id) {
         Orders orders = DTOUtils.newInstance(Orders.class);
         orders.setState(OrderState.Cancel.getCode());
         orders.setId(id);
         updateSelective(orders);
         orders = get(id);
         //发送消息通知流程
-        BaseOutput<String> output = taskRpc.messageEventReceived("deleteRentalOrderMsg", orders.getProcessInstanceId(), null);
-        if(!output.isSuccess()){
-            throw new BusinessException(ResultCode.DATA_ERROR, output.getMessage());
-        }
+        return taskRpc.messageEventReceived("deleteRentalOrderMsg", orders.getProcessInstanceId(), null);
+//        if(!output.isSuccess()){
+//            throw new BusinessException(ResultCode.DATA_ERROR, output.getMessage());
+//        }
     }
 
     @Override
     @Transactional
-    public void handle(Long id) throws BusinessException {
+    public BaseOutput handle(Long id) throws BusinessException {
         Orders orders = get(id);
         //发送消息通知流程
-        BaseOutput<String> output = taskRpc.messageEventReceived("deleteRentalOrderMsg", orders.getProcessInstanceId(), null);
-        if(!output.isSuccess()){
-            throw new BusinessException(ResultCode.DATA_ERROR, output.getMessage());
-        }
+        return taskRpc.messageEventReceived("deleteRentalOrderMsg", orders.getProcessInstanceId(), null);
+//        if(!output.isSuccess()){
+//            throw new BusinessException(ResultCode.DATA_ERROR, output.getMessage());
+//        }
     }
 
     /**

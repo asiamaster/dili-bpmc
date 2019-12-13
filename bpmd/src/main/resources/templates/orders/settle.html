@@ -38,6 +38,7 @@
     <script type="text/javascript">
 
         function cancel() {
+            window.parent.postMessage('<#config name="bpmn.server.address"/>/orders/index.html', '<#config name="bpmc.server.address"/>');
             location.href = "${contextPath}/orders/index.html";
         }
 

@@ -44,7 +44,7 @@ public interface OrdersService extends BaseService<Orders, Long> {
 
     /**
      * 订单生效
-     * @param code
+     * @param code 订单编号，必填
      * @return
      */
     BaseOutput valid(String code);
@@ -54,26 +54,26 @@ public interface OrdersService extends BaseService<Orders, Long> {
      * @param id
      * @return
      */
-    void logicDelete(Long id) throws BusinessException;
+    BaseOutput logicDelete(Long id) throws BusinessException;
 
     /**
      * 作废
      * @param id
      * @return
      */
-    void invalidate(Long id) throws BusinessException;
+    BaseOutput invalidate(Long id) throws BusinessException;
 
     /**
      * 取消
      * @param id
      * @return
      */
-    void cancel(Long id) throws BusinessException;
+    BaseOutput cancel(Long id) throws BusinessException;
 
     /**
      * 插手处理流程
      * @param id
      * @throws BusinessException
      */
-    void handle(Long id) throws BusinessException;
+    BaseOutput handle(Long id) throws BusinessException;
 }
