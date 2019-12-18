@@ -1,4 +1,4 @@
-package com.dili.ss.activiti.service;
+package com.dili.bpmc.service;
 
 import com.dili.ss.domain.BaseOutput;
 import org.springframework.web.bind.annotation.RequestParam;

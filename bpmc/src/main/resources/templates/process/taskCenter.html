@@ -46,14 +46,20 @@
     </div>
     <!-- 西侧布局 -->
     <div region="west" style="width:260px;padding-top: 1px;" height="auto">
-        <% if(has(task)){%>
-        <ul class="easyui-datalist" title="流程列表" lines="true" noheader="true" valueField="id" textField="name" loadMsg="数据加载中..."
+
+        <%/* if(has(task)){%>
+        <ul class="easyui-datalist" title="任务列表" lines="true" noheader="true" valueField="id" textField="name" loadMsg="数据加载中..."
             style="width:260px;height:100%" data-options="textFormatter:fmt, onClickRow:showTask">
             <% for(task in tasks){%>
-            <li value="${task.id}">${task.name}</li>
+            <li value="${task.id}" group="分组">${task.name}</li>
             <%}%>
         </ul>
-        <%}%>
+        <%}
+        */%>
+
+        <div class="easyui-datalist" id="taskDatalist" lines="true" valueField="id" textField="name"  loadMsg="数据加载中..."
+             style="width:260px;height:100%" data-options="textFormatter:fmt, onClickRow:showTask,groupField:'processDefinitionName'">
+        </div>
     </div>
     <!-- 中央布局 -->
     <div region="center" id="centerRegion" style="float:left;width:100%;padding-top: 1px;" height="auto">
@@ -291,6 +297,8 @@
             if(iframe) {
                 iframe.height = $("#centerRegion").height() - 345;
             }
+
+            $("#taskDatalist").datalist("loadData",${tasks});
         <%}%>
         //绑定队列tag右键菜单
         $("#queuedTab").bind('contextmenu', function(e){

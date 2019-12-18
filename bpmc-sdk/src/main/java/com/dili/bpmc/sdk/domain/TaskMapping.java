@@ -148,11 +148,11 @@ public interface TaskMapping extends IDTO {
     Map<String, Object> getProcessVariables();
 
     /** Sets an optional localized name for the task. */
-    void setLocalizedName(String name);
+    void setLocalizedName(String localizedName);
     String getlocalizedName();
 
     /** Sets an optional localized description for the task. */
-    void setLocalizedDescription(String description);
+    void setLocalizedDescription(String localizedDescription);
     String getLocalizedDescription();
 
 //    /** The current {@link DelegationState} for this task. */
@@ -160,5 +160,12 @@ public interface TaskMapping extends IDTO {
 //
 //    /** The current {@link DelegationState} for this task. */
 //    void setDelegationState(DelegationState delegationState);
+
+    /**
+     * 代理人
+     * @param delegation
+     */
+    void setDelegation(String delegation);
+    String getDelegation();
 
 }

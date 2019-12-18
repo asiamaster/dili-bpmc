@@ -86,4 +86,13 @@ public interface TaskRpc {
 	 */
 	@POST("/api/task/list")
 	BaseOutput<List<TaskMapping>> list(@VOBody TaskDto taskDto);
+
+	/**
+	 * 使用mybatis自定义任务查询,目前用于根据流程实例ids批量查询任务
+	 * @param taskDto 任务查询对象
+	 * @return
+	 * @throws Exception
+	 */
+	@POST("/api/task/listTaskMapping")
+	BaseOutput<List<TaskMapping>> listTaskMapping(@VOBody TaskDto taskDto);
 }

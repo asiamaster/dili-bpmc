@@ -1,8 +1,10 @@
 package com.dili.bpmc.controller;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
+import com.alibaba.fastjson.serializer.PropertyFilter;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.dili.bpmc.consts.TaskCategory;
 import com.dili.bpmc.rpc.RoleRpc;
@@ -568,8 +570,32 @@ public class TaskController {
         request.setAttribute("actForm", actForm);
         //设置中间部分的任务详情
         request.setAttribute("task", task);
+        PropertyFilter proFileter = new PropertyFilter() {
+            @Override
+            public boolean apply(Object object, String name, Object value) {
+                if("id".equalsIgnoreCase(name) || "name".equalsIgnoreCase(name) || "processDefinitionId".equalsIgnoreCase(name)){
+                    return true;
+                }
+                return false;
+            }
+        };
+        //组装左侧任务列表
+        JSONArray ja = new JSONArray();
+        Map<String, String> processDefinitionMap = new HashMap<>();
+        for(Task t : tasks){
+            JSONObject jo = new JSONObject();
+            jo.put("id", t.getId());
+            jo.put("name", t.getName());
+            //转换流程定义id为名称
+            if(!processDefinitionMap.containsKey(t.getProcessDefinitionId())){
+                ProcessDefinition processDefinition = repositoryService.createProcessDefinitionQuery().processDefinitionId(t.getProcessDefinitionId()).singleResult();
+                processDefinitionMap.put(processDefinition.getId(), processDefinition.getName());
+            }
+            jo.put("processDefinitionName", processDefinitionMap.get(t.getProcessDefinitionId()));
+            ja.add(jo);
+        }
         //设置左侧任务列表
-        request.setAttribute("tasks", tasks);
+        request.setAttribute("tasks", ja.toJSONString());
         //查询并设置任务所属流程名称
         ProcessDefinition processDefinition =repositoryService.createProcessDefinitionQuery().processDefinitionId(task.getProcessDefinitionId()).singleResult();
         request.setAttribute("processDefinitionName", processDefinition.getName());

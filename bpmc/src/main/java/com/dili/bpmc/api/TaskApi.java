@@ -1,11 +1,11 @@
 package com.dili.bpmc.api;
 
 import com.alibaba.fastjson.JSON;
+import com.dili.bpmc.dao.ActRuTaskMapper;
 import com.dili.bpmc.sdk.domain.TaskMapping;
 import com.dili.bpmc.sdk.dto.TaskDto;
 import com.dili.ss.activiti.service.ActivitiService;
 import com.dili.ss.domain.BaseOutput;
-import com.dili.ss.domain.EasyuiPageOutput;
 import com.dili.ss.dto.DTOUtils;
 import org.activiti.engine.*;
 import org.activiti.engine.form.TaskFormData;
@@ -21,7 +21,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -49,7 +48,8 @@ public class TaskApi {
     private IdentityService identityService;
     @Autowired
     private ActivitiService activitiService;
-
+    @Autowired
+    private ActRuTaskMapper actRuTaskMapper;
     /**
      * 申领(签收)任务
      * @param userId    申领人，为空则默认为当前登录用户,不填为当前UAP用户
@@ -297,7 +297,6 @@ public class TaskApi {
      */
     @RequestMapping(value="/list", method = {RequestMethod.GET, RequestMethod.POST})
     public BaseOutput<List<TaskMapping>> list(TaskDto taskDto) {
-        EasyuiPageOutput easyuiPageOutput = new EasyuiPageOutput();
         TaskQuery taskQuery = taskService.createTaskQuery();
         if(StringUtils.isNotBlank(taskDto.getAssignee())){
             taskQuery.taskAssignee(taskDto.getAssignee());
@@ -338,5 +337,18 @@ public class TaskApi {
 //            taskMappingList.add(taskMapping);
 //        }
         return BaseOutput.success().setData(DTOUtils.asInstance(taskList, TaskMapping.class));
+    }
+
+    /**
+     * 使用mybatis自定义任务查询
+     * @param taskDto 任务查询对象
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value="/listTaskMapping", method = {RequestMethod.GET, RequestMethod.POST})
+    @ResponseBody
+    public BaseOutput<List<TaskMapping>> listTaskMapping(TaskDto taskDto) {
+        List<TaskMapping> list = actRuTaskMapper.list(taskDto);
+        return BaseOutput.success().setData(list);
     }
 }

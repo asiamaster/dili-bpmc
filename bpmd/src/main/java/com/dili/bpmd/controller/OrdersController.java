@@ -108,7 +108,7 @@ public class OrdersController {
      */
     @RequestMapping(value="/validateBusinessKey.action", method = {RequestMethod.GET, RequestMethod.POST})
     @ResponseBody
-    public BaseOutput<String> isClaim(@RequestParam String businessKey, ModelMap modelMap) {
+    public BaseOutput<String> validateBusinessKey(@RequestParam String businessKey, ModelMap modelMap) {
         //根据业务号查询任务
         TaskDto taskDto = DTOUtils.newInstance(TaskDto.class);
         taskDto.setProcessInstanceBusinessKey(businessKey);
@@ -230,6 +230,7 @@ public class OrdersController {
 //        Map<String, Object> executionVariables = runtimeService.getVariables(task.getExecutionId());
 
         String code = taskVariablesOutput.getData().get("orderCode").toString();
+
         modelMap.put("orders", ordersService.getByCode(code));
         modelMap.put("taskId", taskId);
         modelMap.put("cover", cover == null ? output.getData().getAssignee() == null : cover);

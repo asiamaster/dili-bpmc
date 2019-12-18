@@ -1,5 +1,6 @@
 package com.dili.bpmc.sdk.dto;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -28,4 +29,11 @@ public interface TaskDto extends ProcessInstanceDto {
 
     String getProcessInstanceBusinessKey();
     void setProcessInstanceBusinessKey(String processInstanceBusinessKey);
+
+    /**
+     * 批量根据流程实例id查询任务id
+     * @return
+     */
+    List<String> getProcessInstanceIds();
+    void setProcessInstanceIds(List<String> processInstanceIds);
 }

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dili.bpmc.dao.ActRuTaskMapper">
+
+    <select id="list" parameterType="com.dili.bpmc.sdk.dto.TaskDto" resultType="com.dili.bpmc.sdk.domain.TaskMapping">
+        SELECT
+        `ID_` id,
+        `REV_` rev,
+        `EXECUTION_ID_` executionId,
+        `PROC_INST_ID_` processInstanceId,
+        `PROC_DEF_ID_` processDefinitionId,
+        `NAME_`	name,
+        `PARENT_TASK_ID_` parentTaskId,
+        `DESCRIPTION_` description,
+        `TASK_DEF_KEY_` taskDefinitionKey,
+        `OWNER_` owner,
+        `ASSIGNEE_` assignee,
+        `DELEGATION_`,
+        `PRIORITY_` priority,
+        `CREATE_TIME_` createTime,
+        `DUE_DATE_` dueDate,
+        `CATEGORY_` category,
+        `SUSPENSION_STATE_` suspensionState,
+        `TENANT_ID_` tenantId,
+        `FORM_KEY_` formKey
+        FROM
+        ACT_RU_TASK
+        where 1=1
+        <if test="processInstanceIds != null and processInstanceIds.size()>0">
+            and PROC_INST_ID_ IN
+            <foreach collection="processInstanceIds" item="item" open="(" close=")" separator=",">
+                #{item}
+            </foreach>
+        </if>
+
+    </select>
+
+</mapper>

@@ -1,4 +1,4 @@
-package com.dili.ss.activiti.service;
+package com.dili.bpmc.service;
 
 import org.activiti.engine.delegate.DelegateExecution;
 import org.activiti.engine.delegate.JavaDelegate;

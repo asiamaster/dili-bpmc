@@ -1,6 +1,6 @@
-package com.dili.ss.activiti.service.impl;
+package com.dili.bpmc.service.impl;
 
-import com.dili.ss.activiti.service.CustomerOrderProcessService;
+import com.dili.bpmc.service.CustomerOrderProcessService;
 import com.dili.ss.domain.BaseOutput;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;

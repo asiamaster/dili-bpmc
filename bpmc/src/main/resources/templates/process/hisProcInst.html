@@ -33,7 +33,7 @@
         <table class="easyui-datagrid" title="ACT_HI_TASKINST" id="hisProcInstGrid" fitColumns="true" fit="true"
                pageSize="50" pageNumber="1" pagePosition="top" rownumbers="true" remoteSort="false"
                loadMsg="数据加载中..." singleSelect="true" method="post" multiSort="false" sortName="id"
-               align="center" striped="true" idField="id" data-options="view:scrollview, autoRowHeight:false,onLoadSuccess:updateTotal" >
+               align="center" striped="true" idField="id" data-options="view:scrollview, autoRowHeight:false,onLoadSuccess:updateTotal,onDblClickRow:showProgress" >
             <thead>
             <tr>
                 <th width="220" data-options="field:'id',   sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
@@ -90,10 +90,38 @@
             </tr>
             </thead>
         </table>
+        <!-- 隐藏编辑框 -->
+        <div id="dlg" class="easyui-dialog" resizable="false" constrain="true" shadow="true" draggable="true" title="流程图" style="padding:20px" modal="true" border="thin" closed="true"
+             data-options="
+				iconCls: 'icon-save',
+				width:1366,
+				height: 640
+			">
+            <img id="processInstanceImg" />
+        </div>
     </div>
 </div>
 
 <script>
+    /**
+     * 查看进度图片
+     * @param processInstanceId
+     * @param processDefinitionId
+     * @param processInstanceName
+     */
+    function showProgress(){
+        var selected = $("#hisProcInstGrid").datagrid("getSelected");
+        if (null == selected) {
+            swal('警告','请选中一条数据', 'warning');
+            return;
+        }
+        $('#dlg').dialog('open');
+        $('#dlg').dialog('center');
+        var href = '${contextPath}/pi/progress.action?processInstanceId='+selected.id+'&processDefinitionId='+selected.processDefinitionId+"&"+Math.random();;
+        $("#processInstanceImg").attr("src", href);
+        $('#dlg').dialog('setTitle', "["+selected.processDefinitionName+"]流程图");
+    }
+
     //表格查询
     function queryGrid() {
         var opts = $("#hisProcInstGrid").datagrid("options");
