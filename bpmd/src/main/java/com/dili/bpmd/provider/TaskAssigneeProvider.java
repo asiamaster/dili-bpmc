@@ -29,12 +29,15 @@ public class TaskAssigneeProvider extends BatchDisplayTextProviderSupport {
     @Override
     protected BatchProviderMeta getBatchProviderMeta(Map metaMap) {
         BatchProviderMeta batchProviderMeta = DTOUtils.newInstance(BatchProviderMeta.class);
-        batchProviderMeta.setEscapeFiled("assignee");
+        batchProviderMeta.setEscapeFiled("assigneeName");
         batchProviderMeta.setFkField("processInstanceId");
         //忽略大小写关联
         batchProviderMeta.setIgnoreCaseToRef(true);
         //关联(数据库)表的主键的字段名，默认取id
         batchProviderMeta.setRelationTablePkField("processInstanceId");
+        batchProviderMeta.setMismatchHandler((t) -> {
+            return null;
+        });
         return batchProviderMeta;
     }
 

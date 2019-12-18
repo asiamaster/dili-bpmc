@@ -168,4 +168,10 @@ public interface TaskMapping extends IDTO {
     void setDelegation(String delegation);
     String getDelegation();
 
+    /**
+     * 办理人名字
+     */
+    String getAssigneeName();
+
+    void setAssigneeName(String assigneeName);
 }

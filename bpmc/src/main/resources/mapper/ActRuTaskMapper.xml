@@ -4,30 +4,31 @@
 
     <select id="list" parameterType="com.dili.bpmc.sdk.dto.TaskDto" resultType="com.dili.bpmc.sdk.domain.TaskMapping">
         SELECT
-        `ID_` id,
-        `REV_` rev,
-        `EXECUTION_ID_` executionId,
-        `PROC_INST_ID_` processInstanceId,
-        `PROC_DEF_ID_` processDefinitionId,
-        `NAME_`	name,
-        `PARENT_TASK_ID_` parentTaskId,
-        `DESCRIPTION_` description,
-        `TASK_DEF_KEY_` taskDefinitionKey,
-        `OWNER_` owner,
-        `ASSIGNEE_` assignee,
-        `DELEGATION_`,
-        `PRIORITY_` priority,
-        `CREATE_TIME_` createTime,
-        `DUE_DATE_` dueDate,
-        `CATEGORY_` category,
-        `SUSPENSION_STATE_` suspensionState,
-        `TENANT_ID_` tenantId,
-        `FORM_KEY_` formKey
+        t.`ID_` id,
+        t.`REV_` rev,
+        t.`EXECUTION_ID_` executionId,
+        t.`PROC_INST_ID_` processInstanceId,
+        t.`PROC_DEF_ID_` processDefinitionId,
+        t.`NAME_`	name,
+        t.`PARENT_TASK_ID_` parentTaskId,
+        t.`DESCRIPTION_` description,
+        t.`TASK_DEF_KEY_` taskDefinitionKey,
+        t.`OWNER_` owner,
+        t.`ASSIGNEE_` assignee,
+        t.`DELEGATION_`,
+        t.`PRIORITY_` priority,
+        t.`CREATE_TIME_` createTime,
+        t.`DUE_DATE_` dueDate,
+        t.`CATEGORY_` category,
+        t.`SUSPENSION_STATE_` suspensionState,
+        t.`TENANT_ID_` tenantId,
+        t.`FORM_KEY_` formKey,
+        u.real_name assigneeName
         FROM
-        ACT_RU_TASK
+        ACT_RU_TASK t left join user u on t.ASSIGNEE_ = u.id
         where 1=1
         <if test="processInstanceIds != null and processInstanceIds.size()>0">
-            and PROC_INST_ID_ IN
+            and t.PROC_INST_ID_ IN
             <foreach collection="processInstanceIds" item="item" open="(" close=")" separator=",">
                 #{item}
             </foreach>
