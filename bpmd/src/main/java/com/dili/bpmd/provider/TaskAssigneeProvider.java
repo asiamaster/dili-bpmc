@@ -35,6 +35,7 @@ public class TaskAssigneeProvider extends BatchDisplayTextProviderSupport {
         batchProviderMeta.setIgnoreCaseToRef(true);
         //关联(数据库)表的主键的字段名，默认取id
         batchProviderMeta.setRelationTablePkField("processInstanceId");
+        //如果找不到对应的值显示空
         batchProviderMeta.setMismatchHandler((t) -> {
             return null;
         });
