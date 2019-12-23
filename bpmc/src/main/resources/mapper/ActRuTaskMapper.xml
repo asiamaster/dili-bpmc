@@ -36,4 +36,10 @@
 
     </select>
 
+    <select id="taskCandidateUserCount" resultType="int" parameterType="string">
+        SELECT COUNT(DISTINCT RES.ID_)
+        FROM ACT_RU_TASK RES
+        INNER JOIN ACT_RU_IDENTITYLINK I ON I.TASK_ID_ = RES.ID_
+        WHERE RES.ASSIGNEE_ IS NULL AND I.TYPE_ = 'candidate' AND (I.USER_ID_ = #{name} )
+    </select>
 </mapper>

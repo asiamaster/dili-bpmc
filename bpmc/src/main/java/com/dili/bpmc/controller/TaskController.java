@@ -7,6 +7,7 @@ import com.alibaba.fastjson.TypeReference;
 import com.alibaba.fastjson.serializer.PropertyFilter;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.dili.bpmc.consts.TaskCategory;
+import com.dili.bpmc.dao.ActRuTaskMapper;
 import com.dili.bpmc.rpc.RoleRpc;
 import com.dili.bpmc.sdk.domain.ActForm;
 import com.dili.bpmc.sdk.dto.TaskDto;
@@ -73,6 +74,8 @@ public class TaskController {
     private ActFormService actFormService;
     @Autowired
     private RoleRpc roleRpc;
+    @Autowired
+    private ActRuTaskMapper actRuTaskMapper;
 
     private final String INDEX = "/task/index.html";
 
@@ -523,9 +526,10 @@ public class TaskController {
         }
         request.setAttribute("groupMap", groupMap);
         //受邀任务，这里包括候选用户任务和候选组任务
-        long involvedCount = taskService.createTaskQuery().taskCandidateUser(userId).count();
-
-        //设置标题部分显示的任务数
+//        long involvedCount = taskService.createTaskQuery().taskCandidateUser(userId).count();
+        //受邀任务，这里只包括候选用户任务
+        long involvedCount = actRuTaskMapper.taskCandidateUserCount(userId);
+                //设置标题部分显示的任务数
         request.setAttribute("inboxCount", inboxCount);
         request.setAttribute("tasksCount", tasksCount);
         request.setAttribute("queuedCount", queuedCount);

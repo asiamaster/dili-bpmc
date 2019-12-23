@@ -17,4 +17,11 @@ public interface ActRuTaskMapper {
      * @return
      */
     List<TaskMapping> list(TaskDto taskDto);
+
+    /**
+     * 查询用户的候选任务
+     * @param userId
+     * @return
+     */
+    int taskCandidateUserCount(String userId);
 }
