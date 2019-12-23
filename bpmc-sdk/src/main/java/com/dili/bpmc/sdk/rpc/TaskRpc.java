@@ -23,6 +23,13 @@ public interface TaskRpc {
 	BaseOutput<String> claim(@ReqParam(value = "taskId") String taskId, @ReqParam(value = "userId") String userId);
 
 	/**
+	 * 完成任务(无参)
+	 * @param taskId    任务id    必填
+	 */
+	@POST("/api/task/complete")
+	BaseOutput<String> complete(@ReqParam(value = "taskId") String taskId);
+
+	/**
 	 * 完成任务
 	 * @param taskId    任务id    必填
 	 * @param variables
@@ -31,14 +38,15 @@ public interface TaskRpc {
 	BaseOutput<String> complete(@ReqParam(value = "taskId") String taskId, @ReqParam(value = "variables", required = false) Map variables);
 
 	/**
-	 * 完成任务(无参)
-	 * @param taskId    任务id    必填
+	 * 强制提交任务，使用于无办理人的场景
+	 * @param taskId    必填
+	 * @param variables
 	 */
-	@POST("/api/task/complete")
-	BaseOutput<String> complete(@ReqParam(value = "taskId") String taskId);
+	@POST("/api/task/completeByForce")
+	BaseOutput<String> completeByForce(@ReqParam(value = "taskId") String taskId, @ReqParam(value = "variables", required = false) Map variables);
 
 	/**
-	 * 完成任务(无参)
+	 * 签收并完成任务(无参)
 	 * @param taskId    任务id    必填
 	 * @param assignee  强制插手认领人
 	 */

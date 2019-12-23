@@ -4,10 +4,11 @@ import com.alibaba.fastjson.JSON;
 import com.dili.bpmc.dao.ActRuTaskMapper;
 import com.dili.bpmc.sdk.domain.TaskMapping;
 import com.dili.bpmc.sdk.dto.TaskDto;
-import com.dili.ss.activiti.service.ActivitiService;
 import com.dili.ss.domain.BaseOutput;
 import com.dili.ss.dto.DTOUtils;
-import org.activiti.engine.*;
+import org.activiti.engine.FormService;
+import org.activiti.engine.RuntimeService;
+import org.activiti.engine.TaskService;
 import org.activiti.engine.form.TaskFormData;
 import org.activiti.engine.runtime.Execution;
 import org.activiti.engine.task.DelegationState;
@@ -17,7 +18,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
@@ -34,20 +38,20 @@ import java.util.Map;
 @RequestMapping("/api/task")
 public class TaskApi {
     private final Logger log = LoggerFactory.getLogger(TaskApi.class);
-    @Autowired
-    private RepositoryService repositoryService;
+//    @Autowired
+//    private RepositoryService repositoryService;
     @Autowired
     private RuntimeService runtimeService;
     @Autowired
     private TaskService taskService;
     @Autowired
     private FormService formService;
-    @Autowired
-    private HistoryService historyService;
-    @Autowired
-    private IdentityService identityService;
-    @Autowired
-    private ActivitiService activitiService;
+//    @Autowired
+//    private HistoryService historyService;
+//    @Autowired
+//    private IdentityService identityService;
+//    @Autowired
+//    private ActivitiService activitiService;
     @Autowired
     private ActRuTaskMapper actRuTaskMapper;
     /**
@@ -56,8 +60,7 @@ public class TaskApi {
      * @param taskId    任务id    必填
      */
     @RequestMapping(value = "/claim", method = {RequestMethod.GET, RequestMethod.POST})
-    @ResponseBody
-    public BaseOutput<String> claim(@RequestParam String taskId, @RequestParam(required = false) String userId, HttpServletRequest request) {
+    public BaseOutput<String> claim(@RequestParam String taskId, @RequestParam(required = false) String userId) {
         try {
             taskService.claim(taskId, userId);
             return BaseOutput.success();
@@ -72,11 +75,10 @@ public class TaskApi {
      * @param taskId    必填
      * @param assignee  强制插手认领人
      * @param variables
-     * @param request
      * @throws IOException
      */
     @RequestMapping(value = "/complete", method = {RequestMethod.GET, RequestMethod.POST})
-    public BaseOutput<String> complete(@RequestParam String taskId, @RequestParam(required = false) String assignee, @RequestParam Map variables, HttpServletRequest request) {
+    public BaseOutput<String> complete(@RequestParam String taskId, @RequestParam(required = false) String assignee, @RequestParam Map variables) {
         //强制插手人签收任务
         if(StringUtils.isNotBlank(assignee)){
             taskService.claim(taskId, assignee);
@@ -87,6 +89,21 @@ public class TaskApi {
         }
         if(StringUtils.isBlank(task.getAssignee())){
             return BaseOutput.failure("任务还未认领");
+        }
+        taskService.complete(taskId, variables);
+        return BaseOutput.success();
+    }
+
+    /**
+     * 强制提交任务，使用于无办理人的场景
+     * @param taskId    必填
+     * @param variables
+     */
+    @RequestMapping(value = "/completeByForce", method = {RequestMethod.GET, RequestMethod.POST})
+    public BaseOutput<String> completeByForce(@RequestParam String taskId, @RequestParam Map variables) {
+        Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
+        if(task == null){
+            return BaseOutput.failure("任务不存在");
         }
         taskService.complete(taskId, variables);
         return BaseOutput.success();
@@ -188,7 +205,6 @@ public class TaskApi {
      * @param request
      */
     @RequestMapping(value = "/signal", method = {RequestMethod.GET, RequestMethod.POST})
-    @ResponseBody
     public BaseOutput<String> signal(@RequestParam String activityId, @RequestParam String processInstanceId, @RequestParam Map variables, HttpServletRequest request) {
         Execution execution = runtimeService.createExecutionQuery()
           .processInstanceId(processInstanceId)
@@ -211,7 +227,6 @@ public class TaskApi {
      * @param request
      */
     @RequestMapping(value = "/signalEventReceived", method = {RequestMethod.GET, RequestMethod.POST})
-    @ResponseBody
     public BaseOutput<String> signalEventReceived(@RequestParam String signalName, @RequestParam(required = false) String executionId, @RequestParam Map variables, HttpServletRequest request) {
         if(StringUtils.isBlank(executionId)){
             runtimeService.signalEventReceived(signalName, variables);
@@ -229,7 +244,6 @@ public class TaskApi {
      * @param request
      */
     @RequestMapping(value = "/messageEventReceived", method = {RequestMethod.GET, RequestMethod.POST})
-    @ResponseBody
     public BaseOutput<String> messageEventReceived(@RequestParam String messageName, String processInstanceId, @RequestParam Map variables, HttpServletRequest request) {
         Execution execution = runtimeService.createExecutionQuery().messageEventSubscriptionName(messageName).processInstanceId(processInstanceId).singleResult();
         if(execution == null){
@@ -245,7 +259,6 @@ public class TaskApi {
      * @return List<org.activiti.engine.form.FormProperty>
      */
     @RequestMapping(value = "/getTaskFormData", method = {RequestMethod.GET, RequestMethod.POST})
-    @ResponseBody
     public BaseOutput<String> getTaskFormData(@RequestParam String taskId){
         TaskFormData taskFormData = formService.getTaskFormData(taskId);
         if(taskFormData == null){
@@ -260,7 +273,6 @@ public class TaskApi {
      * @return
      */
     @RequestMapping(value = "/getVariables", method = {RequestMethod.GET, RequestMethod.POST})
-    @ResponseBody
     public BaseOutput<Map<String, Object>> getVariables(@RequestParam String taskId){
         return BaseOutput.success().setData(taskService.getVariables(taskId));
     }
@@ -272,7 +284,6 @@ public class TaskApi {
      * @return
      */
     @RequestMapping(value = "/getVariable", method = {RequestMethod.GET, RequestMethod.POST})
-    @ResponseBody
     public BaseOutput<Object> getVariable(@RequestParam String taskId, @RequestParam String variableName){
         return BaseOutput.success().setData(taskService.getVariable(taskId, variableName));
     }
@@ -283,7 +294,6 @@ public class TaskApi {
      * @return
      */
     @RequestMapping(value = "/getById", method = {RequestMethod.GET, RequestMethod.POST})
-    @ResponseBody
     public BaseOutput<TaskMapping> getById(@RequestParam String taskId){
         Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
         return BaseOutput.success().setData(DTOUtils.as(task, TaskMapping.class));
@@ -346,7 +356,6 @@ public class TaskApi {
      * @throws Exception
      */
     @RequestMapping(value="/listTaskMapping", method = {RequestMethod.GET, RequestMethod.POST})
-    @ResponseBody
     public BaseOutput<List<TaskMapping>> listTaskMapping(TaskDto taskDto) {
         List<TaskMapping> list = actRuTaskMapper.list(taskDto);
         return BaseOutput.success().setData(list);
