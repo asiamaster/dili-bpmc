@@ -168,7 +168,6 @@ public class OrdersController {
         modelMap.put("orders", ordersService.getByCode(code));
         modelMap.put("taskId", taskId);
         modelMap.put("cover", cover == null ? output.getData().getAssignee() == null : cover);
-        modelMap.put("cover", false);
         return "orders/submit";
     }
 

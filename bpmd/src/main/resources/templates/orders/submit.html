@@ -1,5 +1,7 @@
  <#body>
-
+<script>
+    document.domain="diligrp.com";
+</script>
  <div class="easyui-panel" id="submitDiv" style="width:100%;" align="center">
     <form id="form" class="easyui-form" method="post" fit="true">
         <input name="taskId" id="taskId" value="${taskId}" type="hidden">
@@ -60,9 +62,13 @@
                 success:function(data){
                     var data = eval('(' + data + ')');
                     if(data.success) {
-                        //向任务中心发送消息，参数为要跳转的地址
-                        window.parent.postMessage('<#config name="bpmc.server.address"/>/task/taskCenter.html', '<#config name="bpmc.server.address"/>');
-                        location.href = "${contextPath}/orders/index.html";
+                        //如果父页面是任务中心
+                        if(parent.location.href='<#config name="bpmc.server.address"/>/task/taskCenter.html') {
+                            //向任务中心发送消息，参数为要跳转的地址
+                            window.parent.postMessage('<#config name="bpmc.server.address"/>/task/taskCenter.html', '<#config name="bpmc.server.address"/>');
+                        }else{
+                            location.href = "${contextPath}/orders/index.html";
+                        }
                     }else{
                         swal('警告', "错误:"+data.message, 'warning');
                     }
