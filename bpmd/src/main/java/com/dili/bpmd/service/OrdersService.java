@@ -72,8 +72,18 @@ public interface OrdersService extends BaseService<Orders, Long> {
 
     /**
      * 插手处理流程
-     * @param id
+     * @param code 订单号
      * @throws BusinessException
+     * @return 返回处理页面URL
      */
-    BaseOutput handle(Long id) throws BusinessException;
+    String handle(String code) throws BusinessException;
+
+    /**
+     * 根据业务号验证任务，用于在插手处理任务前的验证，并签收任务
+     * 判断任务是否被签收
+     * 同时要验证任务是否存在, 是否有已注册的表单，并且当前用户已登录
+     * @param businessKey  订单号
+     * @return
+     */
+    BaseOutput<String> validateBusinessKey(String businessKey);
 }

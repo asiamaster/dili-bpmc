@@ -69,7 +69,7 @@ public interface TaskRpc {
 	 * @return
 	 */
 	@POST("/api/task/getVariable")
-	BaseOutput<Map<String, Object>> getVariable(@ReqParam(value = "taskId") String taskId, @ReqParam(value = "variableName") String variableName);
+	BaseOutput<Object> getVariable(@ReqParam(value = "taskId") String taskId, @ReqParam(value = "variableName") String variableName);
 
 	/**
 	 * 根据任务id查询任务

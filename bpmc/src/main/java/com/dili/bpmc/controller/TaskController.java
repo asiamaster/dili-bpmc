@@ -522,7 +522,7 @@ public class TaskController {
             groupMap.put(role.getId().toString(), new StringBuilder().append(role.getRoleName()).append("[").append(count).append("]").toString());
         }
         request.setAttribute("groupMap", groupMap);
-        //受邀任务，这里和Activiti-explorer不同，只处理候选用户任务
+        //受邀任务，这里包括候选用户任务和候选组任务
         long involvedCount = taskService.createTaskQuery().taskCandidateUser(userId).count();
 
         //设置标题部分显示的任务数

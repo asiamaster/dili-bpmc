@@ -61,45 +61,11 @@ public class OrdersController {
      */
     @RequestMapping(value="/handle.html", method = RequestMethod.GET)
     public String handle(@RequestParam String code, ModelMap modelMap) throws BusinessException {
-        //根据业务号查询任务
-        TaskDto taskDto = DTOUtils.newInstance(TaskDto.class);
-        taskDto.setProcessInstanceBusinessKey(code);
-        BaseOutput<List<TaskMapping>> output = taskRpc.list(taskDto);
-        if(!output.isSuccess()){
-            throw new BusinessException(ResultCode.DATA_ERROR, output.getMessage());
-        }
-        List<TaskMapping> taskMappings = output.getData();
-        //没有进行中的任务或任务已结束
-        if(CollectionUtils.isEmpty(taskMappings)){
-            throw new BusinessException(ResultCode.DATA_ERROR, "未找到进行中的任务");
-        }
-        //默认没有并发流程，所以取第一个任务
-        //如果有并发流程，需使用TaskDefKey来确认流程节点
-        TaskMapping taskMapping = taskMappings.get(0);
-        String formKey = taskMapping.getFormKey();
-        BaseOutput<ActForm> actFormOutput = formRpc.getByKey(formKey);
-        //没有已注册的表单配置
-        if(!actFormOutput.isSuccess()){
-            throw new BusinessException(ResultCode.DATA_ERROR, output.getMessage());
-        }
-        ActForm actForm = actFormOutput.getData();
-        if(actForm == null){
-            throw new ParamErrorException("任务表单["+formKey+"]不存在");
-        }
-        //自动签收任务
-        UserTicket userTicket = SessionContext.getSessionContext().getUserTicket();
-        if(userTicket == null){
-            throw new NotLoginException();
-        }
-        BaseOutput baseOutput = taskRpc.claim(taskMapping.getId(), userTicket.getId().toString());
-        if(!baseOutput.isSuccess()){
-            throw new ParamErrorException(baseOutput.getMessage());
-        }
-        return new StringBuilder().append("redirect:").append(actForm.getTaskUrl()).append("?cover=false&taskId=").append(taskMapping.getId()).append("&businessKey=").append(code).toString();
+        return ordersService.handle(code);
     }
 
     /**
-     * 根据业务号验证任务
+     * 根据业务号验证任务，用于在插手处理任务前的验证，并签收任务
      * 判断任务是否被签收
      * 同时要验证任务是否存在, 是否有已注册的表单，并且当前用户已登录
      * @param businessKey  订单号
@@ -109,37 +75,7 @@ public class OrdersController {
     @RequestMapping(value="/validateBusinessKey.action", method = {RequestMethod.GET, RequestMethod.POST})
     @ResponseBody
     public BaseOutput<String> validateBusinessKey(@RequestParam String businessKey, ModelMap modelMap) {
-        //根据业务号查询任务
-        TaskDto taskDto = DTOUtils.newInstance(TaskDto.class);
-        taskDto.setProcessInstanceBusinessKey(businessKey);
-        BaseOutput<List<TaskMapping>> output = taskRpc.list(taskDto);
-        if(!output.isSuccess()){
-            return BaseOutput.failure(output.getMessage());
-        }
-        List<TaskMapping> taskMappings = output.getData();
-        //没有进行中的任务或任务已结束
-        if(CollectionUtils.isEmpty(taskMappings)){
-            return BaseOutput.failure("未找到进行中的任务");
-        }
-        //默认没有并发流程，所以取第一个任务
-        //如果有并发流程，需使用TaskDefKey来确认流程节点
-        TaskMapping taskMapping = taskMappings.get(0);
-        String formKey = taskMapping.getFormKey();
-        BaseOutput<ActForm> actFormOutput = formRpc.getByKey(formKey);
-        //没有已注册的表单配置
-        if(!actFormOutput.isSuccess()){
-            return BaseOutput.failure(output.getMessage());
-        }
-        ActForm actForm = actFormOutput.getData();
-        if(actForm == null){
-            return BaseOutput.failure("任务表单["+formKey+"]不存在");
-        }
-        //自动签收任务
-        UserTicket userTicket = SessionContext.getSessionContext().getUserTicket();
-        if(userTicket == null){
-            return BaseOutput.failure("用户未登录");
-        }
-        return taskRpc.claim(taskMapping.getId(), userTicket.getId().toString());
+        return ordersService.validateBusinessKey(businessKey);
     }
     /**
      * 创建订单页面
@@ -228,9 +164,7 @@ public class OrdersController {
             throw new AppException(taskVariablesOutput.getMessage());
         }
 //        Map<String, Object> executionVariables = runtimeService.getVariables(task.getExecutionId());
-
         String code = taskVariablesOutput.getData().get("orderCode").toString();
-
         modelMap.put("orders", ordersService.getByCode(code));
         modelMap.put("taskId", taskId);
         modelMap.put("cover", cover == null ? output.getData().getAssignee() == null : cover);

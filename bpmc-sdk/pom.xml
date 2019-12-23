@@ -25,7 +25,6 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <mapper.version>3.3.9</mapper.version>
         <mysql.version>5.1.38</mysql.version>
-        <sharp-sword.version>3.5.2-SNAPSHOT</sharp-sword.version>
     </properties>
 
     <!-- 父工程定义 -->

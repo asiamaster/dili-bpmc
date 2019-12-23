@@ -56,10 +56,11 @@
         </ul>
         <%}
         */%>
-
+        <%if(has(task)){%>
         <div class="easyui-datalist" id="taskDatalist" lines="true" valueField="id" textField="name"  loadMsg="数据加载中..."
              style="width:260px;height:100%" data-options="textFormatter:fmt, onClickRow:showTask,groupField:'processDefinitionName'">
         </div>
+        <%}%>
     </div>
     <!-- 中央布局 -->
     <div region="center" id="centerRegion" style="float:left;width:100%;padding-top: 1px;" height="auto">

@@ -1,6 +1,10 @@
 package com.dili.bpmd.service.impl;
 
+import com.dili.bpmc.sdk.domain.ActForm;
 import com.dili.bpmc.sdk.domain.ProcessInstanceMapping;
+import com.dili.bpmc.sdk.domain.TaskMapping;
+import com.dili.bpmc.sdk.dto.TaskDto;
+import com.dili.bpmc.sdk.rpc.FormRpc;
 import com.dili.bpmc.sdk.rpc.RuntimeRpc;
 import com.dili.bpmc.sdk.rpc.TaskRpc;
 import com.dili.bpmc.sdk.util.DateUtils;
@@ -15,6 +19,7 @@ import com.dili.ss.domain.BaseOutput;
 import com.dili.ss.dto.DTOUtils;
 import com.dili.ss.exception.AppException;
 import com.dili.ss.exception.BusinessException;
+import com.dili.ss.exception.ParamErrorException;
 import com.dili.uap.sdk.domain.UserTicket;
 import com.dili.uap.sdk.exception.NotLoginException;
 import com.dili.uap.sdk.session.SessionContext;
@@ -38,6 +43,8 @@ public class OrdersServiceImpl extends BaseServiceImpl<Orders, Long> implements 
     RuntimeRpc runtimeRpc;
     @Autowired
     TaskRpc taskRpc;
+    @Autowired
+    FormRpc formRpc;
 
     public OrdersMapper getActualDao() {
         return (OrdersMapper)getDao();
@@ -64,7 +71,7 @@ public class OrdersServiceImpl extends BaseServiceImpl<Orders, Long> implements 
         //启动流程
         BaseOutput<ProcessInstanceMapping> processInstanceOutput = runtimeRpc.startProcessInstanceByKey(BpmConsts.PROCESS_DEFINITION_KEY, orders.getCode(), userTicket.getId().toString(), variables);
         if(!processInstanceOutput.isSuccess()){
-            throw new AppException(processInstanceOutput.getMessage());
+            return BaseOutput.failure(processInstanceOutput.getMessage());
         }
         ProcessInstanceMapping processInstance = processInstanceOutput.getData();
         orders.setProcessDefinitionId(processInstance.getProcessDefinitionId());
@@ -156,13 +163,77 @@ public class OrdersServiceImpl extends BaseServiceImpl<Orders, Long> implements 
 
     @Override
     @Transactional
-    public BaseOutput handle(Long id) throws BusinessException {
-        Orders orders = get(id);
-        //发送消息通知流程
-        return taskRpc.messageEventReceived("deleteRentalOrderMsg", orders.getProcessInstanceId(), null);
-//        if(!output.isSuccess()){
-//            throw new BusinessException(ResultCode.DATA_ERROR, output.getMessage());
-//        }
+    public String handle(String code) throws BusinessException {
+        //根据业务号查询任务
+        TaskDto taskDto = DTOUtils.newInstance(TaskDto.class);
+        taskDto.setProcessInstanceBusinessKey(code);
+        BaseOutput<List<TaskMapping>> output = taskRpc.list(taskDto);
+        if(!output.isSuccess()){
+            throw new BusinessException(ResultCode.DATA_ERROR, output.getMessage());
+        }
+        List<TaskMapping> taskMappings = output.getData();
+        //没有进行中的任务或任务已结束
+        if(CollectionUtils.isEmpty(taskMappings)){
+            throw new BusinessException(ResultCode.DATA_ERROR, "未找到进行中的任务");
+        }
+        //默认没有并发流程，所以取第一个任务
+        //如果有并发流程，需使用TaskDefKey来确认流程节点
+        TaskMapping taskMapping = taskMappings.get(0);
+        String formKey = taskMapping.getFormKey();
+        BaseOutput<ActForm> actFormOutput = formRpc.getByKey(formKey);
+        //没有已注册的表单配置
+        if(!actFormOutput.isSuccess()){
+            throw new BusinessException(ResultCode.DATA_ERROR, output.getMessage());
+        }
+        ActForm actForm = actFormOutput.getData();
+        if(actForm == null){
+            throw new ParamErrorException("任务表单["+formKey+"]不存在");
+        }
+        //自动签收任务
+        UserTicket userTicket = SessionContext.getSessionContext().getUserTicket();
+        if(userTicket == null){
+            throw new NotLoginException();
+        }
+        BaseOutput baseOutput = taskRpc.claim(taskMapping.getId(), userTicket.getId().toString());
+        if(!baseOutput.isSuccess()){
+            throw new ParamErrorException(baseOutput.getMessage());
+        }
+        return new StringBuilder().append("redirect:").append(actForm.getTaskUrl()).append("?cover=false&taskId=").append(taskMapping.getId()).append("&businessKey=").append(code).toString();
+    }
+
+    @Override
+    public BaseOutput<String> validateBusinessKey(String businessKey){
+        //根据业务号查询任务
+        TaskDto taskDto = DTOUtils.newInstance(TaskDto.class);
+        taskDto.setProcessInstanceBusinessKey(businessKey);
+        BaseOutput<List<TaskMapping>> output = taskRpc.list(taskDto);
+        if(!output.isSuccess()){
+            return BaseOutput.failure(output.getMessage());
+        }
+        List<TaskMapping> taskMappings = output.getData();
+        //没有进行中的任务或任务已结束
+        if(CollectionUtils.isEmpty(taskMappings)){
+            return BaseOutput.failure("未找到进行中的任务");
+        }
+        //默认没有并发流程，所以取第一个任务
+        //如果有并发流程，需使用TaskDefKey来确认流程节点
+        TaskMapping taskMapping = taskMappings.get(0);
+        String formKey = taskMapping.getFormKey();
+        BaseOutput<ActForm> actFormOutput = formRpc.getByKey(formKey);
+        //没有已注册的表单配置
+        if(!actFormOutput.isSuccess()){
+            return BaseOutput.failure(output.getMessage());
+        }
+        ActForm actForm = actFormOutput.getData();
+        if(actForm == null){
+            return BaseOutput.failure("任务表单["+formKey+"]不存在");
+        }
+        //自动签收任务
+        UserTicket userTicket = SessionContext.getSessionContext().getUserTicket();
+        if(userTicket == null){
+            return BaseOutput.failure("用户未登录");
+        }
+        return taskRpc.claim(taskMapping.getId(), userTicket.getId().toString());
     }
 
     /**
