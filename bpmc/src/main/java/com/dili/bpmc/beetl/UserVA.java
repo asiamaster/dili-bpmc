@@ -3,7 +3,7 @@ package com.dili.bpmc.beetl;
 import com.dili.bpmc.rpc.UserRpc;
 import com.dili.ss.domain.BaseOutput;
 import com.dili.uap.sdk.domain.User;
-import org.activiti.engine.task.Task;
+import org.activiti.engine.task.TaskInfo;
 import org.apache.commons.lang3.StringUtils;
 import org.beetl.core.Context;
 import org.beetl.core.VirtualAttributeEval;
@@ -23,7 +23,7 @@ public class UserVA implements VirtualAttributeEval {
     private UserRpc userRpc;
     @Override
     public boolean isSupport(Class c, String attributeName) {
-        if(!Task.class.isAssignableFrom(c)){
+        if(!TaskInfo.class.isAssignableFrom(c)){
             return false;
         }
         if("assigneeName".equals(attributeName) || "ownerName".equals(attributeName)){
@@ -34,7 +34,7 @@ public class UserVA implements VirtualAttributeEval {
 
     @Override
     public Object eval(Object o, String attributeName, Context ctx) {
-        Task task = (Task)o;
+        TaskInfo task = (TaskInfo)o;
         if(task==null){
             return "";
         }

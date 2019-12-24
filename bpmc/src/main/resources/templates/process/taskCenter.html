@@ -44,6 +44,8 @@
             <a <%if(category=='tasks'){%>class="tab-selected"<%}else{%>class="tab-unselected"<%}%> <%if(tasksCount>0){%>href="${contextPath}/task/taskCenter.html?category=tasks"<%}%> style="margin-left: 18px;">我的任务[${tasksCount}]</a>
             <a id="queuedTab" <%if(category=='queued'){%>class="tab-selected"<%}else{%>class="tab-unselected"<%}%> <%if(queuedCount>0){%>href="${contextPath}/task/taskCenter.html?category=queued"<%}%> style="margin-left: 18px;">队列[${queuedCount}]</a>
             <a <%if(category=='involved'){%>class="tab-selected"<%}else{%>class="tab-unselected"<%}%> <%if(involvedCount>0){%>href="${contextPath}/task/taskCenter.html?category=involved"<%}%> style="margin-left: 18px;">受邀[${involvedCount}]</a>
+            <a <%if(category=='archived'){%>class="tab-selected"<%}else{%>class="tab-unselected"<%}%> <%if(archivedCount>0){%>href="${contextPath}/task/taskCenter.html?category=archived"<%}%> style="margin-left: 18px;">已归档[${archivedCount}]</a>
+
         </div>
     </div>
     <!-- 西侧布局 -->
@@ -126,14 +128,16 @@
 
             <!-- 任务详情 -->
             <div id="taskDetail" style="position: relative; overflow: hidden;" >
+                <div style="vertical-align: top; color:#007dc3;font-size: 20px;font-family: 'Microsoft YaHei';padding-top:10px;padding-bottom: 0px;">相关内容</div>
+                <% if(has(actForm)){%>
                 <div style="vertical-align: top; font-weight:bold;font-family: 'Microsoft YaHei';padding-top:10px;padding-bottom: 10px;">请填写下面的表单后完成任务:<img align="right" onclick="maximize()" class="maximize" src="${contextPath}/resources/images/maximize-16.png"/></div>
                 <%
                 url = actForm.taskUrl + "?taskId=" + task.id + "&formKey=" + task.formKey;
-                //没有办理人则遮照
-                if(!has(isAssignee)) {
-                    //beetl不支持+=，艹
-                    url = url + "&cover=true";
-                }
+                //没有办理人则遮照(目前遮照由任务中心统一实现)
+                //if(!has(isAssignee)) {
+                //    //beetl不支持+=，艹
+                //    url = url + "&cover=true";
+                //}
                 //站内页面，使用href，站外页面(http开头)使用iframe
                 if(strutil.startWith(actForm.taskUrl, "http")){
                 var content = "<iframe id=\"actFormFrame\" src=\"" + url + "\" frameborder=\"0\" height=\"100%\" width=\"100%\" scrolling=\"yes\"></iframe>";
@@ -143,6 +147,9 @@
                 <div class="easyui-panel" style="width: 100%;" data-options="href:'${contextPath}${url}'" >
                 <%}%>
                 </div>
+                <%}else{%>
+                此任务无附加内容
+                <%}%>
             </div>
 
         </div>
@@ -159,7 +166,7 @@
     </div>
 </div>
 <!-- 遮照 -->
-<%if(task.assignee == null){%>
+<%if(has(task) && task.assignee == null){%>
 <#cover cid="taskDetail" cover="true"/>
 <%}%>
 <!-- 队列菜单 -->

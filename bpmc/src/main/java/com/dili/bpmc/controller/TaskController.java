@@ -24,13 +24,16 @@ import com.dili.uap.sdk.exception.NotLoginException;
 import com.dili.uap.sdk.session.SessionContext;
 import org.activiti.engine.*;
 import org.activiti.engine.form.TaskFormData;
+import org.activiti.engine.history.HistoricTaskInstance;
 import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.engine.runtime.Execution;
 import org.activiti.engine.task.DelegationState;
 import org.activiti.engine.task.Task;
+import org.activiti.engine.task.TaskInfo;
 import org.activiti.engine.task.TaskQuery;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.ss.formula.functions.T;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -505,6 +508,8 @@ public class TaskController {
         if(!rolesOutput.isSuccess()){
             throw new AppException("远程查询角色失败");
         }
+        //设置选择类别，用于高亮显示被选中的类别
+        request.setAttribute("category", category);
         //队列任务
 //        候选用户组下的任务
         long queuedCount = 0;
@@ -524,45 +529,43 @@ public class TaskController {
             queuedCount += count;
             groupMap.put(role.getId().toString(), new StringBuilder().append(role.getRoleName()).append("[").append(count).append("]").toString());
         }
+        //队列右键菜单
         request.setAttribute("groupMap", groupMap);
+
         //受邀任务，这里包括候选用户任务和候选组任务
 //        long involvedCount = taskService.createTaskQuery().taskCandidateUser(userId).count();
         //受邀任务，这里只包括候选用户任务
         long involvedCount = actRuTaskMapper.taskCandidateUserCount(userId);
+        //查询已归档任务数
+        long archivedCount = historyService.createHistoricTaskInstanceQuery().taskAssignee(userId).count();
                 //设置标题部分显示的任务数
         request.setAttribute("inboxCount", inboxCount);
         request.setAttribute("tasksCount", tasksCount);
         request.setAttribute("queuedCount", queuedCount);
         request.setAttribute("involvedCount", involvedCount);
+        request.setAttribute("archivedCount", archivedCount);
 
         //查询任务列表，用于左侧任务列表显示
-        //判断有groupId，并且当前用户也有该组权限, 没有groupId则列出当前用户组下所有任务
-        List<Task> tasks = containsGroupId(groupIds, groupId) ? listTaskByCategory(category, userId, groupId) : listTaskByCategory(category, userId, groupIds);
         //设置当前显示的任务，用于在点击时直接跳转到该任务
-        Task task = null;
-        if(!CollectionUtils.isEmpty(tasks)) {
-            if (StringUtils.isBlank(taskId)) {
-                task = tasks.get(0);
-            } else {
-                for (Task t : tasks) {
-                    if (taskId.equals(t.getId())){
-                        task = t;
-                        break;
-                    }
-                }
-            }
+        TaskInfo task = null;
+        //组装左侧任务列表
+        JSONArray ja;
+        //先判断是否已归档类型，单独处理
+        if(TaskCategory.ARCHIVED.getCode().equals(category)){
+            List<HistoricTaskInstance> historicTaskInstances = historyService.createHistoricTaskInstanceQuery().taskAssignee(userId).list();
+            task = findTaskById(historicTaskInstances, taskId);
+            ja = buildTaskList(historicTaskInstances);
+        }else {
+            //判断有groupId，并且当前用户也有该组权限, 没有groupId则列出当前用户组下所有任务
+            List<Task> tasks = containsGroupId(groupIds, groupId) ? listTaskByCategory(category, userId, groupId) : listTaskByCategory(category, userId, groupIds);
+            task = findTaskById(tasks, taskId);
+            ja = buildTaskList(tasks);
         }
-        //设置选择类别，用于高亮显示被选中的类别
-        request.setAttribute("category", category);
-        if(task == null){
+        if (task == null) {
             return;
         }
-        //表单key，用于显示任务内容
-        String formKey = task.getFormKey();
-        ActForm actForm = actFormService.getByKey(formKey);
-        if(actForm == null){
-            throw new ParamErrorException("任务表单["+formKey+"]不存在");
-        }
+        //设置左侧任务列表
+        request.setAttribute("tasks", ja.toJSONString());
         //设置流程发起人(这个会稍微影响性能，暂时不开放)
 //        HistoricProcessInstance historicProcessInstance = historyService.createHistoricProcessInstanceQuery().processInstanceId(task.getProcessInstanceId()).singleResult();
 //        request.setAttribute("startUserId", historicProcessInstance.getStartUserId());
@@ -570,39 +573,78 @@ public class TaskController {
         if(userId.equals(task.getAssignee())){
             request.setAttribute("isAssignee", true);
         }
-
-        request.setAttribute("actForm", actForm);
         //设置中间部分的任务详情
         request.setAttribute("task", task);
-        PropertyFilter proFileter = new PropertyFilter() {
-            @Override
-            public boolean apply(Object object, String name, Object value) {
-                if("id".equalsIgnoreCase(name) || "name".equalsIgnoreCase(name) || "processDefinitionId".equalsIgnoreCase(name)){
-                    return true;
-                }
-                return false;
+
+        //查询并设置任务所属流程名称
+        ProcessDefinition processDefinition =repositoryService.createProcessDefinitionQuery().processDefinitionId(task.getProcessDefinitionId()).singleResult();
+        request.setAttribute("processDefinitionName", processDefinition == null ? "无所属流程定义" :processDefinition.getName());
+        //非归档任务才显示表单信息
+        if(!TaskCategory.ARCHIVED.getCode().equals(category)) {
+            //表单key，用于显示任务内容
+            String formKey = task.getFormKey();
+            if (formKey == null) {
+//            throw new ParamErrorException("任务["+task.getId()+"]的formKey不存在");
+                return;
             }
-        };
+            ActForm actForm = actFormService.getByKey(formKey);
+            if (actForm == null) {
+//            throw new ParamErrorException("任务表单["+formKey+"]不存在");
+                return;
+            }
+            request.setAttribute("actForm", actForm);
+        }
+    }
+
+    /**
+     * 构建任务列表数据
+     * @param tasks
+     * @param <T>
+     * @return
+     */
+    private <T extends TaskInfo> JSONArray buildTaskList(List<T> tasks){
         //组装左侧任务列表
         JSONArray ja = new JSONArray();
         Map<String, String> processDefinitionMap = new HashMap<>();
-        for(Task t : tasks){
+        for(TaskInfo t : tasks){
             JSONObject jo = new JSONObject();
             jo.put("id", t.getId());
             jo.put("name", t.getName());
             //转换流程定义id为名称
             if(!processDefinitionMap.containsKey(t.getProcessDefinitionId())){
                 ProcessDefinition processDefinition = repositoryService.createProcessDefinitionQuery().processDefinitionId(t.getProcessDefinitionId()).singleResult();
-                processDefinitionMap.put(processDefinition.getId(), processDefinition.getName());
+                //流程定义可能被删除了，所以要判空
+                if(processDefinition != null){
+                    processDefinitionMap.put(processDefinition.getId(), processDefinition.getName());
+                }
             }
             jo.put("processDefinitionName", processDefinitionMap.get(t.getProcessDefinitionId()));
             ja.add(jo);
         }
-        //设置左侧任务列表
-        request.setAttribute("tasks", ja.toJSONString());
-        //查询并设置任务所属流程名称
-        ProcessDefinition processDefinition =repositoryService.createProcessDefinitionQuery().processDefinitionId(task.getProcessDefinitionId()).singleResult();
-        request.setAttribute("processDefinitionName", processDefinition.getName());
+        return ja;
+    }
+    /**
+     * 根据任务id从任务列表获取任务，如果任务id为空，则取第一个任务
+     * @param tasks
+     * @param taskId
+     * @param <T>
+     * @return
+     */
+    private <T extends TaskInfo> T findTaskById(List<T> tasks, String taskId){
+        T task = null;
+        if (!CollectionUtils.isEmpty(tasks)) {
+            if (StringUtils.isBlank(taskId)) {
+                task = tasks.get(0);
+            } else {
+                for (T t : tasks) {
+                    if (taskId.equals(t.getId())) {
+                        task = t;
+                        break;
+                    }
+                }
+            }
+        }
+        return task;
     }
 
     /**
