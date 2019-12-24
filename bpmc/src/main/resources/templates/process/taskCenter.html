@@ -123,10 +123,10 @@
                     </div>
                 </div>
             </div>
-            <div style="vertical-align: top; font-weight:bold;font-family: 'Microsoft YaHei';padding-top:10px;padding-bottom: 10px;">请填写下面的表单后完成任务:<img align="right" onclick="maximize()" class="maximize" src="${contextPath}/resources/images/maximize-16.png"/></div>
-            <!-- 任务详情 -->
-            <div style="position: relative; overflow: hidden;" >
 
+            <!-- 任务详情 -->
+            <div id="taskDetail" style="position: relative; overflow: hidden;" >
+                <div style="vertical-align: top; font-weight:bold;font-family: 'Microsoft YaHei';padding-top:10px;padding-bottom: 10px;">请填写下面的表单后完成任务:<img align="right" onclick="maximize()" class="maximize" src="${contextPath}/resources/images/maximize-16.png"/></div>
                 <%
                 url = actForm.taskUrl + "?taskId=" + task.id + "&formKey=" + task.formKey;
                 //没有办理人则遮照
@@ -144,6 +144,7 @@
                 <%}%>
                 </div>
             </div>
+
         </div>
             <!-- 隐藏流程图框 -->
             <div id="dlg" class="easyui-dialog" resizable="true" constrain="true" shadow="true" draggable="true" title="流程图" style="padding:10px" modal="false" closed="true" border="true"
@@ -157,13 +158,16 @@
         <%}%>
     </div>
 </div>
+<!-- 遮照 -->
+<%if(task.assignee == null){%>
+<#cover cid="taskDetail" cover="true"/>
+<%}%>
 <!-- 队列菜单 -->
 <div id="mm" class="easyui-menu" data-options="noline:true,hideOnUnhover:false" style="width:120px;">
     <%for(group in groupMap){%>
     <div href="${contextPath}/task/taskCenter.html?category=queued&groupId=${group.key}">${group.value}</div>
     <%}%>
 </div>
-
 
 <script>
     //监听子页面的toLogin事件消息

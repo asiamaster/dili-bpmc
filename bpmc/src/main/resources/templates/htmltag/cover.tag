@@ -24,7 +24,7 @@
     }
 </style>
 <script type="text/javascript">
-    <%if(cover){%>
+    <%if(cover=="true"){%>
     $(function () {
         //弹出加载层
         $("<div class=\"mask\"></div>").css({
@@ -39,7 +39,7 @@
         $("<div class=\"mask-msg\"></div>").html("请先签收任务...").css({
             position: "fixed",
             left: "50%",
-            top: ($(window).height() / 2 + 20),
+            top: ($(window).height() / 2 +30),
             "line-height": "16px",
             "-moz-opacity": "0.65",
             "opacity": ".65",
