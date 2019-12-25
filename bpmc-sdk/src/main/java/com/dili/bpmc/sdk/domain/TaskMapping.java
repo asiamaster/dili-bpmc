@@ -146,6 +146,8 @@ public interface TaskMapping extends IDTO {
      * Returns the process variables if requested in the task query
      */
     Map<String, Object> getProcessVariables();
+    void setProcessVariables(Map<String, Object> processVariables);
+
 
     /** Sets an optional localized name for the task. */
     void setLocalizedName(String localizedName);

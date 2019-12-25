@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dili.bpmc.dao.TaskAssignmentMapper">
+  <resultMap id="BaseResultMap" type="com.dili.bpmc.domain.TaskAssignment">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <result column="id" jdbcType="BIGINT" property="id" />
+    <result column="assignee" jdbcType="VARCHAR" property="assignee" />
+    <result column="candidate_user" jdbcType="VARCHAR" property="candidateUser" />
+    <result column="candidate_group" jdbcType="VARCHAR" property="candidateGroup" />
+    <result column="handler_url" jdbcType="VARCHAR" property="handlerUrl" />
+    <result column="task_definition_key" jdbcType="VARCHAR" property="taskDefinitionKey" />
+    <result column="process_definition_key" jdbcType="VARCHAR" property="processDefinitionKey" />
+    <result column="creater_id" jdbcType="BIGINT" property="createrId" />
+    <result column="modifier_id" jdbcType="BIGINT" property="modifierId" />
+    <result column="created" jdbcType="TIMESTAMP" property="created" />
+    <result column="modified" jdbcType="TIMESTAMP" property="modified" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    id, assignee, candidate_user, candidate_group, handler_url, task_definition_key, 
+    process_definition_key, creater_id, modifier_id, created, modified
+  </sql>
+</mapper>

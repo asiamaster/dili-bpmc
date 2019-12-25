@@ -1,0 +1,254 @@
+ <#body>
+    <div class="easyui-layout" fit="true">
+        <!-- ====================================================================================================================== -->
+        <!-- 上方布局 -->
+        <!-- ====================================================================================================================== -->
+        <div region="north" height="auto" align="center">
+            <!-- =========================================================表单========================================================= -->
+            <div class="easyui-panel" style="width:100%;" align="left">
+                <form id="form" class="easyui-form" method="post" fit="true">
+                    <table style="padding:10px;">
+                        <tr>
+                            <td style="padding:5px;">
+                                <input class="easyui-textbox" name="assignee" id="assignee" style="width:100%" labelAlign="right" data-options="label:'办理人:', validType:'length[0,10]'" />
+
+                            </td>
+                            <td style="padding:5px;">
+                                <input class="easyui-textbox" name="candidateUser" id="candidateUser" style="width:100%" labelAlign="right" data-options="label:'候选人:', validType:'length[0,64]'" />
+
+                            </td>
+                            <td style="padding:5px;">
+                                <input class="easyui-textbox" name="candidateGroup" id="candidateGroup" style="width:100%" labelAlign="right" data-options="label:'候选组:', validType:'length[0,64]'" />
+
+                            </td>
+                            <td style="padding:5px;">
+                                <input class="easyui-textbox" name="handlerUrl" id="handlerUrl" style="width:100%" labelAlign="right" data-options="label:'处理URL:', validType:'length[0,120]'" />
+
+                            </td>
+                            <td style="padding:5px;">
+                                <input class="easyui-textbox" name="taskDefinitionKey" id="taskDefinitionKey" style="width:100%" labelAlign="right" data-options="label:'任务定义key:', validType:'length[0,64]'" />
+
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding:5px;">
+                                <input class="easyui-textbox" name="processDefinitionKey" id="processDefinitionKey" style="width:100%" labelAlign="right" data-options="label:'流程定义key:', validType:'length[0,64]'" />
+
+                            </td>
+                            <td style="padding:5px;">
+                                <input class="easyui-numberbox" name="createrId" id="createrId" style="width:100%" labelAlign="right" data-options="label:'创建人:', validType:'length[0,19]'" />
+
+                            </td>
+                            <td style="padding:5px;">
+                                <input class="easyui-numberbox" name="modifierId" id="modifierId" style="width:100%" labelAlign="right" data-options="label:'修改人:', validType:'length[0,19]'" />
+
+                            </td>
+                            <td style="padding:5px;">
+                                <input class="easyui-datetimebox" name="created" id="created" style="width:100%" labelAlign="right" data-options="label:'创建时间:'" />
+
+                            </td>
+                            <td style="padding:5px;">
+                                <input class="easyui-datetimebox" name="modified" id="modified" style="width:100%" labelAlign="right" data-options="label:'修改时间:'" />
+
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding-left:28px;padding-top: 10px; padding-bottom: 10px;">
+                                <a href="#" class="easyui-linkbutton" iconCls="icon-search" id="queryBtn"
+                                   onclick="queryGrid()">查询</a>&nbsp;&nbsp;
+                                <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-clear" onclick="clearForm()">清除</a>
+                            </td>
+                        </tr>
+                    </table>
+                </form>
+            </div>
+        </div>
+        <!-- ====================================================================================================================== -->
+        <!-- 中央布局 -->
+        <!-- ====================================================================================================================== -->
+        <!-- 表格 -->
+        <div region="center" style="width:100%;" height="auto">
+            <!-- =========================================================表格========================================================= -->
+            <table class="easyui-datagrid" title="TaskAssignment列表" id="grid" fitColumns="true" noheader="true"
+                   pagination="true" pageSize="30" pageNumber="1" pagePosition="top" rownumbers="false" remoteSort="false"
+                   loadMsg="数据加载中..." singleSelect="true" method="post" multiSort="false" sortName="assignee"
+                   align="center" fit="true" striped="true" idField="id" data-options="onDblClickRow:openUpdate, onHeaderContextMenu:headerContextMenu">
+                <thead>
+                    <tr>
+                        <th data-options="field:'assignee',   sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
+                            办理人
+                        </th>
+                        <th data-options="field:'candidateUser',   sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
+                            候选人
+                        </th>
+                        <th data-options="field:'candidateGroup',   sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
+                            候选组
+                        </th>
+                        <th data-options="field:'handlerUrl',   sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
+                            处理URL
+                        </th>
+                        <th data-options="field:'taskDefinitionKey',   sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
+                            任务定义key
+                        </th>
+                        <th data-options="field:'processDefinitionKey',   sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
+                            流程定义key
+                        </th>
+                        <th data-options="field:'createrId',   sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
+                            创建人
+                        </th>
+                        <th data-options="field:'modifierId',   sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
+                            修改人
+                        </th>
+                        <th data-options="field:'created',  _provider:'datetimeProvider', sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
+                            创建时间
+                        </th>
+                        <th data-options="field:'modified',  _provider:'datetimeProvider', sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
+                            修改时间
+                        </th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+    <!-- 隐藏编辑框 -->
+    <div id="dlg" class="easyui-dialog" resizable="false" constrain="true" shadow="true" draggable="false" title="TaskAssignment信息" style="padding:20px" modal="true" border="thin" closed="true"
+         data-options="
+				iconCls: 'icon-save',
+				height: 480,
+				buttons: [{
+					text:'确认',
+					iconCls:'icon-ok',
+					handler:saveOrUpdate
+				},{
+					text:'取消',
+					iconCls:'icon-cancel',
+					handler:function(){
+						$('#dlg').dialog('close');
+					}
+				}]
+			">
+    <form id="_form" class="easyui-form" method="post" fit="true">
+        <input name="_id" id="_id" type="hidden">
+        <table width="360px">
+            <tr>
+                <td style="padding:5px;">
+                    <input class="easyui-textbox" name="_assignee" id="_assignee" style="width:100%" data-options="label:'办理人:', validType:'length[0,10]'" 
+                        required="true" />
+                </td>
+            </tr>
+            <tr>
+                <td style="padding:5px;">
+                    <input class="easyui-textbox" name="_candidateUser" id="_candidateUser" style="width:100%" data-options="label:'候选人:', validType:'length[0,64]'" />
+                </td>
+            </tr>
+            <tr>
+                <td style="padding:5px;">
+                    <input class="easyui-textbox" name="_candidateGroup" id="_candidateGroup" style="width:100%" data-options="label:'候选组:', validType:'length[0,64]'" />
+                </td>
+            </tr>
+            <tr>
+                <td style="padding:5px;">
+                    <input class="easyui-textbox" name="_handlerUrl" id="_handlerUrl" style="width:100%" data-options="label:'处理URL:', validType:'length[0,120]'" />
+                </td>
+            </tr>
+            <tr>
+                <td style="padding:5px;">
+                    <input class="easyui-textbox" name="_taskDefinitionKey" id="_taskDefinitionKey" style="width:100%" data-options="label:'任务定义key:', validType:'length[0,64]'" />
+                </td>
+            </tr>
+            <tr>
+                <td style="padding:5px;">
+                    <input class="easyui-textbox" name="_processDefinitionKey" id="_processDefinitionKey" style="width:100%" data-options="label:'流程定义key:', validType:'length[0,64]'" />
+                </td>
+            </tr>
+            <tr>
+                <td style="padding:5px;">
+                    <input class="easyui-numberbox" name="_createrId" id="_createrId" style="width:100%" data-options="label:'创建人:'" />
+                </td>
+            </tr>
+            <tr>
+                <td style="padding:5px;">
+                    <input class="easyui-numberbox" name="_modifierId" id="_modifierId" style="width:100%" data-options="label:'修改人:'" />
+                </td>
+            </tr>
+            <tr>
+                <td style="padding:5px;">
+                    <input class="easyui-datetimebox" name="_created" id="_created" style="width:100%" editable="false" data-options="label:'创建时间:'" />
+                </td>
+            </tr>
+            <tr>
+                <td style="padding:5px;">
+                    <input class="easyui-datetimebox" name="_modified" id="_modified" style="width:100%" editable="false" data-options="label:'修改时间:'" />
+                </td>
+            </tr>
+        </table>
+    </form>
+
+    </div>
+    <!-- ====================================================================================================================== -->
+    <!-- style & script 分隔线 -->
+    <!-- ====================================================================================================================== -->
+    <script type="text/javascript">
+        //打开新增窗口
+        function openInsert(){
+            $('#dlg').dialog('open');
+            $('#dlg').dialog('center');
+            $('#_form').form('clear');
+            formFocus("_form", "_assignee");
+        }
+
+        //打开修改窗口
+        function openUpdate(){
+            var selected = $("#grid").datagrid("getSelected");
+            if (null == selected) {
+                swal('警告','请选中一条数据', 'warning');
+                return;
+            }
+            $('#dlg').dialog('open');
+            $('#dlg').dialog('center');
+            formFocus("_form", "_assignee");
+            var formData = $.extend({},selected);
+            formData = addKeyStartWith(getOriginalData(formData),"_");
+            $('#_form').form('load', formData);
+        }
+
+        function saveOrUpdate(){
+            if(!$('#_form').form("validate")){
+                return;
+            }
+            var _formData = removeKeyStartWith($("#_form").serializeObject(),"_");
+            var _url = null;
+            //没有id就新增
+            if(_formData.id == null || _formData.id==""){
+                _url = "${contextPath}/taskAssignment/insert.action";
+            }else{//有id就修改
+                _url = "${contextPath}/taskAssignment/update.action";
+            }
+            $.ajax({
+                type: "POST",
+                url: _url,
+                data: _formData,
+                processData:true,
+                dataType: "json",
+                async : true,
+                success: function (data) {
+                    if(data.code=="200"){
+                        $("#grid").datagrid("reload");
+                        $('#dlg').dialog('close');
+                    }else{
+                        swal('错误',data.result, 'error');
+                    }
+                },
+                error: function(){
+                    swal('错误', '远程访问失败', 'error');
+                }
+            });
+        }
+
+        //根据主键删除
+        function del() {
+            var selected = $("#grid").datagrid("getSelected");
+            if (null == selected) {
+                swal('警告','请选中一条数据', 'warning');
+                return;
+            }
