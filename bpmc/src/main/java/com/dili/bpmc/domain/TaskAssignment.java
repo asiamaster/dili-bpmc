@@ -1,6 +1,7 @@
 package com.dili.bpmc.domain;
 
 import com.dili.ss.dto.IBaseDomain;
+import com.dili.ss.dto.IMybatisForceParams;
 import com.dili.ss.metadata.FieldEditor;
 import com.dili.ss.metadata.annotation.EditMode;
 import com.dili.ss.metadata.annotation.FieldDef;
@@ -14,10 +15,10 @@ import javax.persistence.Id;
 /**
  * 由MyBatis Generator工具自动生成
  * 
- * This file was generated on 2019-12-25 14:11:30.
+ * This file was generated on 2019-12-25 16:23:45.
  */
 @Table(name = "`task_assignment`")
-public interface TaskAssignment extends IBaseDomain {
+public interface TaskAssignment extends IBaseDomain, IMybatisForceParams {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "`id`")
@@ -29,7 +30,7 @@ public interface TaskAssignment extends IBaseDomain {
 
     @Column(name = "`assignee`")
     @FieldDef(label="办理人", maxLength = 10)
-    @EditMode(editor = FieldEditor.Text, required = true)
+    @EditMode(editor = FieldEditor.Text, required = false)
     String getAssignee();
 
     void setAssignee(String assignee);

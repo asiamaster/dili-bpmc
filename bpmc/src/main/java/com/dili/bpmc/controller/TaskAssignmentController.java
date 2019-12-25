@@ -3,6 +3,8 @@ package com.dili.bpmc.controller;
 import com.dili.bpmc.domain.TaskAssignment;
 import com.dili.bpmc.service.TaskAssignmentService;
 import com.dili.ss.domain.BaseOutput;
+import com.dili.uap.sdk.domain.UserTicket;
+import com.dili.uap.sdk.session.SessionContext;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -64,6 +66,12 @@ public class TaskAssignmentController {
      */
     @RequestMapping(value="/insert.action", method = {RequestMethod.GET, RequestMethod.POST})
     public @ResponseBody BaseOutput insert(TaskAssignment taskAssignment) {
+        UserTicket userTicket = SessionContext.getSessionContext().getUserTicket();
+        if(userTicket == null){
+            return BaseOutput.failure("登录超时");
+        }
+        taskAssignment.setCreaterId(userTicket.getId());
+        taskAssignment.setModifierId(userTicket.getId());
         taskAssignmentService.insertSelective(taskAssignment);
         return BaseOutput.success("新增成功");
     }
@@ -75,7 +83,12 @@ public class TaskAssignmentController {
      */
     @RequestMapping(value="/update.action", method = {RequestMethod.GET, RequestMethod.POST})
     public @ResponseBody BaseOutput update(TaskAssignment taskAssignment) {
-        taskAssignmentService.updateSelective(taskAssignment);
+        UserTicket userTicket = SessionContext.getSessionContext().getUserTicket();
+        if(userTicket == null){
+            return BaseOutput.failure("登录超时");
+        }
+        taskAssignment.setModifierId(userTicket.getId());
+        taskAssignmentService.updateExactSimple(taskAssignment);
         return BaseOutput.success("修改成功");
     }
 
