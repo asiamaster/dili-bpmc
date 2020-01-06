@@ -552,7 +552,8 @@ public class TaskController {
         JSONArray ja;
         //先判断是否已归档类型，单独处理
         if(TaskCategory.ARCHIVED.getCode().equals(category)){
-            List<HistoricTaskInstance> historicTaskInstances = historyService.createHistoricTaskInstanceQuery().taskAssignee(userId).list();
+            //只查50条已归档数据
+            List<HistoricTaskInstance> historicTaskInstances = historyService.createHistoricTaskInstanceQuery().taskAssignee(userId).listPage(0, 50);
             task = findTaskById(historicTaskInstances, taskId);
             ja = buildTaskList(historicTaskInstances);
         }else {
@@ -578,7 +579,7 @@ public class TaskController {
 
         //查询并设置任务所属流程名称
         ProcessDefinition processDefinition =repositoryService.createProcessDefinitionQuery().processDefinitionId(task.getProcessDefinitionId()).singleResult();
-        request.setAttribute("processDefinitionName", processDefinition == null ? "无所属流程定义" :processDefinition.getName());
+        request.setAttribute("processDefinitionName", processDefinition == null || processDefinition.getName() == null ? "无所属流程定义" :processDefinition.getName());
         //非归档任务才显示表单信息
         if(!TaskCategory.ARCHIVED.getCode().equals(category)) {
             //表单key，用于显示任务内容
