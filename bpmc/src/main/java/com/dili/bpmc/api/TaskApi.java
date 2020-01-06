@@ -118,7 +118,7 @@ public class TaskApi {
      * @throws IOException
      */
     @RequestMapping(value = "/submitTaskForm", method = {RequestMethod.GET, RequestMethod.POST})
-    public BaseOutput<String> submitTaskForm(@RequestParam String taskId, @RequestParam(required = false) String assignee, @RequestParam Map variables, HttpServletRequest request) {
+    public BaseOutput<String> submitTaskForm(@RequestParam String taskId, @RequestParam(required = false) String assignee, @RequestParam Map<String, String> variables, HttpServletRequest request) {
         //强制插手人签收任务
         if(StringUtils.isNotBlank(assignee)){
             taskService.claim(taskId, assignee);
@@ -244,7 +244,7 @@ public class TaskApi {
      * @param request
      */
     @RequestMapping(value = "/messageEventReceived", method = {RequestMethod.GET, RequestMethod.POST})
-    public BaseOutput<String> messageEventReceived(@RequestParam String messageName, String processInstanceId, @RequestParam Map variables, HttpServletRequest request) {
+    public BaseOutput<String> messageEventReceived(@RequestParam String messageName, String processInstanceId, @RequestParam Map<String, Object> variables, HttpServletRequest request) {
         Execution execution = runtimeService.createExecutionQuery().messageEventSubscriptionName(messageName).processInstanceId(processInstanceId).singleResult();
         if(execution == null){
             return BaseOutput.failure("不存在执行的流程");

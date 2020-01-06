@@ -60,7 +60,7 @@ public interface TaskRpc {
 	 * @param variables
 	 */
 	@POST("/api/task/messageEventReceived")
-	BaseOutput<String> messageEventReceived(@ReqParam(value = "messageName") String messageName, @ReqParam(value = "processInstanceId") String processInstanceId, @ReqParam(value = "variables", required = false) Map variables);
+	BaseOutput<String> messageEventReceived(@ReqParam(value = "messageName") String messageName, @ReqParam(value = "processInstanceId") String processInstanceId, @ReqParam(value = "variables", required = false) Map<String, Object> variables);
 
 	/**
 	 * 获取任务变量
