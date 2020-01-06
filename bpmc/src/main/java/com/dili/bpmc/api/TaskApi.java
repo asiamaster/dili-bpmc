@@ -100,7 +100,7 @@ public class TaskApi {
      * @param variables
      */
     @RequestMapping(value = "/completeByForce", method = {RequestMethod.GET, RequestMethod.POST})
-    public BaseOutput<String> completeByForce(@RequestParam String taskId, @RequestParam Map variables) {
+    public BaseOutput<String> completeByForce(@RequestParam String taskId, @RequestParam Map<String, Object> variables) {
         Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
         if(task == null){
             return BaseOutput.failure("任务不存在");

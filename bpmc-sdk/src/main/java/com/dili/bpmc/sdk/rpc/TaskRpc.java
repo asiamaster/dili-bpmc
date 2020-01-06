@@ -43,7 +43,7 @@ public interface TaskRpc {
 	 * @param variables
 	 */
 	@POST("/api/task/completeByForce")
-	BaseOutput<String> completeByForce(@ReqParam(value = "taskId") String taskId, @ReqParam(value = "variables", required = false) Map variables);
+	BaseOutput<String> completeByForce(@ReqParam(value = "taskId") String taskId, @ReqParam(value = "variables", required = false) Map<String, Object> variables);
 
 	/**
 	 * 签收并完成任务(无参)
