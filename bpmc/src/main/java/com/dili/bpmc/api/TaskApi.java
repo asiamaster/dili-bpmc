@@ -78,7 +78,7 @@ public class TaskApi {
      * @throws IOException
      */
     @RequestMapping(value = "/complete", method = {RequestMethod.GET, RequestMethod.POST})
-    public BaseOutput<String> complete(@RequestParam String taskId, @RequestParam(required = false) String assignee, @RequestParam Map variables) {
+    public BaseOutput<String> complete(@RequestParam String taskId, @RequestParam(required = false) String assignee, @RequestParam Map<String, Object> variables) {
         //强制插手人签收任务
         if(StringUtils.isNotBlank(assignee)){
             taskService.claim(taskId, assignee);

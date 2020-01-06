@@ -35,7 +35,7 @@ public interface TaskRpc {
 	 * @param variables
 	 */
 	@POST("/api/task/complete")
-	BaseOutput<String> complete(@ReqParam(value = "taskId") String taskId, @ReqParam(value = "variables", required = false) Map variables);
+	BaseOutput<String> complete(@ReqParam(value = "taskId") String taskId, @ReqParam(value = "variables", required = false) Map<String, Object> variables);
 
 	/**
 	 * 强制提交任务，使用于无办理人的场景
