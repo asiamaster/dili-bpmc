@@ -28,4 +28,17 @@ public class TaskAssignmentApi {
         assignment.setCandidateGroup(Lists.newArrayList("19"));
         return BaseOutput.success().setData(assignment);
     }
+
+    /**
+     * 请假第一步审批对象
+     * @param taskMapping 任务代理对象
+     * @return
+     */
+    @RequestMapping(value="/vacationStep2Assignment", method = {RequestMethod.GET, RequestMethod.POST})
+    public BaseOutput<Assignment> vacationStep2Assignment(TaskMapping taskMapping) {
+        Assignment assignment = DTOUtils.newInstance(Assignment.class);
+        assignment.setCandidateUser(Lists.newArrayList("1"));
+        assignment.setCandidateGroup(Lists.newArrayList("19"));
+        return BaseOutput.success().setData(assignment);
+    }
 }

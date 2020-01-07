@@ -35,7 +35,7 @@ public interface TaskRpc {
 	 * @param variables
 	 */
 	@POST("/api/task/complete")
-	BaseOutput<String> complete(@ReqParam(value = "taskId") String taskId, @ReqParam(value = "variables", required = false) Map variables);
+	BaseOutput<String> complete(@ReqParam(value = "taskId") String taskId, @ReqParam(value = "variables", required = false) Map<String, Object> variables);
 
 	/**
 	 * 强制提交任务，使用于无办理人的场景
@@ -43,7 +43,7 @@ public interface TaskRpc {
 	 * @param variables
 	 */
 	@POST("/api/task/completeByForce")
-	BaseOutput<String> completeByForce(@ReqParam(value = "taskId") String taskId, @ReqParam(value = "variables", required = false) Map variables);
+	BaseOutput<String> completeByForce(@ReqParam(value = "taskId") String taskId, @ReqParam(value = "variables", required = false) Map<String, Object> variables);
 
 	/**
 	 * 签收并完成任务(无参)
@@ -60,7 +60,7 @@ public interface TaskRpc {
 	 * @param variables
 	 */
 	@POST("/api/task/messageEventReceived")
-	BaseOutput<String> messageEventReceived(@ReqParam(value = "messageName") String messageName, @ReqParam(value = "processInstanceId") String processInstanceId, @ReqParam(value = "variables", required = false) Map variables);
+	BaseOutput<String> messageEventReceived(@ReqParam(value = "messageName") String messageName, @ReqParam(value = "processInstanceId") String processInstanceId, @ReqParam(value = "variables", required = false) Map<String, Object> variables);
 
 	/**
 	 * 获取任务变量
