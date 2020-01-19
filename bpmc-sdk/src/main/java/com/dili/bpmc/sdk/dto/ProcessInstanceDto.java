@@ -5,8 +5,13 @@ package com.dili.bpmc.sdk.dto;
  */
 public interface ProcessInstanceDto extends ProcessDefinitionDto {
 
-    String getProcessInstanceId();
-    void setProcessInstanceId(String processInstanceId);
+	/**
+	 * 流程实例id
+	 * 
+	 * @return
+	 */
+	String getProcessInstanceId();
 
+	void setProcessInstanceId(String processInstanceId);
 
 }

@@ -1,13 +1,11 @@
 package com.dili.bpmc.controller;
 
-import com.dili.bpmc.sdk.domain.ActControl;
-import com.dili.bpmc.sdk.domain.ActForm;
-import com.dili.bpmc.service.ActControlService;
-import com.dili.bpmc.service.ActFormService;
-import com.dili.ss.domain.BaseOutput;
-import com.dili.ss.dto.DTOUtils;
-import com.dili.ss.exception.ParamErrorException;
-import com.dili.ss.util.SpringUtil;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+
 import org.activiti.engine.ActivitiException;
 import org.activiti.engine.FormService;
 import org.activiti.engine.RuntimeService;
@@ -25,9 +23,15 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import javax.servlet.http.HttpServletRequest;
-import java.util.List;
-import java.util.Map;
+import com.dili.bpmc.sdk.domain.ActControl;
+import com.dili.bpmc.sdk.domain.ActForm;
+import com.dili.bpmc.sdk.rpc.FormRpc;
+import com.dili.bpmc.service.ActControlService;
+import com.dili.bpmc.service.ActFormService;
+import com.dili.ss.domain.BaseOutput;
+import com.dili.ss.dto.DTOUtils;
+import com.dili.ss.exception.ParamErrorException;
+import com.dili.ss.util.SpringUtil;
 
 /**
  * 由MyBatis Generator工具自动生成
@@ -50,7 +54,8 @@ public class ActFormController {
 
     @Autowired
     RuntimeService runtimeService;
-
+    @Autowired
+    FormRpc formRpc;
     /**
      * 跳转到ActForm页面
      * @param modelMap
@@ -58,6 +63,9 @@ public class ActFormController {
      */
     @RequestMapping(value="/index.html", method = RequestMethod.GET)
     public String index(ModelMap modelMap) {
+    	List<String> list = new ArrayList();
+    	list.add("fae");
+    	formRpc.getByKeys(list);
         return "actForm/index";
     }
 

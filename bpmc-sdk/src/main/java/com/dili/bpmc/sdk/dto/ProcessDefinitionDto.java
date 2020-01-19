@@ -9,6 +9,12 @@ import com.dili.ss.dto.IBaseDomain;
  */
 public interface ProcessDefinitionDto extends IBaseDomain {
 
-    String getProcessDefinitionId();
-    void setProcessDefinitionId(String processDefinitionId);
+	/**
+	 * 流程定义id
+	 * 
+	 * @return
+	 */
+	String getProcessDefinitionId();
+
+	void setProcessDefinitionId(String processDefinitionId);
 }
