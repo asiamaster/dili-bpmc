@@ -1,8 +1,8 @@
 package com.dili.bpmc.sdk.dto;
 
-import com.dili.ss.dto.IBaseDomain;
+import com.dili.ss.dto.IDTO;
 
-public interface GroupUserDto extends IBaseDomain {
+public interface GroupUserDto extends IDTO {
 
 	String getGroupId();
 

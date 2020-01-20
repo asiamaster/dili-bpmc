@@ -145,13 +145,6 @@
 	</build>
 
 	<dependencies>
-		<dependency>
-			<groupId>com.dili</groupId>
-			<artifactId>ss-mbg</artifactId>
-			<version>${sharp-sword.version}</version>
-			<!--<scope>system</scope> -->
-			<!--<systemPath>${\project.basedir}/lib/sharp-sword-1.5.4-SNAPSHOT.jar</systemPath> -->
-		</dependency>
 		<!-- if you enable json support in spring mvc. -->
 		<dependency>
 			<groupId>org.codehaus.jackson</groupId>
