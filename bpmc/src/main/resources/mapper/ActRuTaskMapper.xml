@@ -8,7 +8,7 @@
 		<result column="PROC_INST_ID_" property="processInstanceId" />
 		<result column="ASSIGNEE_" property="assignee" />
 		<result column="FORM_KEY_" property="formKey" />
-		<collection property="groupUsers" ofType="com.dili.bpmc.sdk.dto.GroupUserDtoImpl" javaType="java.util.List">
+		<collection property="groupUsers" ofType="com.dili.bpmc.sdk.dto.GroupUserDto" javaType="java.util.List">
 			<result column="GROUP_ID_" property="groupId" />
 			<result column="USER_ID_" property="userId" />
 		</collection>
