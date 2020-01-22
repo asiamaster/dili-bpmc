@@ -3,7 +3,7 @@
 <mapper namespace="com.dili.bpmc.dao.ActRuTaskMapper">
 
 	<resultMap type="com.dili.bpmc.sdk.dto.TaskIdentityDto" id="TaskIdentityRM">
-		<id column="ID_" property="id" />
+		<id column="ID_" property="taskId" />
 		<result column="PROC_DEF_ID_" property="processDefinitionId" />
 		<result column="PROC_INST_ID_" property="processInstanceId" />
 		<result column="ASSIGNEE_" property="assignee" />
@@ -64,7 +64,7 @@
 
 	<select id="listTaskIdentityByProcessInstanceIds" parameterType="java.util.List" resultMap="TaskIdentityRM">
 		SELECT
-		art.ID_ AS id,
+		art.ID_,
 		art.PROC_DEF_ID_ ,
 		art.PROC_INST_ID_ ,
 		art.ASSIGNEE_ ,
