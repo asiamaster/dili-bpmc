@@ -55,6 +55,12 @@
 
 	<profiles>
 		<profile>
+			<id>local</id>
+			<properties>
+				<build.profile.id>local</build.profile.id>
+			</properties>
+		</profile>
+		<profile>
 			<id>dev</id>
 			<activation>
 				<activeByDefault>true</activeByDefault>
@@ -67,6 +73,12 @@
 			<id>test</id>
 			<properties>
 				<build.profile.id>test</build.profile.id>
+			</properties>
+		</profile>
+		<profile>
+			<id>prod</id>
+			<properties>
+				<build.profile.id>prod</build.profile.id>
 			</properties>
 		</profile>
 	</profiles>
