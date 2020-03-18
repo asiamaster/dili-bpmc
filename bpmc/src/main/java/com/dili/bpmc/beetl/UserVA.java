@@ -1,8 +1,8 @@
 package com.dili.bpmc.beetl;
 
-import com.dili.bpmc.rpc.UserRpc;
 import com.dili.ss.domain.BaseOutput;
 import com.dili.uap.sdk.domain.User;
+import com.dili.uap.sdk.rpc.UserRpc;
 import org.activiti.engine.task.TaskInfo;
 import org.apache.commons.lang3.StringUtils;
 import org.beetl.core.Context;
