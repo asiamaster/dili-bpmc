@@ -34,42 +34,6 @@
         <version>1.0.0-SNAPSHOT</version>
     </parent>
 
-    <!--地利-->
-    <distributionManagement>
-        <repository>
-            <id>central</id>
-            <name>Artifactory Release Repository</name>
-            <url>
-                http://mvn2.diligrp.com/artifactory/libs-release-local
-            </url>
-        </repository>
-        <snapshotRepository>
-            <id>central</id>
-            <name>Artifactory Snapshot Repository</name>
-            <url>
-                http://mvn2.diligrp.com/artifactory/libs-snapshot-local
-            </url>
-        </snapshotRepository>
-    </distributionManagement>
-
-    <profiles>
-        <profile>
-            <id>dev</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-            <properties>
-                <build.profile.id>dev</build.profile.id>
-            </properties>
-        </profile>
-        <profile>
-            <id>test</id>
-            <properties>
-                <build.profile.id>test</build.profile.id>
-            </properties>
-        </profile>
-    </profiles>
-
     <build>
         <!-- 资源文件过滤 -->
         <resources>
@@ -129,13 +93,6 @@
             <version>1.9.13</version>
         </dependency>
 
-        <!-- springloaded -->
-        <!-- https://mvnrepository.com/artifact/org.springframework/springloaded -->
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>springloaded</artifactId>
-            <version>${springloaded.version}</version>
-        </dependency>
         <dependency>
             <groupId>com.dili</groupId>
             <artifactId>uap-sdk</artifactId>
@@ -148,7 +105,6 @@
             <scope>provided</scope>
         </dependency>
 
-        
     </dependencies>
 
 </project>

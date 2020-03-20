@@ -11,6 +11,13 @@
 	<description>父项目</description>
 	<packaging>pom</packaging>
 
+	<!-- 父工程定义 -->
+	<parent>
+		<artifactId>dili-parent</artifactId>
+		<groupId>com.dili</groupId>
+		<version>3.6.6-SNAPSHOT</version>
+	</parent>
+
 	<modules>
 		<module>bpmc</module>
 		<module>bpmc-sdk</module>
@@ -18,7 +25,6 @@
 	</modules>
 
 	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<java.version>1.8</java.version>
 		<!-- MyBatis Generator -->
 		<!-- Java接口和实体类 -->
@@ -33,73 +39,7 @@
 		<!-- XML生成路径 -->
 		<targetResourcesProject>${basedir}/src/main/resources</targetResourcesProject>
 		<targetXMLPackage>mapper</targetXMLPackage>
-		<!-- 依赖版本 -->
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<springloaded.version>1.2.8.RELEASE</springloaded.version>
-		<mapper.version>3.3.9</mapper.version>
-		<mysql.version>5.1.38</mysql.version>
-		<sharp-sword.version>3.6.6-SNAPSHOT</sharp-sword.version>
 	</properties>
-
-	<!-- 注意： 这里必须要添加， 否者各种依赖有问题  -->
-	<repositories>
-		<repository>
-			<id>spring-milestones</id>
-			<name>Spring Milestones</name>
-			<url>https://repo.spring.io/libs-milestone</url>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-		</repository>
-	</repositories>
-
-	<!--地利 -->
-	<distributionManagement>
-		<repository>
-			<id>central</id>
-			<name>Artifactory Release Repository</name>
-			<url>
-                http://mvn2.diligrp.com/artifactory/libs-release-local
-            </url>
-		</repository>
-		<snapshotRepository>
-			<id>central</id>
-			<name>Artifactory Snapshot Repository</name>
-			<url>
-                http://mvn2.diligrp.com/artifactory/libs-snapshot-local
-            </url>
-		</snapshotRepository>
-	</distributionManagement>
-
-	<profiles>
-		<profile>
-			<id>local</id>
-			<properties>
-				<build.profile.id>local</build.profile.id>
-			</properties>
-		</profile>
-		<profile>
-			<id>dev</id>
-			<activation>
-				<activeByDefault>true</activeByDefault>
-			</activation>
-			<properties>
-				<build.profile.id>dev</build.profile.id>
-			</properties>
-		</profile>
-		<profile>
-			<id>test</id>
-			<properties>
-				<build.profile.id>test</build.profile.id>
-			</properties>
-		</profile>
-		<profile>
-			<id>prod</id>
-			<properties>
-				<build.profile.id>prod</build.profile.id>
-			</properties>
-		</profile>
-	</profiles>
 
 	<build>
 		<!-- 资源文件过滤 -->
@@ -122,28 +62,6 @@
 				</configuration>
 			</plugin>
 			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-source-plugin</artifactId>
-				<version>2.2.1</version>
-				<executions>
-					<execution>
-						<id>attach-sources</id>
-						<goals>
-							<goal>jar</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-
-			<!--<plugin> -->
-			<!--<groupId>org.apache.maven.plugins</groupId> -->
-			<!--<artifactId>maven-surefire-plugin</artifactId> -->
-			<!--<version>2.6</version> -->
-			<!--<configuration> -->
-			<!--<skipTests>true</skipTests> -->
-			<!--</configuration> -->
-			<!--</plugin> -->
-			<plugin>
 				<groupId>org.mybatis.generator</groupId>
 				<artifactId>mybatis-generator-maven-plugin</artifactId>
 				<version>1.4.0</version>
@@ -162,28 +80,5 @@
 			</plugin>
 		</plugins>
 	</build>
-
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<!-- Import dependency management from Spring Boot -->
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-dependencies</artifactId>
-				<version>2.2.4.RELEASE</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-			<!-- Spring Boot 1.3.x and Spring Framework 4.2.x support -->
-			<!--<dependency>-->
-				<!--<groupId>org.springframework.cloud</groupId>-->
-				<!--<artifactId>spring-cloud-dependencies</artifactId>-->
-				<!--&lt;!&ndash;<version>Brixton.RELEASE</version>&ndash;&gt;-->
-				<!--<version>Finchley.M8</version>-->
-				<!--<type>pom</type>-->
-				<!--<scope>import</scope>-->
-			<!--</dependency>-->
-		</dependencies>
-	</dependencyManagement>
-
 
 </project>
