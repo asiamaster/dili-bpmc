@@ -84,6 +84,7 @@
 	</profiles>
 
 	<build>
+		<finalName>bpmc</finalName>
 		<!-- 资源文件过滤 -->
 		<resources>
 			<resource>
@@ -180,6 +181,12 @@
 			<groupId>com.dili</groupId>
 			<artifactId>ss-activiti</artifactId>
 			<version>${sharp-sword.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>com.dili</groupId>
+					<artifactId>commons</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>com.dili</groupId>
