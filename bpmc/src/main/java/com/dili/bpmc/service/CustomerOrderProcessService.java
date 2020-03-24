@@ -8,6 +8,7 @@ import java.util.Map;
 
 /**
  * 客户订单流程服务
+ * 用于测试
  */
 public interface CustomerOrderProcessService {
     /**
