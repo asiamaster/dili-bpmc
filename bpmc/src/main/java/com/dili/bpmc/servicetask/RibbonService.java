@@ -8,11 +8,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import javax.annotation.PostConstruct;
 import java.util.Map;
 
 /**
@@ -22,10 +24,14 @@ import java.util.Map;
  * @Description:
  */
 @Service
-@ConditionalOnBean(RestTemplate.class)
+@ConditionalOnClass(RestTemplate.class)
 public class RibbonService implements JavaDelegate {
 
     public final static Logger log = LoggerFactory.getLogger(RibbonService.class);
+    @PostConstruct
+    public void init(){
+        System.out.println("RibbonService initd");
+    }
     //ribbon URL
     private Expression url;
     //重试次数
@@ -57,7 +63,7 @@ public class RibbonService implements JavaDelegate {
         }
         while(retryInt > 0) {
             try {
-                ResponseEntity<BaseOutput> responseEntity = restTemplate.getForEntity(urlObj.toString(), BaseOutput.class, execution.getVariables());
+                ResponseEntity<BaseOutput> responseEntity = restTemplate.postForEntity(urlObj.toString(), execution.getVariables(), BaseOutput.class);
                 if(HttpStatus.OK.equals(responseEntity.getStatusCode())){
                     BaseOutput<Map<String, Object>> baseOutput = responseEntity.getBody();
                     if (baseOutput.isSuccess()) {
