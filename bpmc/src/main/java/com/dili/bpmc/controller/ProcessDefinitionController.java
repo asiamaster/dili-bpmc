@@ -2,6 +2,7 @@ package com.dili.bpmc.controller;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.serializer.SerializerFeature;
+import com.dili.bpmc.service.ProcessDefinitionService;
 import com.dili.ss.domain.BaseOutput;
 import com.dili.uap.sdk.domain.UserTicket;
 import com.dili.uap.sdk.exception.NotLoginException;
@@ -46,7 +47,7 @@ public class ProcessDefinitionController {
     @Autowired
     private RepositoryService repositoryService;
     @Autowired
-    private RuntimeService runtimeService;
+    private ProcessDefinitionService processDefinitionService;
     @Autowired
     private IdentityService identityService;
     @Autowired
@@ -77,7 +78,7 @@ public class ProcessDefinitionController {
     @RequestMapping(value = "/startProcessInstanceByKey.action", method = {RequestMethod.GET, RequestMethod.POST})
     @ResponseBody
     public BaseOutput<String> startProcessInstanceByKey(@RequestParam String key, @RequestParam(required = false) String businessKey, @RequestParam(required = false) Map<String, Object> variables, HttpServletRequest request) throws IOException {
-        ProcessInstance processInstance = runtimeService.startProcessInstanceByKey(key, businessKey, variables);
+        ProcessInstance processInstance = processDefinitionService.startProcessInstanceByKey(key, businessKey, variables);
         return BaseOutput.success().setData(processInstance.getId());
     }
 
@@ -98,7 +99,7 @@ public class ProcessDefinitionController {
 //        在流程开始之前设置，会自动在表ACT_HI_PROCINST 中的START_USER_ID_中设置用户ID：
 //        用来设置启动流程的人员ID，引擎会自动把用户ID保存到activiti:initiator中
         identityService.setAuthenticatedUserId(userTicket.getId().toString());
-        ProcessInstance processInstance = runtimeService.startProcessInstanceById(processDefinitionId, businessKey, variables);
+        ProcessInstance processInstance = processDefinitionService.startProcessInstanceById(processDefinitionId, businessKey, variables);
 //        ProcessInstanceDto processInstance = formService.submitStartFormData(processDefinitionId);
 //        根据流程发起人查询流程定义id
 //        System.out.println(historyService.createHistoricProcessInstanceQuery()
