@@ -1,0 +1,158 @@
+<#body head_title="我发起的流程">
+<script>
+    document.domain="diligrp.com";
+</script>
+<style>
+    /*设置表格行高*/
+    .datagrid-row {
+        height: 48px;
+    }
+    /*选中tab效果*/
+    .tab-selected{
+        font-weight: bold;
+        font-size:18px;
+        color:#007dc3;
+        display:inline;
+        text-decoration:none;
+    }
+    .tab-unselected{
+        font-size:18px;
+        display:inline;
+        color:#8e8e8e;
+        text-decoration:none;
+    }
+    /*菜单字体*/
+    .menu-text{
+        font-size: 14px;
+        padding-left:10px;
+        float:left;
+    }
+    /*最大化图标样式*/
+    .maximize:hover{
+        transform: scale(1.1);
+        cursor:pointer;
+    }
+</style>
+<div class="easyui-layout" fit="true" >
+    <!-- ====================================== ================================================================================ -->
+    <!-- 北侧布局 -->
+    <!-- ====================================================================================================================== -->
+    <div region="north" style="border-bottom: 1px solid #ababab;" align="center">
+        <!-- =========================================================表单========================================================= -->
+        <div class="easyui-panel gradient-title" style="width:100%;padding-top:10px;padding-bottom: 10px;" align="left" >
+            <a class="tab-selected" <%if(procInstCount>0){%>href="${contextPath}/pi/myProcInst.html"<%}%> style="margin-left: 18px;">我发起的流程[${procInstCount}]</a>
+        </div>
+    </div>
+    <!-- 西侧布局 -->
+    <div region="west" style="width:260px;padding-top: 1px;" height="auto">
+        <%if(has(procInst)){%>
+        <div class="easyui-datalist" id="procInstlist" lines="true" valueField="id" textField="processDefinitionName"  loadMsg="数据加载中..."
+             style="width:260px;height:100%" data-options="textFormatter:fmt, onClickRow:showProcInst">
+        </div>
+        <%}%>
+    </div>
+    <!-- 中央布局 -->
+    <div region="center" id="centerRegion" style="float:left;width:100%;padding-top: 1px;" height="auto">
+        <% //定义表单页面
+        var url;
+        if(has(procInst)){%>
+        名称:${procInst.processDefinitionName}
+        发起时间:${procInst.startTime, dateFormat="yyyy-MM-dd HH:mm:ss"}
+        业务号:${procInst.businessKey}
+        实例id:${procInst.processInstanceId}
+
+        <!-- 流程信息 -->
+        <div style="position: relative; overflow: hidden; height: 70px;border-bottom: 1px solid #CCC;">
+            <div style="overflow: hidden; padding-left: 0px; padding-top: 0px; position: absolute; left: 0px; top: 0px; width: 49px; height: 50px;">
+                <img style="vertical-align: middle;" src="${contextPath}/resources/images/task-50.png"/>&nbsp;&nbsp;
+            </div>
+            <div style="height: 27px; overflow: hidden; padding-left: 0px; padding-top: 0px; position: absolute; left: 61px; top: 0px; width: 845px;">
+                <span onclick="showProgress();" style="vertical-align: top; color:#007dc3;font-size: 20px;font-family: 'Microsoft YaHei';font-weight: bold;">${procInst.processDefinitionName}</span>
+            </div>
+            <div style="height: 18px; overflow: hidden; padding-left: 0px; padding-top: 0px; position: absolute; left: 61px; top: 32px; width: 845px;">
+                <div title="${procInst.startTime, 'yyyy-MM-dd HH:mm:ss'}">
+                    <img style="vertical-align: middle;" src="${contextPath}/resources/images/time.png"/>
+                    <span style="vertical-align: middle;">创建于<span id="startTimeDesc">${procInst.startTime, 'yyyy-MM-dd HH:mm:ss'}</span></span>
+                    <%if(procInst.endTime != null){%>
+                    &nbsp;&nbsp;<span style="vertical-align: middle;">结束于<span id="endTimeDesc">${procInst.endTime, 'yyyy-MM-dd HH:mm:ss'}</span></span>
+                    <%}%>
+                </div>
+            </div>
+        </div>
+        <!-- 流程描述 -->
+            <%if(procInst.description != null){%>
+        <div style="position: relative; overflow: hidden; height: 100px;border-bottom: 1px solid #CCC;">
+            <div style="margin-top: 16px;">
+                <span style="position: relative; top:0px;height: 50px;">${procInst.description}</span>
+            </div>
+        </div>
+            <%}%>
+
+        <%}%>
+        <!-- 隐藏流程图框 -->
+        <div id="dlg" class="easyui-dialog" resizable="true" constrain="true" shadow="true" draggable="true" title="流程图" style="padding:10px" modal="false" closed="true" border="true"
+             data-options="
+                iconCls: 'icon-save',
+                width:1366,
+                height: 640
+            ">
+            <img id="processInstanceImg" />
+        </div>
+    </div>
+</div>
+
+<script>
+    //监听子页面的toLogin事件消息
+    window.addEventListener('message',function(e){
+        var data = e.data;
+        var origin = e.origin;
+        window.location.href=data;
+    },false);
+
+    <% if(has(procInst)){%>
+
+    /**
+     * 查看进度图片
+     * @param processInstanceId
+     * @param processDefinitionId
+     * @param processInstanceName
+     */
+    function showProgress(){
+        $('#dlg').dialog('open');
+        $('#dlg').dialog('center');
+        var href = "${contextPath}/pi/progress.action?processInstanceId=${procInst.processInstanceId}&processDefinitionId=${procInst.processDefinitionId}&"+Math.random();
+        $("#processInstanceImg").attr("src", href);
+        $('#dlg').dialog('setTitle', "${procInst.processDefinitionName}");
+    }
+
+
+    /**
+     * 显示任务详情
+     */
+    function showProcInst(rowIndex, rowData) {
+        location.href="${contextPath}/pi/myProcInst.html?taskId="+rowData.id;
+    }
+
+    /**
+     * 流程列表格式化器
+     */
+    function fmt(value, row, index){
+        //选中当前任务
+        if(row.id=='${procInst.id}'){
+            return "<img style=\"vertical-align: middle;\" src=\"${contextPath}/resources/images/task-22.png\"/>&nbsp;&nbsp;<B style=\"color: #007dc3;font-family: 'Microsoft YaHei';\">"+value+"</B>";
+        }else{
+            return "<img style=\"vertical-align: middle;\" src=\"${contextPath}/resources/images/task-22.png\"/>&nbsp;&nbsp;"+value;
+        }
+    }
+
+    <%}//end of has procInst%>
+    $(function() {
+        <% if(has(procInsts)){%>
+            $("#procInstlist").datalist("loadData",${procInsts});
+        <%}%>
+
+    })
+
+</script>
+
+</#body>

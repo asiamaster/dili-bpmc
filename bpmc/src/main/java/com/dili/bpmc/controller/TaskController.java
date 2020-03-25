@@ -22,6 +22,7 @@ import com.dili.uap.sdk.exception.NotLoginException;
 import com.dili.uap.sdk.session.SessionContext;
 import org.activiti.engine.*;
 import org.activiti.engine.form.TaskFormData;
+import org.activiti.engine.history.HistoricProcessInstance;
 import org.activiti.engine.history.HistoricTaskInstance;
 import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.engine.runtime.Execution;
@@ -518,7 +519,7 @@ public class TaskController {
             Role role = roles.get(i);
             groupIds[i] = role.getId().toString();
         }
-        //用户组信息，用于队列右键菜单显示
+        //用户组信息，用于队列右键菜单显示(注意，在用户有多个角色，并且多个角色都有相同的任务时会重复)
         Map<String, String> groupMap = new HashMap<>(roles.size());
         //统计每个用户组的任务数
         for(Role role : roles) {
@@ -535,7 +536,8 @@ public class TaskController {
         long involvedCount = actRuTaskMapper.taskCandidateUserCount(userId);
         //查询已归档任务数
         long archivedCount = historyService.createHistoricTaskInstanceQuery().taskAssignee(userId).count();
-                //设置标题部分显示的任务数
+
+        //设置标题部分显示的任务数
         request.setAttribute("inboxCount", inboxCount);
         request.setAttribute("tasksCount", tasksCount);
         request.setAttribute("queuedCount", queuedCount);
@@ -549,7 +551,7 @@ public class TaskController {
         JSONArray ja;
         //先判断是否已归档类型，单独处理
         if(TaskCategory.ARCHIVED.getCode().equals(category)){
-            //只查50条已归档数据
+            //只查50条已归档数据;l
             List<HistoricTaskInstance> historicTaskInstances = historyService.createHistoricTaskInstanceQuery().taskAssignee(userId).listPage(0, 50);
             task = findTaskById(historicTaskInstances, taskId);
             ja = buildTaskList(historicTaskInstances);

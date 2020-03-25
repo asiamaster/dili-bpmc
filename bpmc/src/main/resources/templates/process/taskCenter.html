@@ -45,7 +45,6 @@
             <a id="queuedTab" <%if(category=='queued'){%>class="tab-selected"<%}else{%>class="tab-unselected"<%}%> <%if(queuedCount>0){%>href="${contextPath}/task/taskCenter.html?category=queued"<%}%> style="margin-left: 18px;">队列[${queuedCount}]</a>
             <a <%if(category=='involved'){%>class="tab-selected"<%}else{%>class="tab-unselected"<%}%> <%if(involvedCount>0){%>href="${contextPath}/task/taskCenter.html?category=involved"<%}%> style="margin-left: 18px;">受邀[${involvedCount}]</a>
             <a <%if(category=='archived'){%>class="tab-selected"<%}else{%>class="tab-unselected"<%}%> <%if(archivedCount>0){%>href="${contextPath}/task/taskCenter.html?category=archived"<%}%> style="margin-left: 18px;">已归档[${archivedCount}]</a>
-
         </div>
     </div>
     <!-- 西侧布局 -->

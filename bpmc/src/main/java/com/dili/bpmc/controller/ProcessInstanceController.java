@@ -14,6 +14,7 @@ import com.dili.uap.sdk.session.SessionContext;
 import org.activiti.engine.*;
 import org.activiti.engine.form.FormProperty;
 import org.activiti.engine.form.StartFormData;
+import org.activiti.engine.history.HistoricProcessInstance;
 import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
@@ -70,6 +71,30 @@ public class ProcessInstanceController {
     	model.addAttribute("processDefinitionId", processDefinitionId);
     	model.addAttribute("processInstanceId", processInstanceId);
     	return "process/showImage";
+    }
+
+    /**
+     * 我发起的流程
+     * @param procInstId 流程实例id
+     * @param request
+     * @return
+     */
+    @RequestMapping(value = "/myProcInst.html", method = {RequestMethod.GET, RequestMethod.POST})
+    public String myProcInst(@RequestParam(required = false) String procInstId, HttpServletRequest request) {
+        UserTicket userTicket = SessionContext.getSessionContext().getUserTicket();
+        if(userTicket == null){
+            throw new NotLoginException();
+        }
+        //查询当前用户作为流程发起人的流程
+        List<HistoricProcessInstance> historicProcessInstances = historyService.createHistoricProcessInstanceQuery().involvedUser(userTicket.getId().toString()).list();
+        request.setAttribute("procInstCount", historicProcessInstances.size());
+        request.setAttribute("procInsts", JSONArray.toJSONString(historicProcessInstances, SerializerFeature.WriteDateUseDateFormat, SerializerFeature.IgnoreErrorGetter));
+
+        if(!historicProcessInstances.isEmpty()) {
+            request.setAttribute("procInst", historicProcessInstances.get(0));
+        }
+
+        return "process/myProcInst";
     }
     
     /**
