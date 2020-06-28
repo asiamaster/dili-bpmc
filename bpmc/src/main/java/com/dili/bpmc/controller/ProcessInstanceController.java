@@ -19,6 +19,7 @@ import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
 import org.activiti.spring.SpringProcessEngineConfiguration;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -87,11 +88,18 @@ public class ProcessInstanceController {
         }
         //查询当前用户作为流程发起人的流程
         List<HistoricProcessInstance> historicProcessInstances = historyService.createHistoricProcessInstanceQuery().involvedUser(userTicket.getId().toString()).list();
+        //我发起的流程实例数
         request.setAttribute("procInstCount", historicProcessInstances.size());
+        //我发起的流程实例
         request.setAttribute("procInsts", JSONArray.toJSONString(historicProcessInstances, SerializerFeature.WriteDateUseDateFormat, SerializerFeature.IgnoreErrorGetter));
-
         if(!historicProcessInstances.isEmpty()) {
+            //当前显示的流程实例
             request.setAttribute("procInst", historicProcessInstances.get(0));
+        }
+        //进行中的任务
+        List<Task> runningTasks = taskService.createTaskQuery().processInstanceId(procInstId).active().list();
+        if(!CollectionUtils.isEmpty(runningTasks)) {
+            request.setAttribute("runningTasks", runningTasks);
         }
 
         return "process/myProcInst";

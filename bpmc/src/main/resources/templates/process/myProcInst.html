@@ -3,10 +3,6 @@
     document.domain="diligrp.com";
 </script>
 <style>
-    /*设置表格行高*/
-    .datagrid-row {
-        height: 48px;
-    }
     /*选中tab效果*/
     .tab-selected{
         font-weight: bold;
@@ -21,15 +17,8 @@
         color:#8e8e8e;
         text-decoration:none;
     }
-    /*菜单字体*/
-    .menu-text{
-        font-size: 14px;
-        padding-left:10px;
-        float:left;
-    }
     /*最大化图标样式*/
-    .maximize:hover{
-        transform: scale(1.1);
+    .cursorPinter:hover{
         cursor:pointer;
     }
 </style>
@@ -54,20 +43,17 @@
     <!-- 中央布局 -->
     <div region="center" id="centerRegion" style="float:left;width:100%;padding-top: 1px;" height="auto">
         <% //定义表单页面
-        var url;
         if(has(procInst)){%>
-        名称:${procInst.processDefinitionName}
-        发起时间:${procInst.startTime, dateFormat="yyyy-MM-dd HH:mm:ss"}
-        业务号:${procInst.businessKey}
-        实例id:${procInst.processInstanceId}
-
         <!-- 流程信息 -->
         <div style="position: relative; overflow: hidden; height: 70px;border-bottom: 1px solid #CCC;">
-            <div style="overflow: hidden; padding-left: 0px; padding-top: 0px; position: absolute; left: 0px; top: 0px; width: 49px; height: 50px;">
-                <img style="vertical-align: middle;" src="${contextPath}/resources/images/task-50.png"/>&nbsp;&nbsp;
+            <!-- 图标 -->
+            <div class="cursorPinter" style="overflow: hidden; padding-left: 0px; padding-top: 0px; position: absolute; left: 0px; top: 0px; width: 49px; height: 50px;">
+                <img onclick="showProgress();" style="vertical-align: middle;" src="${contextPath}/resources/images/task-50.png"/>&nbsp;&nbsp;
             </div>
-            <div style="height: 27px; overflow: hidden; padding-left: 0px; padding-top: 0px; position: absolute; left: 61px; top: 0px; width: 845px;">
-                <span onclick="showProgress();" style="vertical-align: top; color:#007dc3;font-size: 20px;font-family: 'Microsoft YaHei';font-weight: bold;">${procInst.processDefinitionName}</span>
+            <!-- 流程定义名称 -->
+            <div class="cursorPinter" style="height: 27px; overflow: hidden; padding-left: 0px; padding-top: 0px; position: absolute; left: 61px; top: 0px; width: 845px;">
+                <span onclick="showProgress();" title="${procInst.processInstanceId}" style="vertical-align: top; color:#007dc3;font-size: 20px;font-family: 'Microsoft YaHei';font-weight: bold;">${procInst.processDefinitionName}</span>
+                <span style="vertical-align: bottom;">- ${procInst.businessKey}</span>
             </div>
             <div style="height: 18px; overflow: hidden; padding-left: 0px; padding-top: 0px; position: absolute; left: 61px; top: 32px; width: 845px;">
                 <div title="${procInst.startTime, 'yyyy-MM-dd HH:mm:ss'}">
@@ -79,7 +65,7 @@
                 </div>
             </div>
         </div>
-        <!-- 流程描述 -->
+            <!-- 流程描述 -->
             <%if(procInst.description != null){%>
         <div style="position: relative; overflow: hidden; height: 100px;border-bottom: 1px solid #CCC;">
             <div style="margin-top: 16px;">
@@ -88,7 +74,17 @@
         </div>
             <%}%>
 
-        <%}%>
+            <%
+            //待执行任务
+            if(has(runningTasks)){
+                for(task in runningTasks){
+            %>
+        <div value="${task.id}" >${task.name}</div>
+            <%
+                }
+            }%>
+
+        <%}//end of has(procInst)%>
         <!-- 隐藏流程图框 -->
         <div id="dlg" class="easyui-dialog" resizable="true" constrain="true" shadow="true" draggable="true" title="流程图" style="padding:10px" modal="false" closed="true" border="true"
              data-options="
@@ -109,7 +105,9 @@
         window.location.href=data;
     },false);
 
-    <% if(has(procInst)){%>
+    <%
+    //如果有流程实例，才声明的代码
+    if(has(procInst)){%>
 
     /**
      * 查看进度图片

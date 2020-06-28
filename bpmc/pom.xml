@@ -116,16 +116,16 @@
 <!--			<version>2.2.0.RELEASE</version>-->
 <!--		</dependency>-->
 		<!-- if you enable json support in spring mvc. -->
-		<dependency>
-			<groupId>org.codehaus.jackson</groupId>
-			<artifactId>jackson-mapper-asl</artifactId>
-			<version>1.9.13</version>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>org.codehaus.jackson</groupId>-->
+<!--			<artifactId>jackson-mapper-asl</artifactId>-->
+<!--			<version>1.9.13</version>-->
+<!--		</dependency>-->
 		<!-- 集成tk-mapper -->
 		<dependency>
 			<groupId>tk.mybatis</groupId>
 			<artifactId>mapper-spring-boot-starter</artifactId>
-			<version>2.1.2</version>
+			<version>2.1.5</version>
 			<exclusions>
 				<exclusion>
 					<artifactId>persistence-api</artifactId>
