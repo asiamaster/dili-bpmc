@@ -4,7 +4,7 @@
     <groupId>com.dili</groupId>
     <artifactId>bpmc-sdk</artifactId>
     <version>1.0.0-SNAPSHOT</version>
-    <description>业务流程演示</description>
+    <description>业务流程sdk</description>
     <packaging>jar</packaging>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -23,8 +23,6 @@
         <targetXMLPackage>mapper</targetXMLPackage>
         <!--  依赖版本  -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <mapper.version>3.3.9</mapper.version>
-        <mysql.version>5.1.38</mysql.version>
     </properties>
 
     <!-- 父工程定义 -->
@@ -86,12 +84,6 @@
     </build>
 
     <dependencies>
-        <!-- if you enable json support in spring mvc. -->
-        <dependency>
-            <groupId>org.codehaus.jackson</groupId>
-            <artifactId>jackson-mapper-asl</artifactId>
-            <version>1.9.13</version>
-        </dependency>
 
         <dependency>
             <groupId>com.dili</groupId>

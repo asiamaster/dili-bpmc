@@ -29,7 +29,7 @@
     <div region="north" style="border-bottom: 1px solid #ababab;" align="center">
         <!-- =========================================================表单========================================================= -->
         <div class="easyui-panel gradient-title" style="width:100%;padding-top:10px;padding-bottom: 10px;" align="left" >
-            <a class="tab-selected" <%if(procInstCount>0){%>href="${contextPath}/pi/myProcInst.html"<%}%> style="margin-left: 18px;">我发起的流程[${procInstCount}]</a>
+            <a class="tab-selected" <%if(procInstCount>0){%>href="${contextPath}/pi/myProcInst.html"<%}%> style="margin-left: 18px;">我参与的流程[${procInstCount}]</a>
         </div>
     </div>
     <!-- 西侧布局 -->
@@ -41,7 +41,7 @@
         <%}%>
     </div>
     <!-- 中央布局 -->
-    <div region="center" id="centerRegion" style="float:left;width:100%;padding-top: 1px;" height="auto">
+    <div region="center" id="centerRegion" style="float:left;width:100%;padding: 20px;" height="auto">
         <% //定义表单页面
         if(has(procInst)){%>
         <!-- 流程信息 -->
@@ -57,6 +57,7 @@
             </div>
             <div style="height: 18px; overflow: hidden; padding-left: 0px; padding-top: 0px; position: absolute; left: 61px; top: 32px; width: 845px;">
                 <div title="${procInst.startTime, 'yyyy-MM-dd HH:mm:ss'}">
+                    <span style="vertical-align: middle;">发起人:${startUser}</span>
                     <img style="vertical-align: middle;" src="${contextPath}/resources/images/time.png"/>
                     <span style="vertical-align: middle;">创建于<span id="startTimeDesc">${procInst.startTime, 'yyyy-MM-dd HH:mm:ss'}</span></span>
                     <%if(procInst.endTime != null){%>
@@ -65,8 +66,10 @@
                 </div>
             </div>
         </div>
-            <!-- 流程描述 -->
-            <%if(procInst.description != null){%>
+
+            <%
+        //流程描述
+        if(procInst.description != null){%>
         <div style="position: relative; overflow: hidden; height: 100px;border-bottom: 1px solid #CCC;">
             <div style="margin-top: 16px;">
                 <span style="position: relative; top:0px;height: 50px;">${procInst.description}</span>
@@ -75,14 +78,70 @@
             <%}%>
 
             <%
-            //待执行任务
+            //进行中任务的名称和描述
             if(has(runningTasks)){
                 for(task in runningTasks){
             %>
-        <div value="${task.id}" >${task.name}</div>
+        <div value="${task.id}" style="line-height: 40px;border-bottom: 1px solid #CCC;">${task.name}
+                    <%
+                    if(task.description != null){
+                    %>
+            [${task.description}]
+                    <%
+                    }
+                    %>
+        </div>
+
+        <!-- 参与人 -->
+        <div style="position: relative; overflow: hidden; height: 140px;border-bottom: 1px solid #CCC;">
+            <div style="overflow: hidden; padding-left: 0px; padding-top: 0px; position: absolute; left: 0px; top: 0px; width: 800px; ">
+                <div style="color:#007dc3;font-size: 20px;font-family: 'Microsoft YaHei';padding-top:10px;padding-bottom: 10px;">
+                    <img style="vertical-align: middle;" src="${contextPath}/resources/images/user-22.png"/>
+                    <span style="vertical-align: middle;">任务参与人</span></div>
+                <div style="float:left;padding-right: 30px; ">
+
+                    <%if(task.owner==null){%>
+                    <b>无委托人</b>
+                    <%}else{%>
+                    委托人: ${task.~ownerName}
+                    <%}%>
+                </div>
+                <div style="height: 30px;">
+                    <%if(task.assignee==null){%>
+                    <b>无办理人</b>
+                    <%}else{%>
+                    办理人: ${task.~assigneeName}
+                    <%}%>
+                </div>
+
+                <div style="height: 30px;">
+                    <%
+                    var candidateUser = task.~candidateUser;
+                    if(candidateUser == null){%>
+                    <b>无候选人</b>
+                    <%}else{%>
+                    <b>候选人:</b> ${candidateUser}
+                    <%}%>
+                </div>
+                <div >
+                    <%
+                    var candidateGroup = task.~candidateGroup;
+                    if(candidateGroup == null){%>
+                    <b>无候选组</b>
+                    <%}else{%>
+                    <b>候选组:</b> ${candidateGroup}
+                    <%}%>
+                </div>
+            </div>
+        </div>
+
             <%
-                }
+                }// end of for
             }%>
+
+
+
+
 
         <%}//end of has(procInst)%>
         <!-- 隐藏流程图框 -->
@@ -128,7 +187,7 @@
      * 显示任务详情
      */
     function showProcInst(rowIndex, rowData) {
-        location.href="${contextPath}/pi/myProcInst.html?taskId="+rowData.id;
+        location.href="${contextPath}/pi/myProcInst.html?procInstId="+rowData.id;
     }
 
     /**
@@ -137,9 +196,9 @@
     function fmt(value, row, index){
         //选中当前任务
         if(row.id=='${procInst.id}'){
-            return "<img style=\"vertical-align: middle;\" src=\"${contextPath}/resources/images/task-22.png\"/>&nbsp;&nbsp;<B style=\"color: #007dc3;font-family: 'Microsoft YaHei';\">"+value+"</B>";
+            return "<img style=\"vertical-align: middle;\" src=\"${contextPath}/resources/images/task-22.png\"/>&nbsp;&nbsp;<B style=\"color: #007dc3;font-family: 'Microsoft YaHei';\">"+value+"-"+row.businessKey+"</B>";
         }else{
-            return "<img style=\"vertical-align: middle;\" src=\"${contextPath}/resources/images/task-22.png\"/>&nbsp;&nbsp;"+value;
+            return "<img style=\"vertical-align: middle;\" src=\"${contextPath}/resources/images/task-22.png\"/>&nbsp;&nbsp;"+value+"-"+row.businessKey;
         }
     }
 

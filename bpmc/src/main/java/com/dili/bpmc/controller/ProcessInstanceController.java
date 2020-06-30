@@ -3,22 +3,22 @@ package com.dili.bpmc.controller;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.serializer.SerializerFeature;
-import com.dili.ss.activiti.component.CustomProcessDiagramGenerator;
 import com.dili.ss.activiti.service.ActivitiService;
 import com.dili.ss.domain.BaseOutput;
 import com.dili.ss.domain.EasyuiPageOutput;
 import com.dili.ss.dto.IBaseDomain;
+import com.dili.uap.sdk.domain.User;
 import com.dili.uap.sdk.domain.UserTicket;
 import com.dili.uap.sdk.exception.NotLoginException;
+import com.dili.uap.sdk.rpc.UserRpc;
 import com.dili.uap.sdk.session.SessionContext;
-import org.activiti.engine.*;
-import org.activiti.engine.form.FormProperty;
-import org.activiti.engine.form.StartFormData;
+import org.activiti.engine.HistoryService;
+import org.activiti.engine.IdentityService;
+import org.activiti.engine.RuntimeService;
+import org.activiti.engine.TaskService;
 import org.activiti.engine.history.HistoricProcessInstance;
-import org.activiti.engine.repository.ProcessDefinition;
-import org.activiti.engine.runtime.ProcessInstance;
+import org.activiti.engine.task.IdentityLink;
 import org.activiti.engine.task.Task;
-import org.activiti.spring.SpringProcessEngineConfiguration;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -30,14 +30,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.awt.*;
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 
 /**
  * 流程实例controller
@@ -57,6 +54,8 @@ public class ProcessInstanceController {
     private HistoryService historyService;
     @Autowired
     private ActivitiService activitiService;
+    @Autowired
+    private UserRpc userRpc;
 
     private final String INDEX = "/pi/index.html";
 
@@ -86,18 +85,35 @@ public class ProcessInstanceController {
         if(userTicket == null){
             throw new NotLoginException();
         }
-        //查询当前用户作为流程发起人的流程
-        List<HistoricProcessInstance> historicProcessInstances = historyService.createHistoricProcessInstanceQuery().involvedUser(userTicket.getId().toString()).list();
+
+        //查询当前用户作为流程发起人的流程(仅包括正在进行中的流程)
+        List<HistoricProcessInstance> historicProcessInstances = historyService.createHistoricProcessInstanceQuery().unfinished().involvedUser(userTicket.getId().toString()).list();
         //我发起的流程实例数
         request.setAttribute("procInstCount", historicProcessInstances.size());
         //我发起的流程实例
         request.setAttribute("procInsts", JSONArray.toJSONString(historicProcessInstances, SerializerFeature.WriteDateUseDateFormat, SerializerFeature.IgnoreErrorGetter));
+        //定义当前显示的流程实例
+        HistoricProcessInstance currentProcessInstance = null;
         if(!historicProcessInstances.isEmpty()) {
             //当前显示的流程实例
-            request.setAttribute("procInst", historicProcessInstances.get(0));
+            if(StringUtils.isBlank(procInstId)) {
+                currentProcessInstance = historicProcessInstances.get(0);
+            }else{
+                for(HistoricProcessInstance hpi : historicProcessInstances){
+                    if(procInstId.equals(hpi.getId())){
+                        //显示指定流程
+                        currentProcessInstance =  hpi;
+                        break;
+                    }
+                }
+            }
         }
+        request.setAttribute("procInst", currentProcessInstance);
+        BaseOutput<User> output = userRpc.get(Long.parseLong(currentProcessInstance.getStartUserId()));
+        //远程获取用户名失败则直接显示用户id
+        request.setAttribute("startUser", output.isSuccess() ? output.getData().getRealName() : currentProcessInstance.getStartUserId());
         //进行中的任务
-        List<Task> runningTasks = taskService.createTaskQuery().processInstanceId(procInstId).active().list();
+        List<Task> runningTasks = taskService.createTaskQuery().processInstanceId(currentProcessInstance.getId()).active().list();
         if(!CollectionUtils.isEmpty(runningTasks)) {
             request.setAttribute("runningTasks", runningTasks);
         }

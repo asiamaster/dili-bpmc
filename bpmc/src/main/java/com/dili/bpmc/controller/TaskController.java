@@ -7,7 +7,6 @@ import com.alibaba.fastjson.TypeReference;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.dili.bpmc.consts.TaskCategory;
 import com.dili.bpmc.dao.ActRuTaskMapper;
-import com.dili.bpmc.rpc.RoleRpc;
 import com.dili.bpmc.sdk.domain.ActForm;
 import com.dili.bpmc.sdk.dto.TaskDto;
 import com.dili.bpmc.service.ActFormService;
@@ -19,6 +18,7 @@ import com.dili.ss.metadata.ValueProviderUtils;
 import com.dili.uap.sdk.domain.Role;
 import com.dili.uap.sdk.domain.UserTicket;
 import com.dili.uap.sdk.exception.NotLoginException;
+import com.dili.uap.sdk.rpc.RoleRpc;
 import com.dili.uap.sdk.session.SessionContext;
 import org.activiti.engine.*;
 import org.activiti.engine.form.TaskFormData;
@@ -74,8 +74,10 @@ public class TaskController {
     @Autowired
     private ActFormService actFormService;
     @Autowired
+    @SuppressWarnings("all")
     private RoleRpc roleRpc;
     @Autowired
+    @SuppressWarnings("all")
     private ActRuTaskMapper actRuTaskMapper;
 
     private final String INDEX = "/task/index.html";
@@ -501,6 +503,7 @@ public class TaskController {
         long inboxCount = taskService.createTaskQuery().taskAssignee(userId).count();
         //我的任务
 //        属主的任务
+//        （委托人）：受理人委托其他人操作该TASK的时候，受理人就成了委托人OWNER_，其他人就成了受理人ASSIGNEE_
         long tasksCount = taskService.createTaskQuery().taskOwner(userId).count();
         BaseOutput<List<Role>> rolesOutput = roleRpc.listByUser(Long.valueOf(userId), null);
         if(!rolesOutput.isSuccess()){
@@ -551,7 +554,7 @@ public class TaskController {
         JSONArray ja;
         //先判断是否已归档类型，单独处理
         if(TaskCategory.ARCHIVED.getCode().equals(category)){
-            //只查50条已归档数据;l
+            //只查50条已归档数据;
             List<HistoricTaskInstance> historicTaskInstances = historyService.createHistoricTaskInstanceQuery().taskAssignee(userId).listPage(0, 50);
             task = findTaskById(historicTaskInstances, taskId);
             ja = buildTaskList(historicTaskInstances);
@@ -577,7 +580,7 @@ public class TaskController {
         request.setAttribute("task", task);
 
         //查询并设置任务所属流程名称
-        ProcessDefinition processDefinition =repositoryService.createProcessDefinitionQuery().processDefinitionId(task.getProcessDefinitionId()).singleResult();
+        ProcessDefinition processDefinition = repositoryService.createProcessDefinitionQuery().processDefinitionId(task.getProcessDefinitionId()).singleResult();
         request.setAttribute("processDefinitionName", processDefinition == null || processDefinition.getName() == null ? "无所属流程定义" :processDefinition.getName());
         //非归档任务才显示表单信息
         if(!TaskCategory.ARCHIVED.getCode().equals(category)) {
