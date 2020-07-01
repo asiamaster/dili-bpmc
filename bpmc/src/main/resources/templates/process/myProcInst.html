@@ -47,12 +47,12 @@
         <!-- 流程信息 -->
         <div style="position: relative; overflow: hidden; height: 70px;border-bottom: 1px solid #CCC;">
             <!-- 图标 -->
-            <div class="cursorPinter" style="overflow: hidden; padding-left: 0px; padding-top: 0px; position: absolute; left: 0px; top: 0px; width: 49px; height: 50px;">
-                <img onclick="showProgress();" style="vertical-align: middle;" src="${contextPath}/resources/images/task-50.png"/>&nbsp;&nbsp;
+            <div style="overflow: hidden; padding-left: 0px; padding-top: 0px; position: absolute; left: 0px; top: 0px; width: 49px; height: 50px;">
+                <img style="vertical-align: middle;" src="${contextPath}/resources/images/task-50.png"/>&nbsp;&nbsp;
             </div>
             <!-- 流程定义名称 -->
-            <div class="cursorPinter" style="height: 27px; overflow: hidden; padding-left: 0px; padding-top: 0px; position: absolute; left: 61px; top: 0px; width: 845px;">
-                <span onclick="showProgress();" title="${procInst.processInstanceId}" style="vertical-align: top; color:#007dc3;font-size: 20px;font-family: 'Microsoft YaHei';font-weight: bold;">${procInst.processDefinitionName}</span>
+            <div style="height: 27px; overflow: hidden; padding-left: 0px; padding-top: 0px; position: absolute; left: 61px; top: 0px; width: 845px;">
+                <span title="${procInst.processInstanceId}" style="vertical-align: top; color:#007dc3;font-size: 20px;font-family: 'Microsoft YaHei';font-weight: bold;">${procInst.processDefinitionName}</span>
                 <span style="vertical-align: bottom;">- ${procInst.businessKey}</span>
             </div>
             <div style="height: 18px; overflow: hidden; padding-left: 0px; padding-top: 0px; position: absolute; left: 61px; top: 32px; width: 845px;">
@@ -136,19 +136,12 @@
         </div>
 
             <%
-                }// end of for
+                }// end of for(task in runningTasks)
             }%>
-
-        <%}//end of has(procInst)%>
-        <!-- 隐藏流程图框 -->
-        <div id="dlg" class="easyui-dialog" resizable="true" constrain="true" shadow="true" draggable="true" title="流程图" style="padding:10px" modal="false" closed="true" border="true"
-             data-options="
-                iconCls: 'icon-save',
-                width:1366,
-                height: 640
-            ">
-            <img id="processInstanceImg" />
+        <div style="position: relative; overflow: hidden;">
+            <img id="processInstanceImg" style="padding-top: 10px;" src="${contextPath}/pi/progress.action?processInstanceId=${procInst.processInstanceId}&processDefinitionId=${procInst.processDefinitionId}" />
         </div>
+        <%}//end of has(procInst)%>
     </div>
 </div>
 
@@ -163,21 +156,6 @@
     <%
     //如果有流程实例，才声明的代码
     if(has(procInst)){%>
-
-    /**
-     * 查看进度图片
-     * @param processInstanceId
-     * @param processDefinitionId
-     * @param processInstanceName
-     */
-    function showProgress(){
-        $('#dlg').dialog('open');
-        $('#dlg').dialog('center');
-        var href = "${contextPath}/pi/progress.action?processInstanceId=${procInst.processInstanceId}&processDefinitionId=${procInst.processDefinitionId}&"+Math.random();
-        $("#processInstanceImg").attr("src", href);
-        $('#dlg').dialog('setTitle', "${procInst.processDefinitionName}");
-    }
-
 
     /**
      * 显示任务详情
