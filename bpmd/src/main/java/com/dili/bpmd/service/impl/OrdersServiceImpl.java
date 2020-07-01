@@ -68,7 +68,7 @@ public class OrdersServiceImpl extends BaseServiceImpl<Orders, Long> implements 
         //流程启动参数设置
         Map<String, Object> variables = new HashMap<>(1);
         variables.put(BpmConsts.ORDER_CODE_KEY, orders.getCode());
-        //启动流程
+        //启动流程，因为要获取流程实例id,所以先启动流程，如果插入订单失败，无法回滚流程。
         BaseOutput<ProcessInstanceMapping> processInstanceOutput = runtimeRpc.startProcessInstanceByKey(BpmConsts.PROCESS_DEFINITION_KEY, orders.getCode(), userTicket.getId().toString(), variables);
         if(!processInstanceOutput.isSuccess()){
             return BaseOutput.failure(processInstanceOutput.getMessage());

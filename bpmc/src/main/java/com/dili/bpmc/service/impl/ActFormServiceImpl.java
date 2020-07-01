@@ -30,7 +30,7 @@ public class ActFormServiceImpl extends BaseServiceImpl<ActForm, Long> implement
 	}
 
 	@Override
-	public List<ActForm> getbyKeys(List<String> formKeys) {
+	public List<ActForm> getByKeys(List<String> formKeys) {
 		Example example = new Example(ActForm.class);
 		example.createCriteria().andIn("formKey", formKeys);
 		return this.getActualDao().selectByExample(example);

@@ -103,14 +103,14 @@
                     <%if(task.owner==null){%>
                     <b>无委托人</b>
                     <%}else{%>
-                    委托人: ${task.~ownerName}
+                    <b>委托人:</b> ${task.~ownerName}
                     <%}%>
                 </div>
                 <div style="height: 30px;">
                     <%if(task.assignee==null){%>
                     <b>无办理人</b>
                     <%}else{%>
-                    办理人: ${task.~assigneeName}
+                    <b>办理人:</b> ${task.~assigneeName}
                     <%}%>
                 </div>
 

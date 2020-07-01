@@ -217,6 +217,16 @@
             window.location.href="${contextPath}/orders/create.html";
         }
 
+        //打开详情窗口
+        function openDetail(){
+            var selected = $("#grid").datagrid("getSelected");
+            if (null == selected) {
+                swal('警告','请选中一条数据', 'warning');
+                return;
+            }
+            window.location.href="${contextPath}/orders/detail.html?businessKey="+selected.code;
+        }
+
         //打开修改窗口
         function openUpdate(){
             var selected = $("#grid").datagrid("getSelected");
@@ -404,7 +414,14 @@
                         handler:function(){
                             del();
                         }
+                    },
+                {
+                    iconCls:'icon-detail',
+                    text:'详情',
+                    handler:function(){
+                        openDetail();
                     }
+                }
                 ]
             });
             //表格仅显示下边框

@@ -45,7 +45,7 @@ public class FormApi {
 	 */
 	@PostMapping("/getByKeys")
 	public BaseOutput<List<ActForm>> getByKeys(@RequestBody(required = false) List<String> formKeys) {
-		List<ActForm> list = this.actFormService.getbyKeys(formKeys);
+		List<ActForm> list = this.actFormService.getByKeys(formKeys);
 		return BaseOutput.success().setData(list);
 	}
 

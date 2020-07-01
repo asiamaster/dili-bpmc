@@ -34,30 +34,33 @@
         <!-- =========================================================表格========================================================= -->
         <table class="easyui-datagrid" title="动态表单列表" id="grid" fitColumns="true" noheader="true" order="desc" pageList="[50,100,200]"
                pagination="true" pageSize="50" pageNumber="1" pagePosition="top" rownumbers="false" remoteSort="true"
-               loadMsg="数据加载中..." singleSelect="true" method="post" multiSort="false" sortName="created"
+               loadMsg="数据加载中..." singleSelect="true" method="post" multiSort="false" sortName="modified" sortOrder="desc"
                align="center" fit="true" striped="true" idField="id" data-options="onDblClickRow:openUpdate">
             <thead>
             <tr>
-                <th width="15%" data-options="field:'formKey',   sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
+                <th data-options="field:'formKey',   sortable:true, align:'center', resizable:'true', fixed:'false'">
                     表单key
                 </th>
-                <th data-options="field:'defKey',   sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
-                    任务定义key
+                <th data-options="field:'defKey',   sortable:true, align:'center', resizable:'true', fixed:'false'">
+                    定义key
                 </th>
-                <th data-options="field:'actionUrl',   sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
+                <th data-options="field:'actionUrl',   sortable:true, align:'center', resizable:'true', fixed:'false'">
                     表单URL
                 </th>
-                <th data-options="field:'taskUrl',   sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
+                <th data-options="field:'taskUrl',   sortable:true, align:'center', resizable:'true', fixed:'false'">
                     任务URL
                 </th>
-                <th  data-options="field:'redirectUrl',   sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
+                <th  data-options="field:'redirectUrl',   sortable:true, align:'center', resizable:'true', fixed:'false'">
                     重定向URL
                 </th>
-                <th width="12%" data-options="field:'created',  _provider:'datetimeProvider', sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
+                <th width="12%" data-options="field:'created',  _provider:'datetimeProvider', sortable:true, align:'center', resizable:'true', fixed:'false'">
                     创建时间
                 </th>
-                <th width="12%" data-options="field:'modified',  _provider:'datetimeProvider', sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
+                <th width="12%" data-options="field:'modified',  _provider:'datetimeProvider', sortable:true, order:'desc', align:'center', resizable:'true', fixed:'false'">
                     修改时间
+                </th>
+                <th data-options="field:'description',  sortable:true, align:'center', resizable:'true', fixed:'false'">
+                    备注
                 </th>
             </tr>
             </thead>
@@ -105,7 +108,11 @@
                     <input class="easyui-textbox" name="_redirectUrl" id="_redirectUrl" style="width:100%" data-options="label:'重定向URL:', validType:'length[0,120]'" />
                 </td>
             </tr>
-
+            <tr>
+                <td style="padding:5px;">
+                    <input class="easyui-textbox" name="_description" id="_description" style="width:100%" data-options="label:'备注:', validType:'length[0,120]'" />
+                </td>
+            </tr>
         </table>
     </form>
 

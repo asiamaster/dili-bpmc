@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import com.alibaba.fastjson.serializer.SerializerFeature;
+import com.dili.bpmc.consts.BpmcConsts;
 import com.dili.bpmc.consts.TaskCategory;
 import com.dili.bpmc.dao.ActRuTaskMapper;
 import com.dili.bpmc.sdk.domain.ActForm;
@@ -13,6 +14,8 @@ import com.dili.bpmc.service.ActFormService;
 import com.dili.ss.activiti.service.ActivitiService;
 import com.dili.ss.domain.BaseOutput;
 import com.dili.ss.domain.EasyuiPageOutput;
+import com.dili.ss.dto.DTOUtils;
+import com.dili.ss.dto.IDTO;
 import com.dili.ss.exception.AppException;
 import com.dili.ss.metadata.ValueProviderUtils;
 import com.dili.uap.sdk.domain.Role;
@@ -596,6 +599,21 @@ public class TaskController {
                 return;
             }
             request.setAttribute("actForm", actForm);
+        }else{
+            //归档任务根据ActForm中的流程定义id获取任务URL，来展示业务详情
+            HistoricProcessInstance historicProcessInstance = historyService.createHistoricProcessInstanceQuery().processInstanceId(task.getProcessInstanceId()).singleResult();
+            //根据流程定义Key获取任务URL
+            String processDefinitionKey = historicProcessInstance.getProcessDefinitionKey();
+            ActForm actForm = DTOUtils.newInstance(ActForm.class);
+            actForm.setDefKey(processDefinitionKey);
+            actForm.setFormKey(BpmcConsts.PROCESS_FORM_KEY);
+            List<ActForm> actForms = actFormService.listByExample(actForm);
+            if(actForms.isEmpty() || actForms.size() > 1){
+//                throw new AppException("流程定义Key对应的ActForm不存在或不唯一!");
+                return;
+            }
+            request.setAttribute("actForm", actForms.get(0));
+            request.setAttribute("businessKey", historicProcessInstance.getBusinessKey());
         }
     }
 

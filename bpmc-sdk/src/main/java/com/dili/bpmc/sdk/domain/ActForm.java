@@ -32,6 +32,10 @@ public interface ActForm extends IBaseDomain, IMybatisForceParams {
 
     void setFormKey(String formKey);
 
+    /**
+     * 流程定义或者任务定义id
+     * @return
+     */
     @Column(name = "`def_key`")
     @FieldDef(label="任务定义key", maxLength = 50)
     @EditMode(editor = FieldEditor.Text, required = true)
@@ -74,4 +78,10 @@ public interface ActForm extends IBaseDomain, IMybatisForceParams {
     Date getModified();
 
     void setModified(Date modified);
+
+    @Column(name = "`description`")
+    @FieldDef(label="备注")
+    String getDescription();
+    void setDescription(String description);
+
 }

@@ -23,5 +23,5 @@ public interface ActFormService extends BaseService<ActForm, Long> {
 	 * @param formKeys
 	 * @return
 	 */
-	List<ActForm> getbyKeys(List<String> formKeys);
+	List<ActForm> getByKeys(List<String> formKeys);
 }

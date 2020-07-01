@@ -79,6 +79,17 @@ public class OrdersController {
     }
 
     /**
+     * 订单详情页面
+     * @param modelMap
+     * @return
+     */
+    @RequestMapping(value="/detail.html", method = RequestMethod.GET)
+    public String detail(@RequestParam String businessKey,  ModelMap modelMap) {
+        modelMap.put("orders", ordersService.getByCode(businessKey));
+        return "orders/detail";
+    }
+
+    /**
      * 创建订单
      * @param orders
      * @return
@@ -158,7 +169,7 @@ public class OrdersController {
         String code = taskVariablesOutput.getData().get("orderCode").toString();
         modelMap.put("orders", ordersService.getByCode(code));
         modelMap.put("taskId", taskId);
-        modelMap.put("cover", cover == null ? output.getData().getAssignee() == null : cover);
+//        modelMap.put("cover", cover == null ? output.getData().getAssignee() == null : cover);
         return "orders/submit";
     }
 

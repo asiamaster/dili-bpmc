@@ -131,6 +131,9 @@
                 <div style="vertical-align: top; font-weight:bold;font-family: 'Microsoft YaHei';padding-top:0px;padding-bottom: 10px;">请填写下面的表单后完成任务:<img align="right" onclick="maximize()" class="maximize" src="${contextPath}/resources/images/maximize-16.png"/></div>
                 <%
                 url = actForm.taskUrl + "?taskId=" + task.id + "&formKey=" + task.formKey;
+                if(has(businessKey)){
+                    url = url + "&businessKey=" + businessKey;
+                }
                 //没有办理人则遮照(目前遮照由任务中心统一实现)
                 //if(!has(isAssignee)) {
                 //    //beetl不支持+=，艹
