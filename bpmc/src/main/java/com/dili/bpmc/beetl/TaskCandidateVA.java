@@ -87,6 +87,9 @@ public class TaskCandidateVA implements VirtualAttributeEval {
                 ids.add(identityLink.getUserId());
             }
         }
+        if(ids.isEmpty()){
+            return "";
+        }
         StringBuilder stringBuilder = new StringBuilder();
         BaseOutput<List<User>> listBaseOutput = userRpc.listUserByIds(ids);
         if(!listBaseOutput.isSuccess()){
@@ -113,6 +116,9 @@ public class TaskCandidateVA implements VirtualAttributeEval {
             if(identityLink.getGroupId() != null) {
                 ids.add(identityLink.getGroupId());
             }
+        }
+        if(ids.isEmpty()){
+            return "";
         }
         StringBuilder stringBuilder = new StringBuilder();
         BaseOutput<List<Role>> listBaseOutput = roleRpc.listRoleByIds(ids);
