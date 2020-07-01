@@ -117,7 +117,7 @@
                 <div style="height: 30px;">
                     <%
                     var candidateUser = task.~candidateUser;
-                    if(candidateUser == null){%>
+                    if(candidateUser == ""){%>
                     <b>无候选人</b>
                     <%}else{%>
                     <b>候选人:</b> ${candidateUser}
@@ -126,7 +126,7 @@
                 <div >
                     <%
                     var candidateGroup = task.~candidateGroup;
-                    if(candidateGroup == null){%>
+                    if(candidateGroup == ""){%>
                     <b>无候选组</b>
                     <%}else{%>
                     <b>候选组:</b> ${candidateGroup}
@@ -138,10 +138,6 @@
             <%
                 }// end of for
             }%>
-
-
-
-
 
         <%}//end of has(procInst)%>
         <!-- 隐藏流程图框 -->
