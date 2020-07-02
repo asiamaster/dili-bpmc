@@ -134,14 +134,16 @@
                 </div>
             </div>
         </div>
-
             <%
                 }// end of for(task in runningTasks)
-            }%>
-        <div style="position: relative; overflow: hidden;">
+            }else{//end of if(has(runningTasks))%>
+            <span style="font-weight: bold; color: red;">无进行中的任务</span>
+            <%}%>
+        <div style="position: relative; overflow: auto;">
             <img id="processInstanceImg" style="padding-top: 10px;" src="${contextPath}/pi/progress.action?processInstanceId=${procInst.processInstanceId}&processDefinitionId=${procInst.processDefinitionId}" />
         </div>
         <%}//end of has(procInst)%>
+
     </div>
 </div>
 

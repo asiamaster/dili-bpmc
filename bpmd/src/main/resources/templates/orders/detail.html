@@ -11,12 +11,12 @@
             </tr>
             <tr>
                 <td style="padding:5px;">
-                    <input class="easyui-datetimebox" value="${orders.effectiveTime!}"  name="effectiveTime" id="effectiveTime" style="width:100%" editable="false" data-options="label:'生效时间:'" />
+                    <input class="easyui-datetimebox" value="${orders.effectiveTime!, 'yyyy-MM-dd HH:mm:ss'}"  name="effectiveTime" id="effectiveTime" style="width:100%" editable="false" data-options="label:'生效时间:'" />
                 </td>
             </tr>
             <tr>
                 <td style="padding:5px;">
-                    <input class="easyui-datetimebox" value="${orders.deadTime!}"  name="deadTime" id="deadTime" style="width:100%" editable="false" data-options="label:'失效时间:'" />
+                    <input class="easyui-datetimebox" value="${orders.deadTime!, 'yyyy-MM-dd HH:mm:ss'}"  name="deadTime" id="deadTime" style="width:100%" editable="false" data-options="label:'失效时间:'" />
                 </td>
             </tr>
             <tr>

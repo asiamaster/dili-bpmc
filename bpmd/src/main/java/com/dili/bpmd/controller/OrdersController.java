@@ -179,10 +179,24 @@ public class OrdersController {
      * @param taskId 任务id
      * @return
      */
-    @RequestMapping(value="/submit.action", method = RequestMethod.POST)
+    @RequestMapping(value="/submit.action", method = {RequestMethod.POST, RequestMethod.GET})
     @ResponseBody
-    public BaseOutput<String> doSubmit(@RequestParam String code, @RequestParam String taskId) {
+    public BaseOutput doSubmit(@RequestParam String code, @RequestParam String taskId) {
         return ordersService.submit(code, taskId);
+    }
+
+    /**
+     * 结算订单
+     * @param code  订单号
+     * @param effectiveTime 生效时间
+     * @param deadTime 失败时间
+     * @param taskId 任务id
+     * @return
+     */
+    @RequestMapping(value="/settle.action", method = {RequestMethod.POST, RequestMethod.GET})
+    @ResponseBody
+    public BaseOutput doSettle(@RequestParam String code, @RequestParam Date effectiveTime, @RequestParam Date deadTime, @RequestParam String taskId) {
+        return ordersService.settle(code, effectiveTime, deadTime, taskId);
     }
 
     /**
@@ -206,20 +220,6 @@ public class OrdersController {
         modelMap.put("taskId", taskId);
         modelMap.put("cover", cover == null ? output.getData().getAssignee() == null : cover);
         return "orders/settle";
-    }
-
-    /**
-     * 结算订单
-     * @param code  订单号
-     * @param effectiveTime 生效时间
-     * @param deadTime 失败时间
-     * @param taskId 任务id
-     * @return
-     */
-    @RequestMapping(value="/settle.action", method = RequestMethod.POST)
-    @ResponseBody
-    public BaseOutput<String> doSettle(@RequestParam String code, @RequestParam Date effectiveTime, @RequestParam Date deadTime, @RequestParam String taskId) {
-        return ordersService.settle(code, effectiveTime, deadTime, taskId);
     }
 
     /**

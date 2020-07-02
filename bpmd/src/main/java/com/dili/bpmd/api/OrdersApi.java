@@ -27,6 +27,7 @@ public class OrdersApi {
 
     /**
      * 生效订单
+     * http://bpmd.diligrp.com:8618/api/orders/valid
      * @param variables 任务变量
      * @return
      */

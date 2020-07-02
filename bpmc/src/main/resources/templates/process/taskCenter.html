@@ -91,15 +91,15 @@
                 </div>
             </div>
             <!-- 任务描述和所属流程 -->
-            <div style="position: relative; overflow: hidden; height: 100px;border-bottom: 1px solid #CCC;">
-                <div style="margin-top: 16px;">
+            <div style="position: relative; overflow: hidden; height: 70px;border-bottom: 1px solid #CCC;">
+                <div style="margin-top: 10px;">
                     <%if(task.assignee == null){%>
                     <a href="#" onclick="claimTask();" class="easyui-linkbutton" data-options="">签收</a>
                     <%}%>
                     <span style="position: relative; top:0px;height: 50px;">${task.description}</span>
                 </div>
-                <div style="margin-top: 16px;">
-                <a href="#" onclick="showProgress();" style="text-decoration: none;color:darkred">任务属于流程:'${processDefinitionName}'</a>
+                <div style="margin-top: 10px;">
+                <a href="#" onclick="showProgress();" style="text-decoration: none;color:darkred">所属流程:'${processDefinitionName}'</a>
                 </div>
             </div>
             <!-- 参与人 -->
