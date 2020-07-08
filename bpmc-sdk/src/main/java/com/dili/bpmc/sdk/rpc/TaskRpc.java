@@ -12,6 +12,7 @@ import com.dili.ss.retrofitful.annotation.POST;
 import com.dili.ss.retrofitful.annotation.ReqParam;
 import com.dili.ss.retrofitful.annotation.Restful;
 import com.dili.ss.retrofitful.annotation.VOBody;
+import org.springframework.web.bind.annotation.RequestParam;
 
 /**
  * 任务接口
@@ -41,9 +42,10 @@ public interface TaskRpc {
 	 * 
 	 * @param taskId    任务id 必填
 	 * @param variables
+	 * @return 任务id
 	 */
 	@POST("/api/task/complete")
-	BaseOutput<String> complete(@ReqParam(value = "taskId") String taskId, @ReqParam(value = "variables", required = false) Map<String, Object> variables);
+	BaseOutput<String> complete(@ReqParam(value = "taskId") String taskId, @ReqParam(value = "variables", required = false) Map<String, String> variables);
 
 	/**
 	 * 强制提交任务，使用于无办理人的场景
@@ -92,6 +94,15 @@ public interface TaskRpc {
 	 */
 	@POST("/api/task/getVariable")
 	BaseOutput<Object> getVariable(@ReqParam(value = "taskId") String taskId, @ReqParam(value = "variableName") String variableName);
+
+	/**
+	 * 设置本地任务变量
+	 * @param taskId
+	 * @param variables
+	 * @return
+	 */
+	@POST("/api/task/setVariablesLocal")
+	BaseOutput setVariablesLocal(@ReqParam(value = "taskId") String taskId, @ReqParam(value = "variables") Map<String, String> variables);
 
 	/**
 	 * 根据任务id查询任务

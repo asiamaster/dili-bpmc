@@ -7,17 +7,17 @@ import com.dili.ss.activiti.service.ActivitiService;
 import com.dili.ss.domain.BaseOutput;
 import com.dili.ss.domain.EasyuiPageOutput;
 import com.dili.ss.dto.IBaseDomain;
+import com.dili.ss.metadata.ValueProviderUtils;
 import com.dili.uap.sdk.domain.User;
 import com.dili.uap.sdk.domain.UserTicket;
 import com.dili.uap.sdk.exception.NotLoginException;
 import com.dili.uap.sdk.rpc.UserRpc;
 import com.dili.uap.sdk.session.SessionContext;
 import org.activiti.engine.HistoryService;
-import org.activiti.engine.IdentityService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
 import org.activiti.engine.history.HistoricProcessInstance;
-import org.activiti.engine.task.IdentityLink;
+import org.activiti.engine.history.HistoricTaskInstance;
 import org.activiti.engine.task.Task;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -34,7 +34,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 流程实例controller
@@ -54,6 +56,7 @@ public class ProcessInstanceController {
     private HistoryService historyService;
     @Autowired
     private ActivitiService activitiService;
+    @SuppressWarnings("all")
     @Autowired
     private UserRpc userRpc;
 
@@ -71,6 +74,20 @@ public class ProcessInstanceController {
     	model.addAttribute("processDefinitionId", processDefinitionId);
     	model.addAttribute("processInstanceId", processInstanceId);
     	return "process/showImage";
+    }
+
+    /**
+     * 查询历史任务实例
+     * @param processInstanceId
+     * @return
+     */
+    @RequestMapping(value = "/listHistoricTaskInstance.action", method = {RequestMethod.GET, RequestMethod.POST})
+    @ResponseBody
+    public List<Map> listHistoricTaskInstance(@RequestParam String processInstanceId) throws Exception {
+        List<HistoricTaskInstance> historicTaskInstances = historyService.createHistoricTaskInstanceQuery().processInstanceId(processInstanceId).list();
+        HashMap<Object, Object> metaMap = new HashMap<>();
+        metaMap.put("assignee", "userProvider");
+        return ValueProviderUtils.buildDataByProvider(metaMap, historicTaskInstances);
     }
 
     /**
@@ -108,6 +125,7 @@ public class ProcessInstanceController {
                 }
             }
         }
+        //默认显示的流程实例
         request.setAttribute("procInst", currentProcessInstance);
         BaseOutput<User> output = userRpc.get(Long.parseLong(currentProcessInstance.getStartUserId()));
         //远程获取用户名失败则直接显示用户id
@@ -117,7 +135,11 @@ public class ProcessInstanceController {
         if(!CollectionUtils.isEmpty(runningTasks)) {
             request.setAttribute("runningTasks", runningTasks);
         }
-
+        //流程执行情况(改为在页面上通过列表展示)
+//        List<HistoricTaskInstance> historicTaskInstances = historyService.createHistoricTaskInstanceQuery().processInstanceId(currentProcessInstance.getId()).list();
+//        if(!historicTaskInstances.isEmpty()) {
+//            request.setAttribute("historicTaskInstances", historicTaskInstances);
+//        }
         return "process/myProcInst";
     }
     

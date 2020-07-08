@@ -5,6 +5,7 @@ import com.dili.ss.domain.BaseOutput;
 import com.dili.ss.retrofitful.annotation.GET;
 import com.dili.ss.retrofitful.annotation.ReqParam;
 import com.dili.ss.retrofitful.annotation.Restful;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.Map;
 
@@ -13,6 +14,15 @@ import java.util.Map;
  */
 @Restful("${bpmc.server.address}")
 public interface RuntimeRpc {
+
+	/**
+	 * 根据流程实例id更新businessKey
+	 * @param processInstanceId
+	 * @param businessKey
+	 * @return
+	 */
+	@GET("/api/runtime/updateBusinessKey")
+	BaseOutput updateBusinessKey(@ReqParam(value = "processInstanceId") String processInstanceId, @ReqParam(value = "businessKey") String businessKey);
 
 	/**
 	 * 根据key和参数启动流程定义

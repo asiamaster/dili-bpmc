@@ -137,8 +137,34 @@
             <%
                 }// end of for(task in runningTasks)
             }else{//end of if(has(runningTasks))%>
-            <span style="font-weight: bold; color: red;">无进行中的任务</span>
+            <span style="font-weight: bold; color: red;">流程已结束</span>
             <%}%>
+        <div style="position: relative; overflow: auto;border-bottom: 1px solid #CCC;">
+            <table class="easyui-datagrid" title="任务历史" id="taskHistoryGrid" fitColumns="true" noheader="true"
+                   pagination="false" rownumbers="false" remoteSort="false" sortOrder="desc"
+                   loadMsg="数据加载中..." singleSelect="true" method="post" multiSort="false" sortName="startTime"
+                   align="center" striped="true" idField="id" data-options="url:'${contextPath}/pi/listHistoricTaskInstance.action?processInstanceId=${procInst.id}'" >
+                <thead>
+                <tr>
+                    <th width="15%" data-options="field:'name',   sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
+                        任务名
+                    </th>
+                    <th width="15%" data-options="field:'assignee', _provider:'userProvider',   sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
+                        办理人
+                    </th>
+                    <th width="15%" data-options="field:'startTime',   sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
+                        开始时间
+                    </th>
+                    <th width="15%" data-options="field:'claimTime',   sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
+                        签收时间
+                    </th>
+                    <th width="15%" data-options="field:'endTime',   sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
+                        办理时间
+                    </th>
+                </tr>
+                </thead>
+            </table>
+        </div>
         <div style="position: relative; overflow: auto;">
             <img id="processInstanceImg" style="padding-top: 10px;" src="${contextPath}/pi/progress.action?processInstanceId=${procInst.processInstanceId}&processDefinitionId=${procInst.processDefinitionId}" />
         </div>

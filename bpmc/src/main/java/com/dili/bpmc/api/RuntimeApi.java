@@ -5,6 +5,7 @@ import com.dili.ss.activiti.service.ActivitiService;
 import com.dili.ss.domain.BaseOutput;
 import com.dili.ss.dto.DTOUtils;
 import org.activiti.engine.*;
+import org.activiti.engine.history.HistoricTaskInstance;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -40,6 +42,17 @@ public class RuntimeApi {
     @Autowired
     private ActivitiService activitiService;
 
+    /**
+     * 根据流程实例id更新businessKey
+     * @param processInstanceId
+     * @param businessKey
+     * @return
+     */
+    @RequestMapping(value = "/updateBusinessKey", method = {RequestMethod.GET, RequestMethod.POST})
+    public BaseOutput updateBusinessKey(@RequestParam String processInstanceId, @RequestParam String businessKey){
+        runtimeService.updateBusinessKey(processInstanceId, businessKey);
+        return BaseOutput.success();
+    }
 
     /**
      * 根据key和参数启动流程定义
@@ -50,7 +63,6 @@ public class RuntimeApi {
      * @return 流程实例对象封装
      */
     @RequestMapping(value = "/startProcessInstanceByKey", method = {RequestMethod.GET, RequestMethod.POST})
-    @ResponseBody
     public BaseOutput<ProcessInstanceMapping> startProcessInstanceByKey(@RequestParam String processDefinitionKey, @RequestParam(required = false) String businessKey, @RequestParam String userId, @RequestParam(required = false) Map<String, Object> variables, HttpServletRequest request) throws Exception {
         //流程发起前设置发起人，记录在流程历史中
 //        在流程开始之前设置，会自动在表ACT_HI_PROCINST 中的START_USER_ID_中设置用户ID：

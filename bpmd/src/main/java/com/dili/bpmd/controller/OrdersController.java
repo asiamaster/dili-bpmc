@@ -1,8 +1,10 @@
 package com.dili.bpmd.controller;
 
 import com.dili.bpmc.sdk.annotation.BpmTask;
+import com.dili.bpmc.sdk.domain.HistoricTaskInstanceMapping;
 import com.dili.bpmc.sdk.domain.TaskMapping;
 import com.dili.bpmc.sdk.rpc.FormRpc;
+import com.dili.bpmc.sdk.rpc.HistoryRpc;
 import com.dili.bpmc.sdk.rpc.TaskRpc;
 import com.dili.bpmd.domain.Orders;
 import com.dili.bpmd.service.OrdersService;
@@ -31,10 +33,15 @@ import java.util.Map;
 public class OrdersController {
     @Autowired
     OrdersService ordersService;
+    @SuppressWarnings("all")
     @Autowired
     TaskRpc taskRpc;
+    @SuppressWarnings("all")
     @Autowired
     FormRpc formRpc;
+    @SuppressWarnings("all")
+    @Autowired
+    HistoryRpc historyRpc;
     /**
      * 订单查询页面
      * @param modelMap
@@ -85,7 +92,12 @@ public class OrdersController {
      */
     @RequestMapping(value="/detail.html", method = RequestMethod.GET)
     public String detail(@RequestParam String businessKey,  ModelMap modelMap) {
-        modelMap.put("orders", ordersService.getByCode(businessKey));
+        Orders orders = ordersService.getByCode(businessKey);
+        modelMap.put("orders", orders);
+        BaseOutput<List<HistoricTaskInstanceMapping>> listBaseOutput = historyRpc.listHistoricTaskInstance(orders.getProcessInstanceId(), true);
+        if(listBaseOutput.isSuccess()){
+            System.out.println(listBaseOutput.getData());
+        }
         return "orders/detail";
     }
 

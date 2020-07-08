@@ -1,11 +1,12 @@
 package com.dili.bpmc.api;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-
+import com.alibaba.fastjson.JSON;
+import com.dili.bpmc.dao.ActRuTaskMapper;
+import com.dili.bpmc.sdk.domain.TaskMapping;
+import com.dili.bpmc.sdk.dto.TaskDto;
+import com.dili.bpmc.sdk.dto.TaskIdentityDto;
+import com.dili.ss.domain.BaseOutput;
+import com.dili.ss.dto.DTOUtils;
 import org.activiti.engine.FormService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
@@ -18,20 +19,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import com.alibaba.fastjson.JSON;
-import com.dili.bpmc.dao.ActRuTaskMapper;
-import com.dili.bpmc.sdk.domain.TaskMapping;
-import com.dili.bpmc.sdk.dto.TaskDto;
-import com.dili.bpmc.sdk.dto.TaskIdentityDto;
-import com.dili.ss.domain.BaseOutput;
-import com.dili.ss.dto.DTOUtils;
+import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 任务接口
@@ -85,9 +78,10 @@ public class TaskApi {
 	 * @param assignee  强制插手认领人
 	 * @param variables
 	 * @throws IOException
+	 * @return taskId
 	 */
 	@RequestMapping(value = "/complete", method = { RequestMethod.GET, RequestMethod.POST })
-	public BaseOutput<String> complete(@RequestParam String taskId, @RequestParam(required = false) String assignee, @RequestParam Map<String, Object> variables) {
+	public BaseOutput<String> complete(@RequestParam String taskId, @RequestParam(required = false) String assignee, @RequestParam Map<String, String> variables) {
 		// 强制插手人签收任务
 		if (StringUtils.isNotBlank(assignee)) {
 			taskService.claim(taskId, assignee);
@@ -99,8 +93,8 @@ public class TaskApi {
 		if (StringUtils.isBlank(task.getAssignee())) {
 			return BaseOutput.failure("任务还未认领");
 		}
-		taskService.complete(taskId, variables);
-		return BaseOutput.success();
+		taskService.complete(taskId, (Map)variables);
+		return BaseOutput.successData(taskId);
 	}
 
 	/**
@@ -292,6 +286,20 @@ public class TaskApi {
 	}
 
 	/**
+	 * 设置本地任务变量
+	 *
+	 * @param taskId，必填
+	 * @return
+	 */
+	@RequestMapping(value = "/setVariablesLocal", method = { RequestMethod.GET, RequestMethod.POST })
+	public BaseOutput setVariablesLocal(@RequestParam String taskId, @RequestParam Map<String, String> variables) {
+		variables.remove("taskId");
+		taskService.setVariablesLocal(taskId, variables);
+		return BaseOutput.success();
+	}
+
+
+	/**
 	 * 获取任务变量
 	 * 
 	 * @param taskId       任务id，必填
@@ -390,4 +398,6 @@ public class TaskApi {
 		List<TaskIdentityDto> list = this.actRuTaskMapper.listTaskIdentityByProcessInstanceIds(processIntanceIds);
 		return BaseOutput.success().setData(list);
 	}
+
+
 }

@@ -39,10 +39,13 @@ import java.util.Map;
  */
 @Service
 public class OrdersServiceImpl extends BaseServiceImpl<Orders, Long> implements OrdersService {
+    @SuppressWarnings("all")
     @Autowired
     RuntimeRpc runtimeRpc;
+    @SuppressWarnings("all")
     @Autowired
     TaskRpc taskRpc;
+    @SuppressWarnings("all")
     @Autowired
     FormRpc formRpc;
 
@@ -68,7 +71,8 @@ public class OrdersServiceImpl extends BaseServiceImpl<Orders, Long> implements 
         //流程启动参数设置
         Map<String, Object> variables = new HashMap<>(1);
         variables.put(BpmConsts.ORDER_CODE_KEY, orders.getCode());
-        //启动流程，因为要获取流程实例id,所以先启动流程，如果插入订单失败，无法回滚流程。
+        // 启动流程，因为订单要设置流程实例id,所以先启动流程
+        // 如果插入订单失败，该流程作废，不影响订单下次创建。
         BaseOutput<ProcessInstanceMapping> processInstanceOutput = runtimeRpc.startProcessInstanceByKey(BpmConsts.PROCESS_DEFINITION_KEY, orders.getCode(), userTicket.getId().toString(), variables);
         if(!processInstanceOutput.isSuccess()){
             return BaseOutput.failure(processInstanceOutput.getMessage());
@@ -88,6 +92,10 @@ public class OrdersServiceImpl extends BaseServiceImpl<Orders, Long> implements 
         Orders orders = DTOUtils.newInstance(Orders.class);
         orders.setState(OrderState.Submit.getCode());
         updateSelectiveByCode(code, orders);
+        HashMap<String, String> param = new HashMap<>(2);
+        param.put("content", "提交订单");
+        param.put("agree", "true");
+        taskRpc.setVariablesLocal(taskId, param);
         return taskRpc.complete(taskId);
     }
 
@@ -99,10 +107,14 @@ public class OrdersServiceImpl extends BaseServiceImpl<Orders, Long> implements 
         orders.setEffectiveTime(effectiveTime);
         orders.setDeadTime(deadTime);
         updateSelectiveByCode(code, orders);
-        Map<String, Object> variables = new HashMap<>(2);
+        Map<String, String> variables = new HashMap<>(2);
         variables.put(BpmConsts.ORDER_CODE_KEY, code);
         //设置ISO8601格式的订单生效时间，用于流程中的定时器
         variables.put(BpmConsts.FIRE_TIME, DateUtils.getISO8601TimeDate(effectiveTime));
+        Map<String, String> localVariables = new HashMap<>(4);
+        localVariables.put("content", "订单缴费");
+        localVariables.put("agree", "true");
+        taskRpc.setVariablesLocal(taskId, localVariables);
         return taskRpc.complete(taskId, variables);
     }
 
