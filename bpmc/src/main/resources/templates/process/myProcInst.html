@@ -29,7 +29,8 @@
     <div region="north" style="border-bottom: 1px solid #ababab;" align="center">
         <!-- =========================================================表单========================================================= -->
         <div class="easyui-panel gradient-title" style="width:100%;padding-top:10px;padding-bottom: 10px;" align="left" >
-            <a class="tab-selected" <%if(procInstCount>0){%>href="${contextPath}/pi/myProcInst.html"<%}%> style="margin-left: 18px;">我参与的流程[${procInstCount}]</a>
+            <a <%if(finished==false){%>class="tab-selected"<%}else{%>class="tab-unselected"<%}%> <%if(activeProcInstCount>0){%>href="${contextPath}/pi/myProcInst.html?finished=false"<%}%> style="margin-left: 18px;">进行中[${activeProcInstCount}]</a>
+            <a <%if(finished==true){%>class="tab-selected"<%}else{%>class="tab-unselected"<%}%> <%if(finishedProcInstCount>0){%>href="${contextPath}/pi/myProcInst.html?finished=true"<%}%> style="margin-left: 18px;">已完结[${finishedProcInstCount}]</a>
         </div>
     </div>
     <!-- 西侧布局 -->
@@ -78,6 +79,7 @@
             <%}%>
 
             <%
+            if(finished==false){
             //进行中任务的名称和描述
             if(has(runningTasks)){
                 for(task in runningTasks){
@@ -93,6 +95,7 @@
         </div>
 
         <!-- 参与人 -->
+
         <div style="position: relative; overflow: hidden; height: 140px;border-bottom: 1px solid #CCC;">
             <div style="overflow: hidden; padding-left: 0px; padding-top: 0px; position: absolute; left: 0px; top: 0px; width: 800px; ">
                 <div style="color:#007dc3;font-size: 20px;font-family: 'Microsoft YaHei';padding-top:10px;padding-bottom: 10px;">
@@ -136,9 +139,11 @@
         </div>
             <%
                 }// end of for(task in runningTasks)
-            }else{//end of if(has(runningTasks))%>
-            <span style="font-weight: bold; color: red;">流程已结束</span>
-            <%}%>
+            }else{//end of if(has(runningTasks))
+            %>
+            <span style="font-weight: bold; color: red;">无进行中的任务</span>
+            <%}
+            }//end of if(finished==false)%>
         <div style="position: relative; overflow: auto;border-bottom: 1px solid #CCC;">
             <table class="easyui-datagrid" title="任务历史" id="taskHistoryGrid" fitColumns="true" noheader="true"
                    pagination="false" rownumbers="false" remoteSort="false" sortOrder="desc"
@@ -189,7 +194,7 @@
      * 显示任务详情
      */
     function showProcInst(rowIndex, rowData) {
-        location.href="${contextPath}/pi/myProcInst.html?procInstId="+rowData.id;
+        location.href="${contextPath}/pi/myProcInst.html?finished=${finished}&procInstId="+rowData.id;
     }
 
     /**

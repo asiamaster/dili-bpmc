@@ -97,16 +97,21 @@ public class ProcessInstanceController {
      * @return
      */
     @RequestMapping(value = "/myProcInst.html", method = {RequestMethod.GET, RequestMethod.POST})
-    public String myProcInst(@RequestParam(required = false) String procInstId, HttpServletRequest request) {
+    public String myProcInst(@RequestParam(required = false) String procInstId, @RequestParam(required = false, defaultValue = "false") Boolean finished, HttpServletRequest request) {
         UserTicket userTicket = SessionContext.getSessionContext().getUserTicket();
         if(userTicket == null){
             throw new NotLoginException();
         }
-
+        //设置选择类别，用于高亮显示被选中的类别
+        request.setAttribute("finished", finished);
         //查询当前用户作为流程发起人的流程(仅包括正在进行中的流程)
-        List<HistoricProcessInstance> historicProcessInstances = historyService.createHistoricProcessInstanceQuery().unfinished().involvedUser(userTicket.getId().toString()).list();
-        //我发起的流程实例数
-        request.setAttribute("procInstCount", historicProcessInstances.size());
+        List<HistoricProcessInstance> historicProcessInstances = finished ?
+                historyService.createHistoricProcessInstanceQuery().finished().involvedUser(userTicket.getId().toString()).orderByProcessInstanceEndTime().desc().listPage(0, 50) :
+                historyService.createHistoricProcessInstanceQuery().unfinished().involvedUser(userTicket.getId().toString()).orderByProcessInstanceStartTime().desc().listPage(0, 50);
+        //已完结流程实例数
+        request.setAttribute("finishedProcInstCount", historyService.createHistoricProcessInstanceQuery().finished().involvedUser(userTicket.getId().toString()).count());
+        //进行中流程实例数
+        request.setAttribute("activeProcInstCount", historyService.createHistoricProcessInstanceQuery().unfinished().involvedUser(userTicket.getId().toString()).count());
         //我发起的流程实例
         request.setAttribute("procInsts", JSONArray.toJSONString(historicProcessInstances, SerializerFeature.WriteDateUseDateFormat, SerializerFeature.IgnoreErrorGetter));
         //定义当前显示的流程实例
