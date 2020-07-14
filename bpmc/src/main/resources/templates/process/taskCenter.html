@@ -130,7 +130,11 @@
                 <% if(has(actForm)){%>
                 <div style="vertical-align: top; font-weight:bold;font-family: 'Microsoft YaHei';padding-top:0px;padding-bottom: 10px;">请填写下面的表单后完成任务:<img align="right" onclick="maximize()" class="maximize" src="${contextPath}/resources/images/maximize-16.png"/></div>
                 <%
-                url = actForm.taskUrl + "?taskId=" + task.id + "&formKey=" + task.formKey;
+                var symbol = "?";
+                if(strutil.lastIndex(actForm.taskUrl,"?") > 0){
+                    symbol = "&";
+                }
+                url = actForm.taskUrl + symbol + "taskId=" + task.id + "&formKey=" + task.formKey;
                 if(has(businessKey)){
                     url = url + "&businessKey=" + businessKey;
                 }

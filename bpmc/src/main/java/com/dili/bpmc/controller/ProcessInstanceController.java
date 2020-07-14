@@ -96,7 +96,7 @@ public class ProcessInstanceController {
      * @param request
      * @return
      */
-    @RequestMapping(value = "/myProcInst.html", method = {RequestMethod.GET, RequestMethod.POST})
+    @RequestMapping(value = "/processCenter.html", method = {RequestMethod.GET, RequestMethod.POST})
     public String myProcInst(@RequestParam(required = false) String procInstId, @RequestParam(required = false, defaultValue = "false") Boolean finished, HttpServletRequest request) {
         UserTicket userTicket = SessionContext.getSessionContext().getUserTicket();
         if(userTicket == null){
@@ -145,7 +145,7 @@ public class ProcessInstanceController {
 //        if(!historicTaskInstances.isEmpty()) {
 //            request.setAttribute("historicTaskInstances", historicTaskInstances);
 //        }
-        return "process/myProcInst";
+        return "process/processCenter";
     }
     
     /**
