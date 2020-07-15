@@ -29,8 +29,8 @@
     <div region="north" style="border-bottom: 1px solid #ababab;" align="center">
         <!-- =========================================================表单========================================================= -->
         <div class="easyui-panel gradient-title" style="width:100%;padding-top:10px;padding-bottom: 10px;" align="left" >
-            <a <%if(finished==false){%>class="tab-selected"<%}else{%>class="tab-unselected"<%}%> <%if(activeProcInstCount>0){%>href="${contextPath}/pi/myProcInst.html?finished=false"<%}%> style="margin-left: 18px;">进行中[${activeProcInstCount}]</a>
-            <a <%if(finished==true){%>class="tab-selected"<%}else{%>class="tab-unselected"<%}%> <%if(finishedProcInstCount>0){%>href="${contextPath}/pi/myProcInst.html?finished=true"<%}%> style="margin-left: 18px;">已完结[${finishedProcInstCount}]</a>
+            <a <%if(finished==false){%>class="tab-selected"<%}else{%>class="tab-unselected"<%}%> <%if(activeProcInstCount>0){%>href="${contextPath}/pi/processCenter.html?finished=false"<%}%> style="margin-left: 18px;">进行中[${activeProcInstCount}]</a>
+            <a <%if(finished==true){%>class="tab-selected"<%}else{%>class="tab-unselected"<%}%> <%if(finishedProcInstCount>0){%>href="${contextPath}/pi/processCenter.html?finished=true"<%}%> style="margin-left: 18px;">已完结[${finishedProcInstCount}]</a>
         </div>
     </div>
     <!-- 西侧布局 -->
@@ -194,7 +194,7 @@
      * 显示任务详情
      */
     function showProcInst(rowIndex, rowData) {
-        location.href="${contextPath}/pi/myProcInst.html?finished=${finished}&procInstId="+rowData.id;
+        location.href="${contextPath}/pi/processCenter.html?finished=${finished}&procInstId="+rowData.id;
     }
 
     /**

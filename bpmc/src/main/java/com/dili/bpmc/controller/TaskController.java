@@ -29,6 +29,7 @@ import org.activiti.engine.history.HistoricProcessInstance;
 import org.activiti.engine.history.HistoricTaskInstance;
 import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.engine.runtime.Execution;
+import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.DelegationState;
 import org.activiti.engine.task.Task;
 import org.activiti.engine.task.TaskInfo;
@@ -598,7 +599,9 @@ public class TaskController {
 //            throw new ParamErrorException("任务表单["+formKey+"]不存在");
                 return;
             }
+            ProcessInstance processInstance = runtimeService.createProcessInstanceQuery().processInstanceId(task.getProcessInstanceId()).singleResult();
             request.setAttribute("actForm", actForm);
+            request.setAttribute("businessKey", processInstance.getBusinessKey());
         }else{
             //归档任务根据ActForm中的流程定义id获取任务URL，来展示业务详情
             HistoricProcessInstance historicProcessInstance = historyService.createHistoricProcessInstanceQuery().processInstanceId(task.getProcessInstanceId()).singleResult();

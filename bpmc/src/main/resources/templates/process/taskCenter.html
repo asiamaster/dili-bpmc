@@ -134,7 +134,7 @@
                 if(strutil.lastIndex(actForm.taskUrl,"?") > 0){
                     symbol = "&";
                 }
-                url = actForm.taskUrl + symbol + "taskId=" + task.id + "&formKey=" + task.formKey;
+                url = actForm.taskUrl + symbol + "taskId=" + task.id + "&formKey=" + task.formKey + "&processInstanceId=" + task.processInstanceId;
                 if(has(businessKey)){
                     url = url + "&businessKey=" + businessKey;
                 }
