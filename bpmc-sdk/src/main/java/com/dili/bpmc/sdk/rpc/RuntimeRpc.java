@@ -44,4 +44,13 @@ public interface RuntimeRpc {
 	@GET("/api/runtime/startProcessInstanceById")
 	BaseOutput<ProcessInstanceMapping> startProcessInstanceById(@ReqParam(value = "processDefinitionId") String processDefinitionId, @ReqParam(value = "businessKey", required = false) String businessKey, @ReqParam(value = "userId") String userId, @ReqParam(value = "variables") Map<String, Object> variables);
 
+	/**
+	 * 结束流程实例
+	 * @param processInstanceId	流程实例id
+	 * @param deleteReason 结束原因
+	 * @return
+	 */
+	@GET("/api/runtime/stopProcessInstanceById")
+	BaseOutput<ProcessInstanceMapping> stopProcessInstanceById(@ReqParam(value = "processInstanceId") String processInstanceId, @ReqParam(value = "deleteReason", required = false) String deleteReason);
+
 }

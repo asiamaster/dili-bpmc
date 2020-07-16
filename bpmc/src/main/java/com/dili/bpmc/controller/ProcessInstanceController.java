@@ -185,7 +185,7 @@ public class ProcessInstanceController {
     }
 
     /**
-     * 结束流程定义
+     * 结束流程实例
      * @param processInstanceId
      * @param request
      * @param response

@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -87,6 +88,31 @@ public class RuntimeApi {
         identityService.setAuthenticatedUserId(userId);
         ProcessInstance processInstance = runtimeService.startProcessInstanceById(processDefinitionId, businessKey, variables);
         return BaseOutput.success().setData(DTOUtils.as(processInstance, ProcessInstanceMapping.class));
+    }
+
+    /**
+     * 结束流程实例
+     * @param processInstanceId
+     * @param deleteReason  结束原因
+     * @throws IOException
+     */
+    @RequestMapping(value = "/stopProcessInstanceById", method = {RequestMethod.GET, RequestMethod.POST})
+    public BaseOutput stopProcessInstanceById(@RequestParam String processInstanceId, @RequestParam(required = false) String deleteReason) throws IOException {
+        try {
+            //流程已经结束
+            //顺序不能换
+            if (activitiService.isFinished2(processInstanceId)) {
+                historyService.deleteHistoricProcessInstance(processInstanceId);
+                runtimeService.suspendProcessInstanceById(processInstanceId);
+            } else {//流程没有结束
+//            taskService.addComment(taskId, processInstanceId, comment);//备注
+                runtimeService.deleteProcessInstance(processInstanceId, deleteReason);
+                historyService.deleteHistoricProcessInstance(processInstanceId);
+            }
+            return BaseOutput.success("流程已结束");
+        }catch (Exception e){
+            return BaseOutput.failure("流程结束失败:"+e.getMessage());
+        }
     }
 
     /**
