@@ -12,6 +12,7 @@ import java.util.concurrent.TimeUnit;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.delegate.DelegateTask;
 import org.activiti.engine.delegate.TaskListener;
+import org.activiti.engine.impl.persistence.entity.TaskEntity;
 import org.activiti.engine.repository.ProcessDefinition;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -75,6 +76,9 @@ public class AssignmentHandler implements TaskListener {
 		if (StringUtils.isNotBlank(taskAssignment.getHandlerUrl())) {
 			// 构建参数
 			TaskMapping taskMapping = DTOUtils.asInstance(delegateTask, TaskMapping.class);
+			if(delegateTask instanceof TaskEntity) {
+				taskMapping.setProcessDefinitionKey(((TaskEntity) delegateTask).getProcessInstance().getProcessDefinitionKey());
+			}
 			taskMapping.setProcessVariables(delegateTask.getVariables());
 			Map<String, Object> params = new HashMap();
 			try {

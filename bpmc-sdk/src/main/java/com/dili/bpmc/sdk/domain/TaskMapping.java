@@ -176,4 +176,12 @@ public interface TaskMapping extends IDTO {
     String getAssigneeName();
 
     void setAssigneeName(String assigneeName);
+
+    /**
+     * 流程定义KEY
+     * @return
+     */
+    String getProcessDefinitionKey();
+    void setProcessDefinitionKey(String processDefinitionKey);
+
 }
