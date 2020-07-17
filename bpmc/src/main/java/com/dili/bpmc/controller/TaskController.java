@@ -577,9 +577,9 @@ public class TaskController {
 //        HistoricProcessInstance historicProcessInstance = historyService.createHistoricProcessInstanceQuery().processInstanceId(task.getProcessInstanceId()).singleResult();
 //        request.setAttribute("startUserId", historicProcessInstance.getStartUserId());
         //判断当前用户是否是办理人，如果不是则需要屏蔽任务表单
-        if(userId.equals(task.getAssignee())){
-            request.setAttribute("isAssignee", true);
-        }
+//        if(userId.equals(task.getAssignee())){
+//            request.setAttribute("isAssignee", true);
+//        }
         //设置中间部分的任务详情
         request.setAttribute("task", task);
 

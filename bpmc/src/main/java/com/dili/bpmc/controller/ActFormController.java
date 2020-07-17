@@ -86,12 +86,10 @@ public class ActFormController {
 	 */
 	@RequestMapping(value = "/insert.action", method = { RequestMethod.GET, RequestMethod.POST })
 	public @ResponseBody BaseOutput insert(ActForm actForm) {
-		// 设置默认表单提交地址
-		if (StringUtils.isBlank(actForm.getActionUrl())) {
-			actForm.setActionUrl("/actForm/submit.action");
-		}
 		// 设置默认任务表单URL,必填参数1(@RequestParam):formKey,参数2/3(@RequestParam):processDefinitionId或taskId必填一个
 		if (StringUtils.isBlank(actForm.getTaskUrl())) {
+			actForm.setActionUrl("/actForm/submit.action");
+			// 设置默认表单提交地址
 			actForm.setTaskUrl("/actForm/dynamicForm.html");
 		}
 		actFormService.insertSelective(actForm);

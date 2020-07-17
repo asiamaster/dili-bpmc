@@ -4,7 +4,6 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.dili</groupId>
 	<artifactId>bpmc</artifactId>
-	<version>1.0.0-SNAPSHOT</version>
 	<description>业务流程管控中心</description>
 	<packaging>jar</packaging>
 	<properties>
