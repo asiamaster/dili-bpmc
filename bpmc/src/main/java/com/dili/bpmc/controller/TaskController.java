@@ -559,7 +559,7 @@ public class TaskController {
         //先判断是否已归档类型，单独处理
         if(TaskCategory.ARCHIVED.getCode().equals(category)){
             //只查50条已归档数据;
-            List<HistoricTaskInstance> historicTaskInstances = historyService.createHistoricTaskInstanceQuery().taskAssignee(userId).listPage(0, 50);
+            List<HistoricTaskInstance> historicTaskInstances = historyService.createHistoricTaskInstanceQuery().taskAssignee(userId).orderByTaskCreateTime().desc().listPage(0, 50);
             task = findTaskById(historicTaskInstances, taskId);
             ja = buildTaskList(historicTaskInstances);
         }else {

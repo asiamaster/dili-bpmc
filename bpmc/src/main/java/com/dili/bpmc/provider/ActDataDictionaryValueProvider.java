@@ -20,6 +20,7 @@ import java.util.Map;
 
 /**
  * 远程数据字典批量提供者
+ * 用于动态表单的combo使用UAP的数据字典数据源
  */
 @Component("actDataDictionaryValueProvider")
 @Scope("prototype")

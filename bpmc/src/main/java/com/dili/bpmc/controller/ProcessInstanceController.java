@@ -3,6 +3,7 @@ package com.dili.bpmc.controller;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.serializer.SerializerFeature;
+import com.dili.bpmc.domain.ProcessInstanceQueryDto;
 import com.dili.ss.activiti.service.ActivitiService;
 import com.dili.ss.domain.BaseOutput;
 import com.dili.ss.domain.EasyuiPageOutput;
@@ -18,6 +19,8 @@ import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
 import org.activiti.engine.history.HistoricProcessInstance;
 import org.activiti.engine.history.HistoricTaskInstance;
+import org.activiti.engine.runtime.ProcessInstance;
+import org.activiti.engine.runtime.ProcessInstanceQuery;
 import org.activiti.engine.task.Task;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -26,10 +29,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -172,14 +172,24 @@ public class ProcessInstanceController {
      * 查询流程实例列表
      * @param param
      * @return
-     * @throws Exception
      */
-    @RequestMapping(value="/listPage.action", method = {RequestMethod.GET, RequestMethod.POST})
-    public @ResponseBody String listPage(IBaseDomain param) throws Exception {
+    @PostMapping(value="/listPage.action")
+    public @ResponseBody String listPage(ProcessInstanceQueryDto param){
         EasyuiPageOutput easyuiPageOutput = new EasyuiPageOutput();
         int firstResult = (param.getPage()-1)*param.getRows();
-        easyuiPageOutput.setRows(runtimeService.createProcessInstanceQuery().active().listPage(firstResult, param.getRows()));
-        Long total = runtimeService.createProcessInstanceQuery().active().count();
+        ProcessInstanceQuery query = runtimeService.createProcessInstanceQuery().active();
+        if(StringUtils.isNotEmpty(param.getProcessInstanceId())){
+            query.processInstanceId(param.getProcessInstanceId());
+        }
+        if(StringUtils.isNotEmpty(param.getProcessDefinitionKey())){
+            query.processDefinitionKey(param.getProcessDefinitionKey());
+        }
+        if(StringUtils.isNotEmpty(param.getBusinessKey())){
+            query.processInstanceBusinessKey(param.getBusinessKey());
+        }
+        List<ProcessInstance> processInstances = query.listPage(firstResult, param.getRows());
+        easyuiPageOutput.setRows(processInstances);
+        Long total = query.count();
         easyuiPageOutput.setTotal(total.intValue());
         return JSON.toJSONString(easyuiPageOutput, SerializerFeature.IgnoreErrorGetter);
     }

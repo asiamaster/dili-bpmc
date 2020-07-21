@@ -1,45 +1,62 @@
-<#body >
+<#body head_title="流程实例列表">
 <div class="easyui-layout" fit="true">
     <!-- ====================================== ================================================================================ -->
     <!-- 上方布局 -->
     <!-- ====================================================================================================================== -->
-    <div region="north" height="38" align="center">
+    <div region="north" align="center">
         <div id="nav" style="padding-left:15px;padding-top:10px;" align="left">
             <#nav/>
         </div>
+        <div class="easyui-panel" style="width:100%;" align="left" >
+            <form id="form" class="easyui-form" method="post" fit="true">
+                <div class="search-wrap">
+                    <div class="search-item">
+                        <input class="easyui-textbox" name="processDefinitionKey" id="processDefinitionKey" style="width:100%" labelAlign="right" data-options="label:'流程定义Key:', validType:'length[0,64]'" />
+                    </div>
+                    <div class="search-item">
+                        <input class="easyui-textbox" name="processInstanceId" id="processInstanceId" style="width:100%" labelAlign="right" data-options="label:'流程实例id:', validType:'length[0,64]'" />
+                    </div>
+                    <div class="search-item">
+                        <input class="easyui-textbox" name="businessKey" id="businessKey" style="width:100%" labelAlign="right" data-options="label:'业务Key:', validType:'length[0,64]'" />
+                    </div>
+                    <div class="search-wrap-btn">
+                        <a href="#" class="easyui-linkbutton" iconCls="icon-search" id="queryBtn"
+                           onclick="queryGrid()">查询</a>&nbsp;&nbsp;
+                        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-clear" onclick="clearForm()">清除</a>
+                    </div>
+                </div>
+            </form>
+        </div>
     </div>
-    <div region="center" style="width:100%;padding-top: 1px" height="auto">
+    <div region="center" style="width:100%;padding-top: 1px;">
         <table class="easyui-datagrid" title="流程实例管理" id="processInstanceGrid" fitColumns="true" noheader="true" pageList="[50,100,200]"
-               pagination="true" pageSize="50" pageNumber="1" pagePosition="top" rownumbers="false" remoteSort="false"
-               loadMsg="数据加载中..." singleSelect="true" method="post" multiSort="false" sortName="id" url="${contextPath}/pi/listPage.action"
-               align="center" striped="false" idField="id" data-options="border:true,onDblClickRow:showProgress" >
+               pagination="true" pageSize="50" pageNumber="1" pagePosition="top" rownumbers="false" remoteSort="true" sortName="id" sortOrder="desc"
+               loadMsg="数据加载中..." singleSelect="true" method="post" multiSort="false" url="${contextPath}/pi/listPage.action"
+               align="center" striped="true" idField="id" data-options="autoRowHeight:false,onDblClickRow:showProgress" fit="true">
             <thead>
             <tr>
-                <th width="13%" data-options="field:'id',   sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
+                <th width="14%" data-options="field:'id',   sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
                     流程实例ID
                 </th>
-                <th width="7%" data-options="field:'name',   sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
-                    名称
-                </th>
-                <th width="13%" data-options="field:'deploymentId',   sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
+                <th width="14%" data-options="field:'deploymentId',   sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
                     部署ID
                 </th>
-                <th width="21%" data-options="field:'processDefinitionId',   sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
+                <th width="23%" data-options="field:'processDefinitionId',   sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
                     流程定义ID
                 </th>
                 <th width="5%" data-options="field:'processDefinitionVersion',   sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
                     版本号
                 </th>
-                <th width="9%" data-options="field:'processDefinitionName',   sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
+                <th width="10%" data-options="field:'processDefinitionName',   sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
                     流程定义名称
                 </th>
-                <th width="10%" data-options="field:'processDefinitionKey',   sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
+                <th width="12%" data-options="field:'processDefinitionKey',   sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
                     流程定义Key
                 </th>
                 <th width="12%" data-options="field:'businessKey',  sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
                     BusinessKey
                 </th>
-                <th width="11%" data-options="field:'description',   sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
+                <th width="10%" data-options="field:'description',   sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
                     描述
                 </th>
 
@@ -120,6 +137,24 @@
         window.location.href = '${contextPath}/pi/end.action?processInstanceId='+selected.id;
         </#swalConfirm>
     }
+
+    //表格查询
+    function queryGrid() {
+        var opts = $("#processInstanceGrid").datagrid("options");
+        if (null == opts.url || "" == opts.url) {
+            opts.url = "${contextPath}/pi/listPage.action";
+        }
+        if(!$('#form').form("validate")){
+            return;
+        }
+        $("#processInstanceGrid").datagrid("load", bindGridMeta2Form("processInstanceGrid", "form"));
+    }
+
+    //清空表单
+    function clearForm() {
+        $('#form').form('clear');
+    }
+
 $(function() {
     var pager = $("#processInstanceGrid").datagrid('getPager');
     pager.pagination({
