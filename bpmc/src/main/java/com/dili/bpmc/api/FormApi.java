@@ -40,7 +40,7 @@ public class FormApi {
 	/**
 	 * 批量查询ActForm
 	 * 
-	 * @param formKey
+	 * @param formKeys
 	 * @return
 	 */
 	@PostMapping("/getByKeys")

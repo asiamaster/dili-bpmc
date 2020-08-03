@@ -86,6 +86,9 @@ public class AssignmentHandler implements TaskListener {
 				Iterator<Map.Entry<String, Object>> it = params.entrySet().iterator();
 				while (it.hasNext()) {
 					Map.Entry<String, Object> entry = it.next();
+					if(entry.getValue() == null) {
+						continue;
+					}
 					if (entry.getValue() instanceof Date) {
 						entry.setValue(DateUtils.format((Date) entry.getValue()));
 					} else if (entry.getKey().equalsIgnoreCase("processVariables")) {
@@ -97,6 +100,7 @@ public class AssignmentHandler implements TaskListener {
 					}
 				}
 			} catch (Exception e) {
+				log.error(e.getMessage());
 			}
 			Assignment assignment = remoteHandle(taskAssignment.getHandlerUrl(), (Map) params);
 			// 可能远程处理没有结果或报错
