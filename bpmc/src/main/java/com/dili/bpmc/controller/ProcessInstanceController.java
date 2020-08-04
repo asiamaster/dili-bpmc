@@ -112,21 +112,22 @@ public class ProcessInstanceController {
         request.setAttribute("finishedProcInstCount", historyService.createHistoricProcessInstanceQuery().finished().involvedUser(userTicket.getId().toString()).count());
         //进行中流程实例数
         request.setAttribute("activeProcInstCount", historyService.createHistoricProcessInstanceQuery().unfinished().involvedUser(userTicket.getId().toString()).count());
+        if(historicProcessInstances.isEmpty()){
+            return "process/processCenter";
+        }
         //我发起的流程实例
         request.setAttribute("procInsts", JSONArray.toJSONString(historicProcessInstances, SerializerFeature.WriteDateUseDateFormat, SerializerFeature.IgnoreErrorGetter));
         //定义当前显示的流程实例
         HistoricProcessInstance currentProcessInstance = null;
-        if(!historicProcessInstances.isEmpty()) {
-            //当前显示的流程实例
-            if(StringUtils.isBlank(procInstId)) {
-                currentProcessInstance = historicProcessInstances.get(0);
-            }else{
-                for(HistoricProcessInstance hpi : historicProcessInstances){
-                    if(procInstId.equals(hpi.getId())){
-                        //显示指定流程
-                        currentProcessInstance =  hpi;
-                        break;
-                    }
+        //当前显示的流程实例
+        if(StringUtils.isBlank(procInstId)) {
+            currentProcessInstance = historicProcessInstances.get(0);
+        }else{
+            for(HistoricProcessInstance hpi : historicProcessInstances){
+                if(procInstId.equals(hpi.getId())){
+                    //显示指定流程
+                    currentProcessInstance =  hpi;
+                    break;
                 }
             }
         }
