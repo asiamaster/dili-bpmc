@@ -83,6 +83,9 @@ public class TaskCandidateVA implements VirtualAttributeEval {
         //一般任务候选人不会超过4人
         List<String> ids = new ArrayList<>(4);
         for(IdentityLink identityLink : identityLinksForTask){
+            if(identityLink.getType().equals("assignee")){
+                continue;
+            }
             if(identityLink.getUserId() != null) {
                 ids.add(identityLink.getUserId());
             }
