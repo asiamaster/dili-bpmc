@@ -1,14 +1,18 @@
 package com.dili.bpmc.listener;
 
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.parser.Feature;
+import com.alibaba.fastjson.serializer.SerializerFeature;
+import com.dili.bpmc.domain.TaskAssignment;
+import com.dili.bpmc.sdk.domain.TaskMapping;
+import com.dili.bpmc.sdk.dto.Assignment;
+import com.dili.bpmc.service.TaskAssignmentService;
+import com.dili.ss.domain.BaseOutput;
+import com.dili.ss.dto.DTOUtils;
+import com.dili.ss.util.BeanConver;
+import com.dili.ss.util.DateUtils;
+import okhttp3.*;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.delegate.DelegateTask;
 import org.activiti.engine.delegate.TaskListener;
@@ -19,28 +23,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.parser.Feature;
-import com.alibaba.fastjson.serializer.SerializerFeature;
-import com.dili.bpmc.domain.TaskAssignment;
-import com.dili.bpmc.sdk.domain.TaskMapping;
-import com.dili.bpmc.sdk.dto.Assignment;
-import com.dili.bpmc.service.TaskAssignmentService;
-import com.dili.http.okhttp.OkHttpUtils;
-import com.dili.http.okhttp.request.RequestCall;
-import com.dili.ss.domain.BaseOutput;
-import com.dili.ss.dto.DTOUtils;
-import com.dili.ss.util.BeanConver;
-import com.dili.ss.util.DateUtils;
-
-import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
+import java.io.IOException;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 任务办理人处理器
@@ -53,6 +41,11 @@ public class AssignmentHandler implements TaskListener {
 	private TaskAssignmentService taskAssignmentService;
 	@Autowired
 	private RepositoryService repositoryService;
+	/**
+	 * 流程异常时的审批人id，用于在流程异常时，作为兜底的处理人
+	 */
+	@Value("${bpmc.exceptionHandlerId:1}")
+	private String exceptionHandlerId;
 
 	@Override
 	public void notify(DelegateTask delegateTask) {
@@ -72,6 +65,8 @@ public class AssignmentHandler implements TaskListener {
 			return;
 		}
 		TaskAssignment taskAssignment = taskAssignmentList.get(0);
+		//任务人分配
+		Assignment assignment = null;
 		// 优先处理URL的方式
 		if (StringUtils.isNotBlank(taskAssignment.getHandlerUrl())) {
 			// 构建参数
@@ -102,11 +97,11 @@ public class AssignmentHandler implements TaskListener {
 			} catch (Exception e) {
 				log.error(e.getMessage());
 			}
-			Assignment assignment = remoteHandle(taskAssignment.getHandlerUrl(), (Map) params);
-			// 可能远程处理没有结果或报错
-			if (assignment == null) {
-				return;
-			}
+			assignment = remoteHandle(taskAssignment.getHandlerUrl(), (Map) params);
+		} else {
+		}
+		// 远程处理任务人分配
+		if (assignment != null) {
 			if (StringUtils.isNotBlank(assignment.getAssignee())) {
 				delegateTask.setAssignee(assignment.getAssignee());
 			}
@@ -116,16 +111,21 @@ public class AssignmentHandler implements TaskListener {
 			if (CollectionUtils.isNotEmpty(assignment.getCandidateGroup())) {
 				delegateTask.addCandidateGroups(assignment.getCandidateGroup());
 			}
-		} else {// 没有URL，则直接取TaskAssignment中配置的分配方式
-			if (StringUtils.isNotBlank(taskAssignment.getAssignee())) {
-				delegateTask.setAssignee(taskAssignment.getAssignee());
-			}
-			if (StringUtils.isNotBlank(taskAssignment.getCandidateUser())) {
-				delegateTask.addCandidateUsers(Arrays.asList(taskAssignment.getCandidateUser().split(",")));
-			}
-			if (StringUtils.isNotBlank(taskAssignment.getCandidateGroup())) {
-				delegateTask.addCandidateGroups(Arrays.asList(taskAssignment.getCandidateGroup().split(",")));
-			}
+			return;
+		}
+		//远程获取为空或异常时，或者没有配置处理URL，则使用动态任务分配作为默认（直接取TaskAssignment中配置的分配方式）
+		if (StringUtils.isNotBlank(taskAssignment.getAssignee())) {
+			delegateTask.setAssignee(taskAssignment.getAssignee());
+		}
+		if (StringUtils.isNotBlank(taskAssignment.getCandidateUser())) {
+			delegateTask.addCandidateUsers(Arrays.asList(taskAssignment.getCandidateUser().split(",")));
+		}
+		if (StringUtils.isNotBlank(taskAssignment.getCandidateGroup())) {
+			delegateTask.addCandidateGroups(Arrays.asList(taskAssignment.getCandidateGroup().split(",")));
+		}
+		//如果没有配置默认的任务处理人，则使用系统兜底人
+		if(delegateTask.getAssignee() == null && CollectionUtils.isEmpty(delegateTask.getCandidates())){
+			delegateTask.setAssignee(exceptionHandlerId);
 		}
 	}
 

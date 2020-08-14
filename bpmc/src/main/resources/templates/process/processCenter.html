@@ -11,6 +11,13 @@
         display:inline;
         text-decoration:none;
     }
+    /*tab href效果*/
+    .tab-href{
+        font-size:18px;
+        color:#666666;
+        display:inline;
+        text-decoration:none;
+    }
     .tab-unselected{
         font-size:18px;
         display:inline;
@@ -31,6 +38,7 @@
         <div class="easyui-panel gradient-title" style="width:100%;padding-top:10px;padding-bottom: 10px;" align="left" >
             <a <%if(finished==false){%>class="tab-selected"<%}else{%>class="tab-unselected"<%}%> <%if(activeProcInstCount>0){%>href="${contextPath}/pi/processCenter.html?finished=false"<%}%> style="margin-left: 18px;">进行中[${activeProcInstCount}]</a>
             <a <%if(finished==true){%>class="tab-selected"<%}else{%>class="tab-unselected"<%}%> <%if(finishedProcInstCount>0){%>href="${contextPath}/pi/processCenter.html?finished=true"<%}%> style="margin-left: 18px;">已完结[${finishedProcInstCount}]</a>
+            <a  style="float: right; padding-right: 50px;" class="tab-href" href="${contextPath}/task/taskCenter.html">任务中心</a>
         </div>
     </div>
     <!-- 西侧布局 -->
