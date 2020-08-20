@@ -136,7 +136,7 @@ public interface TaskRpc {
 	/**
 	 * 根据taksId查询任务候选人、候选组、办理人
 	 * 
-	 * @param taskIds
+	 * @param processInstanceIds
 	 * @return
 	 */
 	@POST("/api/task/listTaskIdentityByProcessInstanceIds")
@@ -150,7 +150,7 @@ public interface TaskRpc {
 	 * @return
 	 */
 	@POST("/api/task/signal")
-	BaseOutput<ProcessInstanceMapping> signal(@ReqParam(value = "processInstanceId") String processInstanceId, @ReqParam(value = "activityId") String activityId, @ReqParam(value = "variables") Map<String, String> variables);
+	BaseOutput<String> signal(@ReqParam(value = "processInstanceId") String processInstanceId, @ReqParam(value = "activityId") String activityId, @ReqParam(value = "variables") Map<String, String> variables);
 
 
 }
