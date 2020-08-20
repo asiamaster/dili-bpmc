@@ -150,7 +150,7 @@ public interface TaskRpc {
 	 * @return
 	 */
 	@POST("/api/task/signal")
-	BaseOutput<String> signal(@ReqParam(value = "processInstanceId") String processInstanceId, @ReqParam(value = "activityId") String activityId, @ReqParam(value = "variables") Map<String, String> variables);
+	BaseOutput<String> signal(@ReqParam(value = "processInstanceId") String processInstanceId, @ReqParam(value = "activityId") String activityId, @ReqParam(value = "variables", required = false) Map<String, String> variables);
 
 
 }
