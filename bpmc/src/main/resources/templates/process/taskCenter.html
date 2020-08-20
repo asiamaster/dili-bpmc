@@ -57,7 +57,7 @@
 
     </div>
     <!-- 西侧布局 -->
-    <div region="west" style="width:260px;padding-top: 1px;" height="auto">
+    <div region="west" style="width:260px;" >
 
         <%/* if(has(task)){%>
         <ul class="easyui-datalist" title="任务列表" lines="true" noheader="true" valueField="id" textField="name" loadMsg="数据加载中..."
@@ -75,7 +75,7 @@
         <%}%>
     </div>
     <!-- 中央布局 -->
-    <div region="center" id="centerRegion" style="float:left;width:100%;padding-top: 1px;" height="auto">
+    <div region="center" id="centerRegion" style="width: 100%;" height="auto">
         <% //定义表单页面
             var url;
         if(has(task)){%>
@@ -138,7 +138,7 @@
             <!-- 任务详情 -->
             <div id="taskDetail" style="position: relative; overflow: hidden;" >
                 <% if(has(actForm)){%>
-                <div style="vertical-align: top; font-weight:bold;font-family: 'Microsoft YaHei';padding-top:0px;padding-bottom: 10px;">请填写下面的表单后完成任务:<img align="right" onclick="maximize()" class="maximize" src="${contextPath}/resources/images/maximize-16.png"/></div>
+                <div style="vertical-align: top; font-weight:bold;font-family: 'Microsoft YaHei';padding-top:0px;">请填写下面的表单后完成任务:<img align="right" onclick="maximize()" class="maximize" src="${contextPath}/resources/images/maximize-16.png"/></div>
                 <%
                 var symbol = "?";
                 if(strutil.lastIndex(actForm.taskUrl,"?") > 0){
@@ -155,7 +155,7 @@
                 //}
                 //站内页面，使用href，站外页面(http开头)使用iframe
                 if(strutil.startWith(actForm.taskUrl, "http")){
-                var content = "<iframe id=\"actFormFrame\" src=\"" + url + "\" frameborder=\"0\" height=\"100%\" width=\"100%\" scrolling=\"yes\"></iframe>";
+                var content = "<iframe id=\"actFormFrame\" src=\"" + url + "\" frameborder=\"0\" width=\"100%\" scrolling=\"yes\"></iframe>";
                 %>
                 ${content}
                 <%}else{//站内页面%>
