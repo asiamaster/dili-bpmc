@@ -3,6 +3,7 @@ package com.dili.bpmc.sdk.rpc;
 import java.util.List;
 import java.util.Map;
 
+import com.dili.bpmc.sdk.domain.ProcessInstanceMapping;
 import com.dili.bpmc.sdk.domain.TaskMapping;
 import com.dili.bpmc.sdk.dto.TaskDto;
 import com.dili.bpmc.sdk.dto.TaskIdentityDto;
@@ -140,4 +141,16 @@ public interface TaskRpc {
 	 */
 	@POST("/api/task/listTaskIdentityByProcessInstanceIds")
 	BaseOutput<List<TaskIdentityDto>> listTaskIdentityByProcessInstanceIds(@VOBody List<String> processInstanceIds);
+
+	/**
+	 * 触发Java接收任务
+	 * @param processInstanceId
+	 * @param activityId
+	 * @param variables
+	 * @return
+	 */
+	@POST("/api/task/signal")
+	BaseOutput<ProcessInstanceMapping> signal(@ReqParam(value = "processInstanceId") String processInstanceId, @ReqParam(value = "activityId") String activityId, @ReqParam(value = "variables") Map<String, String> variables);
+
+
 }
