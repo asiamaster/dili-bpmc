@@ -72,36 +72,33 @@
                     <%if(procInst.endTime != null){%>
                     &nbsp;&nbsp;<span style="vertical-align: middle;">结束于<span id="endTimeDesc">${procInst.endTime, 'yyyy-MM-dd HH:mm:ss'}</span></span>
                     <%}%>
+                    <%//流程描述
+                    if(procInst.description != null){%>
+                    &nbsp;&nbsp;
+                    <span style="vertical-align: middle; ">1111111111111111111</span>
+                    <%}%>
                 </div>
             </div>
         </div>
 
             <%
-        //流程描述
-        if(procInst.description != null){%>
-        <div style="position: relative; overflow: hidden; height: 100px;border-bottom: 1px solid #CCC;">
-            <div style="margin-top: 16px;">
-                <span style="position: relative; top:0px;height: 50px;">${procInst.description}</span>
-            </div>
-        </div>
-            <%}%>
 
-            <%
             if(finished==false){
             //进行中任务的名称和描述
             if(has(runningTasks)){
                 for(task in runningTasks){
             %>
+        <#comment>
         <div value="${task.id}" style="line-height: 40px;border-bottom: 1px solid #CCC;">${task.name}
                     <%
                     if(task.description != null){
                     %>
-            [${task.description}]
+                    [${task.description}]
                     <%
                     }
                     %>
         </div>
-
+        </#comment>
         <!-- 参与人 -->
 
         <div style="position: relative; overflow: hidden; height: 140px;border-bottom: 1px solid #CCC;">
@@ -110,7 +107,6 @@
                     <img style="vertical-align: middle;" src="${contextPath}/resources/images/user-22.png"/>
                     <span style="vertical-align: middle;">任务参与人</span></div>
                 <div style="float:left;padding-right: 30px; ">
-
                     <%if(task.owner==null){%>
                     <b>无委托人</b>
                     <%}else{%>
