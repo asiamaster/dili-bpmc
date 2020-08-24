@@ -79,40 +79,46 @@
         <% //定义表单页面
             var url;
         if(has(task)){%>
-        <div style="margin: 25px;">
+        <div style="margin-top: 15px;margin-left: 15px;margin-right: 15px;">
             <!-- 任务信息 -->
             <div style="position: relative; overflow: hidden; height: 70px;border-bottom: 1px solid #CCC;">
                 <div style="overflow: hidden; padding-left: 0px; padding-top: 0px; position: absolute; left: 0px; top: 0px; width: 49px; height: 50px;">
                     <img style="vertical-align: middle;" src="${contextPath}/resources/images/task-50.png"/>&nbsp;&nbsp;
                 </div>
                 <div style="height: 27px; overflow: hidden; padding-left: 0px; padding-top: 0px; position: absolute; left: 61px; top: 0px; width: 845px;">
-                    <span style="vertical-align: top; color:#007dc3;font-size: 20px;font-family: 'Microsoft YaHei';font-weight: bold;">${task.name}</span>
+                    <span onclick="showProgress()" class="maximize" style="vertical-align: top; color:#007dc3;font-size: 20px;font-family: 'Microsoft YaHei';font-weight: bold;">${task.name}</span>
                     <span style="vertical-align: bottom; color:#007dc3;font-family: 'Microsoft YaHei';">- ${businessKey!}</span>
                 </div>
-                <div style="height: 18px; overflow: hidden; padding-left: 0px; padding-top: 0px; position: absolute; left: 61px; top: 32px; width: 845px;">
+                <div style="height: 28px; overflow: hidden; padding-left: 0px; padding-top: 0px; position: absolute; left: 61px; top: 32px; width: 845px;">
                     <div style="float: left;" title="${task.priority}">
                         <img style="vertical-align: middle;" src="${contextPath}/resources/images/priority-medium-16.png"/>
                         <span id="taskPriorityDesc" style="vertical-align: middle;">${task.priority}</span>&nbsp;
                     </div>
-                    <div title="${task.createTime, 'yyyy-MM-dd HH:mm:ss'}">
+                    <div style="float: left;" title="${task.createTime, 'yyyy-MM-dd HH:mm:ss'}">
                         <img style="vertical-align: middle;" src="${contextPath}/resources/images/time.png"/>
                         <span style="vertical-align: middle;">创建于<span id="taskTimeDesc">${task.createTime, 'yyyy-MM-dd HH:mm:ss'}</span></span>
+                    </div>
+                    <div style="position: relative;left:30px;">
+                        <img src="${contextPath}/resources/images/user-16.png"/>
+                        <%if(task.assignee==null){%>
+                        无办理人
+                        <%}else{%>
+                        办理人: ${task.~assigneeName}
+                        <%}%>
                     </div>
                 </div>
             </div>
             <!-- 任务描述和所属流程 -->
+            <%if(task.assignee == null){%>
             <div style="position: relative; overflow: hidden; height: 70px;border-bottom: 1px solid #CCC;">
                 <div style="margin-top: 10px;">
-                    <%if(task.assignee == null){%>
                     <a href="#" onclick="claimTask();" class="easyui-linkbutton" data-options="">签收</a>
-                    <%}%>
                     <span style="position: relative; top:0px;height: 50px;">${task.description}</span>
                 </div>
-                <div style="margin-top: 10px;">
-                <a href="#" onclick="showProgress();" style="text-decoration: none;color:darkred">所属流程:'${processDefinitionName}'</a>
-                </div>
             </div>
+            <%}%>
             <!-- 参与人 -->
+            <#comment>
             <div style="position: relative; overflow: hidden; height: 80px;border-bottom: 1px solid #CCC;">
                 <div style="overflow: hidden; padding-left: 0px; padding-top: 0px; position: absolute; left: 0px; top: 0px; width: 800px; ">
                     <div style="vertical-align: top; color:#007dc3;font-size: 20px;font-family: 'Microsoft YaHei';padding-top:10px;padding-bottom: 10px;">参与人</div>
@@ -134,7 +140,8 @@
                     </div>
                 </div>
             </div>
-            <div style="vertical-align: top; color:#007dc3;font-size: 20px;font-family: 'Microsoft YaHei';padding-top:10px;padding-bottom: 10px;">相关内容</div>
+            </#comment>
+            <div style="vertical-align: top; color:#007dc3;font-size: 20px;font-family: 'Microsoft YaHei';padding-top:10px;padding-bottom: 0px;">任务详情</div>
             <!-- 任务详情 -->
             <div id="taskDetail" style="position: relative; overflow: hidden;" >
                 <% if(has(actForm)){%>
@@ -155,9 +162,11 @@
                 //}
                 //站内页面，使用href，站外页面(http开头)使用iframe
                 if(strutil.startWith(actForm.taskUrl, "http")){
-                var content = "<iframe id=\"actFormFrame\" src=\"" + url + "\" frameborder=\"0\" width=\"100%\" scrolling=\"yes\"></iframe>";
+                var content = "<iframe id=\"actFormFrame\" src=\"" + url + "\" frameborder=\"0\" width=\"100%\"  scrolling=\"yes\"></iframe>";
                 %>
+                <div style="font-family: 'Microsoft YaHei';padding-top:0px;padding-bottom: 0px;">
                 ${content}
+                </div>
                 <%}else{//站内页面%>
                 <div class="easyui-panel" style="width: 100%;" data-options="href:'${contextPath}${url}'" >
                 <%}%>
@@ -324,9 +333,8 @@
             var iframe = document.getElementById("actFormFrame");
             //中央区域的高度减去上任务基本属性的高度
             if(iframe) {
-                iframe.height = $("#centerRegion").height() - 345;
+                iframe.height = $("#centerRegion").height() - 145;
             }
-
             $("#taskDatalist").datalist("loadData",${tasks});
         <%}%>
         //绑定队列tag右键菜单
