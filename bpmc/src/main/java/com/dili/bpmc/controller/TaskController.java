@@ -562,12 +562,12 @@ public class TaskController {
             //只查50条已归档数据;
             List<HistoricTaskInstance> historicTaskInstances = historyService.createHistoricTaskInstanceQuery().taskAssignee(userId).orderByTaskCreateTime().desc().listPage(0, 50);
             task = findTaskById(historicTaskInstances, taskId);
-            ja = buildTaskTreeList(historicTaskInstances);
+            ja = buildTaskTreeList(historicTaskInstances, taskId);
         }else {
             //判断有groupId，并且当前用户也有该组权限, 没有groupId则列出当前用户组下所有任务
             List<Task> tasks = containsGroupId(groupIds, groupId) ? listTaskByCategory(category, userId, groupId) : listTaskByCategory(category, userId, groupIds);
             task = findTaskById(tasks, taskId);
-            ja = buildTaskTreeList(tasks);
+            ja = buildTaskTreeList(tasks, taskId);
         }
         if (task == null) {
             return;
@@ -627,15 +627,18 @@ public class TaskController {
      * @param <T>
      * @return
      */
-    private <T extends TaskInfo> JSONArray buildTaskTreeList(List<T> tasks){
+    private <T extends TaskInfo> JSONArray buildTaskTreeList(List<T> tasks, String taskId){
         //组装左侧任务列表
         JSONArray ja = new JSONArray();
         Map<String, String> processDefinitionMap = new HashMap<>();
         for(TaskInfo taskInfo : tasks){
             JSONObject jo = new JSONObject();
             jo.put("id", taskInfo.getId());
-            jo.put("text", "<div><div><B>·</B> "+taskInfo.getName()+"</div><span style=\"font-size:6px;\">"+ DateUtils.format(taskInfo.getCreateTime())+"</span></div>");
-//            jo.put("iconCls", "fa fa-circle");
+            if(taskInfo.getId().equals(taskId)){
+                jo.put("text", "<div><div style=\"color:#007dc3;font-weight:bold;\"><b>·</b> " + taskInfo.getName() + "</div><span style=\"font-size:6px;\">" + DateUtils.format(taskInfo.getCreateTime()) + "</span></div>");
+            }else {
+                jo.put("text", "<div><div><b>·</b> " + taskInfo.getName() + "</div><span style=\"font-size:6px;\">" + DateUtils.format(taskInfo.getCreateTime()) + "</span></div>");
+            }
             jo.put("parentId", taskInfo.getProcessDefinitionId());
             ja.add(jo);
             //转换流程定义id为名称

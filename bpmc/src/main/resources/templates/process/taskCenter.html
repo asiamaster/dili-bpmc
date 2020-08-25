@@ -193,7 +193,7 @@
             <!-- 隐藏流程图框 -->
             <div id="dlg" class="easyui-dialog" resizable="true" constrain="true" shadow="true" draggable="true" title="流程图" style="padding:10px" modal="false" closed="true" border="true"
                  data-options="
-                    iconCls: 'fa fa-circle',
+                    iconCls: 'icon-save',
                     width:1366,
                     height: 640
                 ">
@@ -272,6 +272,10 @@
      * 显示任务详情
      */
     function showTask(item) {
+        //如果没有子菜单，当前调用者则是easyui-linkbutton，回调事件没有item参数，只能从options中获取
+        if(item == null){
+            return;
+        }
         location.href="${contextPath}/task/taskCenter.html?taskId="+item.id+"&category=${category}";
     }
 
