@@ -18,6 +18,7 @@ import com.dili.ss.dto.DTOUtils;
 import com.dili.ss.dto.IDTO;
 import com.dili.ss.exception.AppException;
 import com.dili.ss.metadata.ValueProviderUtils;
+import com.dili.ss.util.DateUtils;
 import com.dili.uap.sdk.domain.Role;
 import com.dili.uap.sdk.domain.UserTicket;
 import com.dili.uap.sdk.exception.NotLoginException;
@@ -561,12 +562,12 @@ public class TaskController {
             //只查50条已归档数据;
             List<HistoricTaskInstance> historicTaskInstances = historyService.createHistoricTaskInstanceQuery().taskAssignee(userId).orderByTaskCreateTime().desc().listPage(0, 50);
             task = findTaskById(historicTaskInstances, taskId);
-            ja = buildTaskList(historicTaskInstances);
+            ja = buildTaskTreeList(historicTaskInstances);
         }else {
             //判断有groupId，并且当前用户也有该组权限, 没有groupId则列出当前用户组下所有任务
             List<Task> tasks = containsGroupId(groupIds, groupId) ? listTaskByCategory(category, userId, groupId) : listTaskByCategory(category, userId, groupIds);
             task = findTaskById(tasks, taskId);
-            ja = buildTaskList(tasks);
+            ja = buildTaskTreeList(tasks);
         }
         if (task == null) {
             return;
@@ -621,7 +622,43 @@ public class TaskController {
     }
 
     /**
-     * 构建任务列表数据
+     * 构建任务中心左侧菜单任务树形列表数据
+     * @param tasks
+     * @param <T>
+     * @return
+     */
+    private <T extends TaskInfo> JSONArray buildTaskTreeList(List<T> tasks){
+        //组装左侧任务列表
+        JSONArray ja = new JSONArray();
+        Map<String, String> processDefinitionMap = new HashMap<>();
+        for(TaskInfo taskInfo : tasks){
+            JSONObject jo = new JSONObject();
+            jo.put("id", taskInfo.getId());
+            jo.put("text", "<div><div><B>·</B> "+taskInfo.getName()+"</div><span style=\"font-size:6px;\">"+ DateUtils.format(taskInfo.getCreateTime())+"</span></div>");
+//            jo.put("iconCls", "fa fa-circle");
+            jo.put("parentId", taskInfo.getProcessDefinitionId());
+            ja.add(jo);
+            //转换流程定义id为名称
+            if(!processDefinitionMap.containsKey(taskInfo.getProcessDefinitionId())){
+                ProcessDefinition processDefinition = repositoryService.createProcessDefinitionQuery().processDefinitionId(taskInfo.getProcessDefinitionId()).singleResult();
+                //流程定义可能被删除了，所以要判空
+                if(processDefinition != null){
+                    processDefinitionMap.put(processDefinition.getId(), processDefinition.getName());
+                }
+                JSONObject parentObj = new JSONObject();
+                parentObj.put("id", taskInfo.getProcessDefinitionId());
+                parentObj.put("state", "open");
+                parentObj.put("iconCls", "fa fa-list-ul");
+                parentObj.put("text", processDefinitionMap.get(taskInfo.getProcessDefinitionId()));
+                ja.add(parentObj);
+            }
+
+        }
+        return ja;
+    }
+
+    /**
+     * 构建任务中心左侧菜单任务列表数据
      * @param tasks
      * @param <T>
      * @return
@@ -647,6 +684,7 @@ public class TaskController {
         }
         return ja;
     }
+
     /**
      * 根据任务id从任务列表获取任务，如果任务id为空，则取第一个任务
      * @param tasks
@@ -690,7 +728,7 @@ public class TaskController {
     }
 
     /**
-     * 根据类别和用户查询任务列表
+     * 根据类别和用户查询任务列表，用于任务中心左侧datalist分组显示
      * @param category
      * @param userId
      * @param groupIds 用户组id列表，用于类别是任务队列时。

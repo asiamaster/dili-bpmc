@@ -2,7 +2,15 @@
 <script>
     document.domain="diligrp.com";
 </script>
+<link rel="stylesheet" type="text/css" href="${contextPath}/resources/css/main.css">
+<link rel="stylesheet" href="/resources/bui/lib/font-awesome-4.7.0/css/font-awesome.min.css">
 <style>
+    .sidemenu .tree-node {
+        height: 45px;
+    }
+    .sidemenu .tree-title{
+        margin: 1px 0;
+    }
     /*设置表格行高*/
     .datagrid-row {
         height: 48px;
@@ -54,26 +62,30 @@
             <a <%if(category=='archived'){%>class="tab-selected"<%}else{%>class="tab-unselected"<%}%> <%if(archivedCount>0){%>href="${contextPath}/task/taskCenter.html?category=archived"<%}%> style="margin-left: 18px;">已归档[${archivedCount}]</a>
             <a  style="float: right; padding-right: 50px;" class="tab-href" href="${contextPath}/pi/processCenter.html">流程中心</a>
         </div>
-
     </div>
-    <!-- 西侧布局 -->
-    <div region="west" style="width:260px;" >
 
+    <!-- 西侧布局 -->
+    <div data-options="region:'west',split:true, hideCollapsedContent:false, expandMode:'dock'" style="width:210px;" >
         <%/* if(has(task)){%>
+        <!-- datalist普通实现 -->
         <ul class="easyui-datalist" title="任务列表" lines="true" noheader="true" valueField="id" textField="name" loadMsg="数据加载中..."
             style="width:260px;height:100%" data-options="textFormatter:fmt, onClickRow:showTask">
             <% for(task in tasks){%>
             <li value="${task.id}" group="分组">${task.name}</li>
             <%}%>
         </ul>
-        <%}
-        */%>
-        <%if(has(task)){%>
+        <!-- datalist分组实现 -->
         <div class="easyui-datalist" id="taskDatalist" lines="true" valueField="id" textField="name"  loadMsg="数据加载中..."
              style="width:260px;height:100%" data-options="textFormatter:fmt, onClickRow:showTask,groupField:'processDefinitionName'">
         </div>
+        <%}
+        */%>
+        <%if(has(task)){%>
+        <!-- 分组菜单实现 -->
+        <div id="sm" class="easyui-sidemenu" width="200" data-options="onSelect:showTask, data:[]"></div>
         <%}%>
     </div>
+
     <!-- 中央布局 -->
     <div region="center" id="centerRegion" style="width: 100%;" height="auto">
         <% //定义表单页面
@@ -181,7 +193,7 @@
             <!-- 隐藏流程图框 -->
             <div id="dlg" class="easyui-dialog" resizable="true" constrain="true" shadow="true" draggable="true" title="流程图" style="padding:10px" modal="false" closed="true" border="true"
                  data-options="
-                    iconCls: 'icon-save',
+                    iconCls: 'fa fa-circle',
                     width:1366,
                     height: 640
                 ">
@@ -210,6 +222,7 @@
     },false);
 
     <% if(has(task)){%>
+
         /**
          * 打开任务页面
          */
@@ -258,8 +271,8 @@
     /**
      * 显示任务详情
      */
-    function showTask(rowIndex, rowData) {
-        location.href="${contextPath}/task/taskCenter.html?taskId="+rowData.id+"&category=${category}";
+    function showTask(item) {
+        location.href="${contextPath}/task/taskCenter.html?taskId="+item.id+"&category=${category}";
     }
 
     /**
@@ -336,7 +349,10 @@
             if(iframe) {
                 iframe.height = $("#centerRegion").height() - 145;
             }
-            $("#taskDatalist").datalist("loadData",${tasks});
+            //$("#taskDatalist").datalist("loadData",${tasks});
+            var treeData = convertTree(${tasks});
+            //加载左侧菜单
+            $("#sm").sidemenu({data: treeData});
         <%}%>
         //绑定队列tag右键菜单
         $("#queuedTab").bind('contextmenu', function(e){
