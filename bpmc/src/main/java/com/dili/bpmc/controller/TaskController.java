@@ -631,14 +631,17 @@ public class TaskController {
         //组装左侧任务列表
         JSONArray ja = new JSONArray();
         Map<String, String> processDefinitionMap = new HashMap<>();
+        //用于没有任务id时，高亮显示第一个任务
+        int i=0;
         for(TaskInfo taskInfo : tasks){
             JSONObject jo = new JSONObject();
             jo.put("id", taskInfo.getId());
-            if(taskInfo.getId().equals(taskId)){
+            if(taskInfo.getId().equals(taskId) || (StringUtils.isBlank(taskId) && i == 0)){
                 jo.put("text", "<div><div style=\"color:#007dc3;font-weight:bold;\"><b>·</b> " + taskInfo.getName() + "</div><span style=\"font-size:6px;\">" + DateUtils.format(taskInfo.getCreateTime()) + "</span></div>");
             }else {
                 jo.put("text", "<div><div><b>·</b> " + taskInfo.getName() + "</div><span style=\"font-size:6px;\">" + DateUtils.format(taskInfo.getCreateTime()) + "</span></div>");
             }
+            i++;
             jo.put("parentId", taskInfo.getProcessDefinitionId());
             ja.add(jo);
             //转换流程定义id为名称
