@@ -189,6 +189,9 @@ public class TaskApi {
 	public BaseOutput<String> resolve(@RequestParam String taskId, @RequestParam Map variables, HttpServletRequest request) {
 		// 根据taskId提取任务
 		Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
+		if(task == null){
+			return BaseOutput.failure("任务不存在");
+		}
 		if (StringUtils.isNotBlank(task.getOwner())) {
 			DelegationState delegationState = task.getDelegationState();
 			if (delegationState.toString().equals(DelegationState.RESOLVED.name())) {
@@ -213,13 +216,17 @@ public class TaskApi {
 	 */
 	@RequestMapping(value = "/signal", method = { RequestMethod.GET, RequestMethod.POST })
 	public BaseOutput<String> signal(@RequestParam String activityId, @RequestParam String processInstanceId, @RequestParam Map variables, HttpServletRequest request) {
-		Execution execution = runtimeService.createExecutionQuery().processInstanceId(processInstanceId).activityId(activityId)// 当前活动的id，对应receiveTask.bpmn文件中的活动节点的id的属性值
-				.singleResult();
-		if (execution == null) {
-			return BaseOutput.failure("信号[" + activityId + "]发送失败");
+		try {
+			Execution execution = runtimeService.createExecutionQuery().processInstanceId(processInstanceId).activityId(activityId)// 当前活动的id，对应receiveTask.bpmn文件中的活动节点的id的属性值
+					.singleResult();
+			if (execution == null) {
+				return BaseOutput.failure("信号[" + activityId + "]发送失败");
+			}
+			runtimeService.signal(execution.getId(), variables);
+			return BaseOutput.success("信号[" + activityId + "]发送成功");
+		} catch (Exception e) {
+			return BaseOutput.failure(e.getMessage());
 		}
-		runtimeService.signal(execution.getId(), variables);
-		return BaseOutput.success("信号[" + activityId + "]发送成功");
 	}
 
 	/**
@@ -233,12 +240,16 @@ public class TaskApi {
 	 */
 	@RequestMapping(value = "/signalEventReceived", method = { RequestMethod.GET, RequestMethod.POST })
 	public BaseOutput<String> signalEventReceived(@RequestParam String signalName, @RequestParam(required = false) String executionId, @RequestParam Map variables, HttpServletRequest request) {
-		if (StringUtils.isBlank(executionId)) {
-			runtimeService.signalEventReceived(signalName, variables);
-		} else {
-			runtimeService.signalEventReceived(signalName, executionId, variables);
+		try {
+			if (StringUtils.isBlank(executionId)) {
+				runtimeService.signalEventReceived(signalName, variables);
+			} else {
+				runtimeService.signalEventReceived(signalName, executionId, variables);
+			}
+			return BaseOutput.success("抛出信号[" + signalName + "]发送成功");
+		} catch (Exception e) {
+			return BaseOutput.failure(e.getMessage());
 		}
-		return BaseOutput.success("抛出信号[" + signalName + "]发送成功");
 	}
 
 	/**
@@ -251,12 +262,16 @@ public class TaskApi {
 	 */
 	@RequestMapping(value = "/messageEventReceived", method = { RequestMethod.GET, RequestMethod.POST })
 	public BaseOutput<String> messageEventReceived(@RequestParam String messageName, String processInstanceId, @RequestParam Map<String, Object> variables, HttpServletRequest request) {
-		Execution execution = runtimeService.createExecutionQuery().messageEventSubscriptionName(messageName).processInstanceId(processInstanceId).singleResult();
-		if (execution == null) {
-			return BaseOutput.failure("不存在执行的流程");
+		try {
+			Execution execution = runtimeService.createExecutionQuery().messageEventSubscriptionName(messageName).processInstanceId(processInstanceId).singleResult();
+			if (execution == null) {
+				return BaseOutput.failure("不存在执行的流程");
+			}
+			runtimeService.messageEventReceived(messageName, execution.getId(), variables);
+			return BaseOutput.success("抛出消息[" + messageName + "]发送成功");
+		} catch (Exception e) {
+			return BaseOutput.failure(e.getMessage());
 		}
-		runtimeService.messageEventReceived(messageName, execution.getId(), variables);
-		return BaseOutput.success("抛出消息[" + messageName + "]发送成功");
 	}
 
 	/**
@@ -320,6 +335,9 @@ public class TaskApi {
 	@RequestMapping(value = "/getById", method = { RequestMethod.GET, RequestMethod.POST })
 	public BaseOutput<TaskMapping> getById(@RequestParam String taskId) {
 		Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
+		if(task == null){
+			return BaseOutput.failure("任务不存在");
+		}
 		return BaseOutput.success().setData(DTOUtils.as(task, TaskMapping.class));
 	}
 
