@@ -1,5 +1,6 @@
 package com.dili.bpmc.controller;
 
+import bsh.StringUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -28,6 +29,7 @@ import org.activiti.engine.*;
 import org.activiti.engine.form.TaskFormData;
 import org.activiti.engine.history.HistoricProcessInstance;
 import org.activiti.engine.history.HistoricTaskInstance;
+import org.activiti.engine.history.HistoricTaskInstanceQuery;
 import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.engine.runtime.Execution;
 import org.activiti.engine.runtime.ProcessInstance;
@@ -116,8 +118,9 @@ public class TaskController {
     public String taskCenter(@RequestParam(required = false) String taskId,
                         @RequestParam(defaultValue = "inbox") String category,
                         @RequestParam(required = false) String groupId,
+                         @RequestParam(required = false) String businessKey,
                         HttpServletRequest request) {
-        handleTaskCategory(category, taskId, groupId, request);
+        handleTaskCategory(category, taskId, groupId, businessKey, request);
         return "process/taskCenter";
     }
 
@@ -495,8 +498,9 @@ public class TaskController {
      * @param category  任务类别
      * @param taskId 任务id
      * @param groupId 受邀用户组
+     * @param businessKey 查询的业务号
      */
-    private void handleTaskCategory(String category, String taskId, String groupId, HttpServletRequest request){
+    private void handleTaskCategory(String category, String taskId, String groupId, String businessKey, HttpServletRequest request){
         UserTicket userTicket = SessionContext.getSessionContext().getUserTicket();
         if(userTicket == null){
             throw new NotLoginException();
@@ -551,7 +555,9 @@ public class TaskController {
         request.setAttribute("queuedCount", queuedCount);
         request.setAttribute("involvedCount", involvedCount);
         request.setAttribute("archivedCount", archivedCount);
-
+        if(StringUtils.isNotBlank(businessKey)) {
+            request.setAttribute("showBusinessKey", true);
+        }
         //查询任务列表，用于左侧任务列表显示
         //设置当前显示的任务，用于在点击时直接跳转到该任务
         TaskInfo task = null;
@@ -559,13 +565,17 @@ public class TaskController {
         JSONArray ja;
         //先判断是否已归档类型，单独处理
         if(TaskCategory.ARCHIVED.getCode().equals(category)){
+            HistoricTaskInstanceQuery historicTaskInstanceQuery = historyService.createHistoricTaskInstanceQuery();
+            if(StringUtils.isNotBlank(businessKey)){
+                historicTaskInstanceQuery = historicTaskInstanceQuery.processInstanceBusinessKey(businessKey);
+            }
             //只查50条已归档数据;
-            List<HistoricTaskInstance> historicTaskInstances = historyService.createHistoricTaskInstanceQuery().taskAssignee(userId).orderByTaskCreateTime().desc().listPage(0, 50);
+            List<HistoricTaskInstance> historicTaskInstances = historicTaskInstanceQuery.taskAssignee(userId).orderByTaskCreateTime().desc().listPage(0, 50);
             task = findTaskById(historicTaskInstances, taskId);
             ja = buildTaskTreeList(historicTaskInstances, taskId);
         }else {
             //判断有groupId，并且当前用户也有该组权限, 没有groupId则列出当前用户组下所有任务
-            List<Task> tasks = containsGroupId(groupIds, groupId) ? listTaskByCategory(category, userId, groupId) : listTaskByCategory(category, userId, groupIds);
+            List<Task> tasks = containsGroupId(groupIds, groupId) ? listTaskByCategory(category, userId, businessKey, groupId) : listTaskByCategory(category, userId, businessKey, groupIds);
             task = findTaskById(tasks, taskId);
             ja = buildTaskTreeList(tasks, taskId);
         }
@@ -740,8 +750,12 @@ public class TaskController {
      * @param groupIds 用户组id列表，用于类别是任务队列时。
      * @return
      */
-    private List<Task> listTaskByCategory(String category, String userId, String... groupIds){
-        TaskQuery taskQuery = taskService.createTaskQuery().orderByTaskCreateTime().desc();
+    private List<Task> listTaskByCategory(String category, String userId, String businessKey, String... groupIds){
+        TaskQuery taskQuery = taskService.createTaskQuery();
+        if(StringUtils.isNotBlank(businessKey)){
+            taskQuery = taskQuery.processInstanceBusinessKey(businessKey);
+        }
+        taskQuery.orderByTaskCreateTime().desc();
         List<Task> tasks = new ArrayList<>();
         if(TaskCategory.INBOX.getCode().equals(category)){
             tasks = taskQuery.taskAssignee(userId).list();

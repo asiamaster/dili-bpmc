@@ -66,6 +66,26 @@
 
     <!-- 西侧布局 -->
     <div data-options="region:'west',split:true, hideCollapsedContent:false, expandMode:'dock'" style="width:210px;" >
+        <input id="tt" class="easyui-textbox" <% if(has(showBusinessKey)){%> value="${businessKey}" <%}%> style="width:100%;" data-options="
+                    prompt: '业务编号查询',
+                    iconWidth: 22,
+                    icons: [{
+                            iconCls:'icon-clear',
+                            handler: function(e){
+                                $(e.data.target).textbox('clear');
+                            }
+                            },{
+                            iconCls:'icon-search',
+                            handler: function(e){
+                                var v = $(e.data.target).textbox('getValue');
+                                if(v == null || v.trim() == ''){
+                                    window.location.href = '${contextPath}/task/taskCenter.html?category=${category}';
+                                }else{
+                                    window.location.href = '${contextPath}/task/taskCenter.html?category=${category}&businessKey='+v;
+                                }
+                            }
+                        }]
+                    ">
         <%/* if(has(task)){%>
         <!-- datalist普通实现 -->
         <ul class="easyui-datalist" title="任务列表" lines="true" noheader="true" valueField="id" textField="name" loadMsg="数据加载中..."
