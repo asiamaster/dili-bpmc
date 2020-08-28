@@ -555,9 +555,6 @@ public class TaskController {
         request.setAttribute("queuedCount", queuedCount);
         request.setAttribute("involvedCount", involvedCount);
         request.setAttribute("archivedCount", archivedCount);
-        if(StringUtils.isNotBlank(businessKey)) {
-            request.setAttribute("showBusinessKey", true);
-        }
         //查询任务列表，用于左侧任务列表显示
         //设置当前显示的任务，用于在点击时直接跳转到该任务
         TaskInfo task = null;
@@ -579,11 +576,15 @@ public class TaskController {
             task = findTaskById(tasks, taskId);
             ja = buildTaskTreeList(tasks, taskId);
         }
+        //设置左侧任务列表
+        request.setAttribute("tasks", ja.toJSONString());
         if (task == null) {
             return;
         }
-        //设置左侧任务列表
-        request.setAttribute("tasks", ja.toJSONString());
+        //是否在任务列表的查询框回显业务号，不能和上面的代码交换位置
+        if(StringUtils.isNotBlank(businessKey)) {
+            request.setAttribute("showBusinessKey", true);
+        }
         //设置流程发起人(这个会稍微影响性能，暂时不开放)
 //        HistoricProcessInstance historicProcessInstance = historyService.createHistoricProcessInstanceQuery().processInstanceId(task.getProcessInstanceId()).singleResult();
 //        request.setAttribute("startUserId", historicProcessInstance.getStartUserId());
