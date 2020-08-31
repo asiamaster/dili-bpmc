@@ -7,6 +7,7 @@ import com.dili.bpmc.sdk.dto.TaskDto;
 import com.dili.bpmc.sdk.dto.TaskIdentityDto;
 import com.dili.ss.domain.BaseOutput;
 import com.dili.ss.dto.DTOUtils;
+import com.google.common.collect.Lists;
 import org.activiti.engine.FormService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
@@ -412,10 +413,19 @@ public class TaskApi {
 	 * @return
 	 */
 	@PostMapping("/listTaskIdentityByProcessInstanceIds")
-	public BaseOutput<List<TaskIdentityDto>> listTaskIdentityByTaskIds(@RequestBody List<String> processIntanceIds) {
-		List<TaskIdentityDto> list = this.actRuTaskMapper.listTaskIdentityByProcessInstanceIds(processIntanceIds);
-		return BaseOutput.success().setData(list);
+	public BaseOutput<List<TaskIdentityDto>> listTaskIdentityByProcessInstanceIds(@RequestBody List<String> processIntanceIds) {
+		return BaseOutput.successData(this.actRuTaskMapper.listTaskIdentityByProcessInstanceIds(processIntanceIds));
 	}
 
+	/**
+	 * 根据流程实例id批量查询任务候选人、候选组、办理人
+	 *
+	 * @param processIntanceIds
+	 * @return
+	 */
+	@PostMapping("/listTaskIdentityByProcessInstanceId")
+	public BaseOutput<List<TaskIdentityDto>> listTaskIdentityByProcessInstanceId(@RequestBody String processIntanceIds) {
+		return BaseOutput.successData(this.actRuTaskMapper.listTaskIdentityByProcessInstanceIds(Lists.newArrayList(processIntanceIds)));
+	}
 
 }
