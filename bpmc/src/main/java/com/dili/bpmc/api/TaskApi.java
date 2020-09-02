@@ -38,20 +38,13 @@ import java.util.Map;
 @RequestMapping("/api/task")
 public class TaskApi {
 	private final Logger log = LoggerFactory.getLogger(TaskApi.class);
-//    @Autowired
-//    private RepositoryService repositoryService;
+
 	@Autowired
 	private RuntimeService runtimeService;
 	@Autowired
 	private TaskService taskService;
 	@Autowired
 	private FormService formService;
-//    @Autowired
-//    private HistoryService historyService;
-//    @Autowired
-//    private IdentityService identityService;
-//    @Autowired
-//    private ActivitiService activitiService;
 	@Autowired
 	private ActRuTaskMapper actRuTaskMapper;
 

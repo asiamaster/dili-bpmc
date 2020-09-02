@@ -547,7 +547,7 @@ public class TaskController {
         //受邀任务，这里只包括候选用户任务
         long involvedCount = actRuTaskMapper.taskCandidateUserCount(userId);
         //查询已归档任务数
-        long archivedCount = historyService.createHistoricTaskInstanceQuery().taskAssignee(userId).count();
+        long archivedCount = historyService.createHistoricTaskInstanceQuery().finished().taskAssignee(userId).count();
 
         //设置标题部分显示的任务数
         request.setAttribute("inboxCount", inboxCount);
@@ -567,7 +567,7 @@ public class TaskController {
                 historicTaskInstanceQuery = historicTaskInstanceQuery.processInstanceBusinessKey(businessKey);
             }
             //只查50条已归档数据;
-            List<HistoricTaskInstance> historicTaskInstances = historicTaskInstanceQuery.taskAssignee(userId).orderByTaskCreateTime().desc().listPage(0, 50);
+            List<HistoricTaskInstance> historicTaskInstances = historicTaskInstanceQuery.taskAssignee(userId).finished().orderByTaskCreateTime().desc().listPage(0, 50);
             task = findTaskById(historicTaskInstances, taskId);
             ja = buildTaskTreeList(historicTaskInstances, taskId);
         }else {
