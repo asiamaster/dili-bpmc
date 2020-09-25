@@ -22,8 +22,13 @@
       </timerEventDefinition>
     </intermediateCatchEvent>
     <sequenceFlow id="sid-67B115E5-92FD-4F29-ABF8-E938346137EA" sourceRef="settlementRentalOrder" targetRef="validateTimer"></sequenceFlow>
-    <serviceTask id="takeRentalOrderEffect" name="租赁单生效" activiti:delegateExpression="${rentalOrderEffectService}">
+    <serviceTask id="takeRentalOrderEffect" name="租赁单生效" activiti:delegateExpression="${restfulService}">
       <documentation>使租赁订单生效</documentation>
+      <extensionElements>
+        <activiti:field name="url">
+          <activiti:string><![CDATA[http://bpmd.diligrp.com:8618/api/orders/valid]]></activiti:string>
+        </activiti:field>
+      </extensionElements>
     </serviceTask>
     <sequenceFlow id="sid-981470C8-088B-444D-8578-1566200098BA" sourceRef="validateTimer" targetRef="takeRentalOrderEffect"></sequenceFlow>
     <endEvent id="endRentalOrder" name="结束租赁单流程">
@@ -69,20 +74,20 @@
         <omgdc:Bounds height="28.0" width="28.0" x="1007.4375" y="128.0"></omgdc:Bounds>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape bpmnElement="deleteRentalOrderTerminate" id="BPMNShape_deleteRentalOrderTerminate">
-        <omgdc:Bounds height="28.0" width="28.0" x="261.0" y="276.0"></omgdc:Bounds>
+        <omgdc:Bounds height="28.0" width="28.0" x="238.01320552523464" y="276.0"></omgdc:Bounds>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape bpmnElement="invalidateRentalOrderTerminate" id="BPMNShape_invalidateRentalOrderTerminate">
-        <omgdc:Bounds height="28.0" width="28.0" x="486.0" y="276.0"></omgdc:Bounds>
+        <omgdc:Bounds height="28.0" width="28.0" x="461.17947247649386" y="276.0"></omgdc:Bounds>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape bpmnElement="deleteRentalOrder" id="BPMNShape_deleteRentalOrder">
-        <omgdc:Bounds height="30.0" width="30.0" x="260.4814876253994" y="170.62004694278417"></omgdc:Bounds>
+        <omgdc:Bounds height="30.0" width="30.0" x="237.01320552523464" y="170.56357416741338"></omgdc:Bounds>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape bpmnElement="invalidateRentalOrder" id="BPMNShape_invalidateRentalOrder">
-        <omgdc:Bounds height="30.0" width="29.999999999999943" x="484.3169118783275" y="167.59495123082453"></omgdc:Bounds>
+        <omgdc:Bounds height="30.0" width="30.0" x="460.1794724764938" y="167.5073405542869"></omgdc:Bounds>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge bpmnElement="sid-981470C8-088B-444D-8578-1566200098BA" id="BPMNEdge_sid-981470C8-088B-444D-8578-1566200098BA">
-        <omgdi:waypoint x="707.9374278562717" y="142.45195216859977"></omgdi:waypoint>
-        <omgdi:waypoint x="808.4375" y="142.15015015015015"></omgdi:waypoint>
+        <omgdi:waypoint x="706.9375" y="142.0"></omgdi:waypoint>
+        <omgdi:waypoint x="808.4375" y="142.0"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="sid-833E2023-465D-4A02-80CC-0A9F5871FA41" id="BPMNEdge_sid-833E2023-465D-4A02-80CC-0A9F5871FA41">
         <omgdi:waypoint x="120.0" y="145.0"></omgdi:waypoint>
@@ -97,16 +102,16 @@
         <omgdi:waypoint x="450.0" y="142.66666666666669"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="sid-B6EB70B7-F3C9-4C38-B6B7-B0710AB65595" id="BPMNEdge_sid-B6EB70B7-F3C9-4C38-B6B7-B0710AB65595">
-        <omgdi:waypoint x="499.41230883334805" y="197.59464787512277"></omgdi:waypoint>
-        <omgdi:waypoint x="499.91096284198085" y="276.0002831319883"></omgdi:waypoint>
+        <omgdi:waypoint x="475.1794724764938" y="197.5073405542869"></omgdi:waypoint>
+        <omgdi:waypoint x="475.17947247649386" y="276.0"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="sid-A89805B9-530A-4482-B78F-9895A0991220" id="BPMNEdge_sid-A89805B9-530A-4482-B78F-9895A0991220">
         <omgdi:waypoint x="908.4375" y="142.0"></omgdi:waypoint>
         <omgdi:waypoint x="1007.4375" y="142.0"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="sid-31B1F0AB-1A94-4B07-AA92-8C3FABBD2EA8" id="BPMNEdge_sid-31B1F0AB-1A94-4B07-AA92-8C3FABBD2EA8">
-        <omgdi:waypoint x="275.4122958186247" y="200.61988735839776"></omgdi:waypoint>
-        <omgdi:waypoint x="275.0645790196564" y="276.0001489454273"></omgdi:waypoint>
+        <omgdi:waypoint x="252.01320552523464" y="200.56357416741338"></omgdi:waypoint>
+        <omgdi:waypoint x="252.01320552523464" y="276.0"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
