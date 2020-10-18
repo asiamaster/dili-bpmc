@@ -20,6 +20,10 @@ public interface TaskDto extends ProcessInstanceDto {
     String getCandidateUser();
 
     void setCandidateUser(String candidateUser);
+    
+    List<String> getCandidateGroups();
+    
+    void setCandidateGroups(List<String> candidateGroups);
 
     Map<String, Object> getProcessVariables();
     void setProcessVariables(Map<String, Object> processVariables);

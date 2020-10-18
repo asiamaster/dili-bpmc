@@ -7,6 +7,8 @@ import com.dili.bpmc.sdk.dto.TaskDto;
 import com.dili.bpmc.sdk.dto.TaskIdentityDto;
 import com.dili.ss.domain.BaseOutput;
 import com.dili.ss.dto.DTOUtils;
+import com.dili.uap.sdk.domain.Role;
+import com.dili.uap.sdk.rpc.RoleRpc;
 import com.google.common.collect.Lists;
 import org.activiti.engine.FormService;
 import org.activiti.engine.RuntimeService;
@@ -16,6 +18,7 @@ import org.activiti.engine.runtime.Execution;
 import org.activiti.engine.task.DelegationState;
 import org.activiti.engine.task.Task;
 import org.activiti.engine.task.TaskQuery;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +27,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -47,6 +51,8 @@ public class TaskApi {
 	private FormService formService;
 	@Autowired
 	private ActRuTaskMapper actRuTaskMapper;
+	@Autowired
+	private RoleRpc roleRpc;
 
 	/**
 	 * 申领(签收)任务
@@ -87,7 +93,7 @@ public class TaskApi {
 		if (StringUtils.isBlank(task.getAssignee())) {
 			return BaseOutput.failure("任务还未认领");
 		}
-		taskService.complete(taskId, (Map)variables);
+		taskService.complete(taskId, (Map) variables);
 		return BaseOutput.successData(taskId);
 	}
 
@@ -183,7 +189,7 @@ public class TaskApi {
 	public BaseOutput<String> resolve(@RequestParam String taskId, @RequestParam Map variables, HttpServletRequest request) {
 		// 根据taskId提取任务
 		Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
-		if(task == null){
+		if (task == null) {
 			return BaseOutput.failure("任务不存在");
 		}
 		if (StringUtils.isNotBlank(task.getOwner())) {
@@ -307,7 +313,6 @@ public class TaskApi {
 		return BaseOutput.success();
 	}
 
-
 	/**
 	 * 获取任务变量
 	 * 
@@ -329,7 +334,7 @@ public class TaskApi {
 	@RequestMapping(value = "/getById", method = { RequestMethod.GET, RequestMethod.POST })
 	public BaseOutput<TaskMapping> getById(@RequestParam String taskId) {
 		Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
-		if(task == null){
+		if (task == null) {
 			return BaseOutput.failure("任务不存在");
 		}
 		return BaseOutput.success().setData(DTOUtils.as(task, TaskMapping.class));
@@ -362,6 +367,9 @@ public class TaskApi {
 		}
 		if (StringUtils.isNotBlank(taskDto.getCandidateUser())) {
 			taskQuery.taskCandidateUser(taskDto.getCandidateUser());
+		}
+		if (CollectionUtils.isNotEmpty(taskDto.getCandidateGroups())) {
+			taskQuery.taskCandidateGroupIn(taskDto.getCandidateGroups());
 		}
 		if (taskDto.getProcessVariables() != null) {
 			for (Map.Entry<String, Object> entry : taskDto.getProcessVariables().entrySet()) {
@@ -419,6 +427,38 @@ public class TaskApi {
 	@PostMapping("/listTaskIdentityByProcessInstanceId")
 	public BaseOutput<List<TaskIdentityDto>> listTaskIdentityByProcessInstanceId(@RequestBody String processIntanceIds) {
 		return BaseOutput.successData(this.actRuTaskMapper.listTaskIdentityByProcessInstanceIds(Lists.newArrayList(processIntanceIds)));
+	}
+
+	@RequestMapping(value = "/listUserTask", method = { RequestMethod.GET, RequestMethod.POST })
+	public BaseOutput<List<TaskMapping>> listUserTask(@RequestParam Long userId, @RequestParam String processDefinitionKey) {
+		TaskQuery taskQuery = taskService.createTaskQuery();
+		if (StringUtils.isNotBlank(processDefinitionKey)) {
+			taskQuery.processDefinitionKey(processDefinitionKey);
+		}
+		taskQuery.taskAssignee(userId.toString());
+		List<Task> taskList = taskQuery.list();
+		taskQuery = taskService.createTaskQuery();
+		if (StringUtils.isNotBlank(processDefinitionKey)) {
+			taskQuery.processDefinitionKey(processDefinitionKey);
+		}
+		taskQuery.taskCandidateUser(userId.toString());
+		taskList.addAll(taskQuery.list());
+		BaseOutput<List<Role>> roleOutput = this.roleRpc.listByUser(userId, null);
+		if (!roleOutput.isSuccess()) {
+			log.error(roleOutput.getMessage());
+			return BaseOutput.failure("查询用户角色信息失败");
+		}
+//		List<String> roleIds = new ArrayList<String>(roleOutput.getData().size());
+//		roleOutput.getData().forEach(r -> roleIds.add(r.getId().toString()));
+//		if (CollectionUtils.isNotEmpty(roleIds)) {
+//			taskQuery = taskService.createTaskQuery();
+//			if (StringUtils.isNotBlank(processDefinitionKey)) {
+//				taskQuery.processDefinitionKey(processDefinitionKey);
+//			}
+//			taskQuery.taskCandidateGroupIn(roleIds);
+//			taskList.addAll(taskQuery.list());
+//		}
+		return BaseOutput.success().setData(DTOUtils.asInstance(taskList, TaskMapping.class));
 	}
 
 }
