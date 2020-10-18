@@ -429,6 +429,13 @@ public class TaskApi {
 		return BaseOutput.successData(this.actRuTaskMapper.listTaskIdentityByProcessInstanceIds(Lists.newArrayList(processIntanceIds)));
 	}
 
+	/**
+	 * 查询用户任务
+	 * 
+	 * @param userId               用户id
+	 * @param processDefinitionKey 流程定义key
+	 * @return
+	 */
 	@RequestMapping(value = "/listUserTask", method = { RequestMethod.GET, RequestMethod.POST })
 	public BaseOutput<List<TaskMapping>> listUserTask(@RequestParam Long userId, @RequestParam String processDefinitionKey) {
 		TaskQuery taskQuery = taskService.createTaskQuery();
