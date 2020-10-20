@@ -4,6 +4,7 @@ import com.dili.bpmc.sdk.domain.ActForm;
 import com.dili.bpmc.sdk.domain.ProcessInstanceMapping;
 import com.dili.bpmc.sdk.domain.TaskMapping;
 import com.dili.bpmc.sdk.dto.TaskDto;
+import com.dili.bpmc.sdk.rpc.EventRpc;
 import com.dili.bpmc.sdk.rpc.FormRpc;
 import com.dili.bpmc.sdk.rpc.RuntimeRpc;
 import com.dili.bpmc.sdk.rpc.TaskRpc;
@@ -45,6 +46,9 @@ public class OrdersServiceImpl extends BaseServiceImpl<Orders, Long> implements 
     @SuppressWarnings("all")
     @Autowired
     TaskRpc taskRpc;
+    @SuppressWarnings("all")
+    @Autowired
+    EventRpc eventRpc;
     @SuppressWarnings("all")
     @Autowired
     FormRpc formRpc;
@@ -136,7 +140,7 @@ public class OrdersServiceImpl extends BaseServiceImpl<Orders, Long> implements 
         updateSelective(orders);
         orders = get(id);
         //发送消息通知流程
-        return taskRpc.messageEventReceived("deleteRentalOrderMsg", orders.getProcessInstanceId(), null);
+        return eventRpc.messageEventReceived("deleteRentalOrderMsg", orders.getProcessInstanceId(), null);
         //
 //        if(!output.isSuccess()){
 //            throw new BusinessException(ResultCode.DATA_ERROR, output.getMessage());
@@ -152,7 +156,7 @@ public class OrdersServiceImpl extends BaseServiceImpl<Orders, Long> implements 
         updateSelective(orders);
         orders = get(id);
         //发送消息通知流程
-        return taskRpc.messageEventReceived("invalidRentalOrderMsg", orders.getProcessInstanceId(), null);
+        return eventRpc.messageEventReceived("invalidRentalOrderMsg", orders.getProcessInstanceId(), null);
 //        if(!output.isSuccess()){
 //            throw new BusinessException(ResultCode.DATA_ERROR, output.getMessage());
 //        }
@@ -167,7 +171,7 @@ public class OrdersServiceImpl extends BaseServiceImpl<Orders, Long> implements 
         updateSelective(orders);
         orders = get(id);
         //发送消息通知流程
-        return taskRpc.messageEventReceived("deleteRentalOrderMsg", orders.getProcessInstanceId(), null);
+        return eventRpc.messageEventReceived("deleteRentalOrderMsg", orders.getProcessInstanceId(), null);
 //        if(!output.isSuccess()){
 //            throw new BusinessException(ResultCode.DATA_ERROR, output.getMessage());
 //        }

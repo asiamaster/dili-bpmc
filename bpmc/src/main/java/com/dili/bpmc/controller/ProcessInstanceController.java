@@ -188,7 +188,8 @@ public class ProcessInstanceController {
         if(StringUtils.isNotEmpty(param.getBusinessKey())){
             query.processInstanceBusinessKey(param.getBusinessKey());
         }
-        List<ProcessInstance> processInstances = query.listPage(firstResult, param.getRows());
+        //按流程实例id降序查询
+        List<ProcessInstance> processInstances = query.orderByProcessInstanceId().desc().listPage(firstResult, param.getRows());
         easyuiPageOutput.setRows(processInstances);
         Long total = query.count();
         easyuiPageOutput.setTotal(total.intValue());

@@ -3,7 +3,6 @@ package com.dili.bpmc.api;
 import com.alibaba.fastjson.JSON;
 import com.dili.bpmc.dao.ActRuTaskMapper;
 import com.dili.bpmc.dao.EventSubscriptionMapper;
-import com.dili.bpmc.sdk.domain.EventSubscriptionMapping;
 import com.dili.bpmc.sdk.domain.TaskMapping;
 import com.dili.bpmc.sdk.dto.TaskDto;
 import com.dili.bpmc.sdk.dto.TaskIdentityDto;
@@ -17,7 +16,6 @@ import org.activiti.engine.TaskService;
 import org.activiti.engine.form.TaskFormData;
 import org.activiti.engine.runtime.Execution;
 import org.activiti.engine.task.DelegationState;
-import org.activiti.engine.task.Event;
 import org.activiti.engine.task.Task;
 import org.activiti.engine.task.TaskQuery;
 import org.apache.commons.lang3.StringUtils;
@@ -65,39 +63,6 @@ public class TaskApi {
 		try {
 			List<Task> list = taskService.createTaskQuery().processInstanceId(processInstanceId).active().list();
 			return BaseOutput.successData(DTOUtils.as(list, TaskMapping.class));
-		} catch (Exception e) {
-			return BaseOutput.failure(e.getMessage());
-		}
-	}
-
-	/**
-	 * 根据任务id查询边界事件
-	 *
-	 * @param processInstanceId 必填
-	 */
-	@RequestMapping(value = "/listEventSubscription", method = { RequestMethod.GET, RequestMethod.POST })
-	public BaseOutput<List<EventSubscriptionMapping>> listEventSubscription(@RequestParam String processInstanceId) {
-		try {
-			EventSubscriptionMapping eventSubscriptionMapping = DTOUtils.newInstance(EventSubscriptionMapping.class);
-			eventSubscriptionMapping.setProcessInstanceId(processInstanceId);
-			List<EventSubscriptionMapping> list = eventSubscriptionMapper.select(eventSubscriptionMapping);
-			return BaseOutput.successData(list);
-		} catch (Exception e) {
-			return BaseOutput.failure(e.getMessage());
-		}
-	}
-
-	/**
-	 * 根据流程实例id查询运行中的唯一任务的边界事件
-	 *
-	 * @param processInstanceId 必填
-	 */
-	@RequestMapping(value = "/listTaskEventsByProcessInstanceId", method = { RequestMethod.GET, RequestMethod.POST })
-	public BaseOutput<List<Event>> listTaskEventsByProcessInstanceId(@RequestParam String processInstanceId) {
-		try {
-			Task task = taskService.createTaskQuery().processInstanceId(processInstanceId).active().singleResult();
-			List<Event> taskEvents = taskService.getTaskEvents(task.getId());
-			return BaseOutput.successData(taskEvents);
 		} catch (Exception e) {
 			return BaseOutput.failure(e.getMessage());
 		}
@@ -256,13 +221,14 @@ public class TaskApi {
 	}
 
 	/**
-	 * 根据活动id和实例id，触发信号事件
-	 * 
+	 * 根据活动id和实例id，触发Java接收任务(Java Receive Task)
+	 * 该接口已迁移至EventApi
 	 * @param activityId        当前活动的id，对应receiveTask.bpmn文件中的活动节点的id的属性值，必填
 	 * @param processInstanceId 必填
 	 * @param variables
 	 * @param request
 	 */
+	@Deprecated
 	@RequestMapping(value = "/signal", method = { RequestMethod.GET, RequestMethod.POST })
 	public BaseOutput<String> signal(@RequestParam String activityId, @RequestParam String processInstanceId, @RequestParam Map variables, HttpServletRequest request) {
 		try {
@@ -281,12 +247,13 @@ public class TaskApi {
 	/**
 	 * 根据signalName和executionId触发信号事件 executionId为空，则在全局范围广播，为所有已订阅处理器抛出信号（广播）
 	 * executionId不为空， 只为指定的执行传递信号
-	 * 
+	 * 该接口已迁移至EventApi
 	 * @param signalName  必填
 	 * @param executionId 选填
 	 * @param variables
 	 * @param request
 	 */
+	@Deprecated
 	@RequestMapping(value = "/signalEventReceived", method = { RequestMethod.GET, RequestMethod.POST })
 	public BaseOutput<String> signalEventReceived(@RequestParam String signalName, @RequestParam(required = false) String executionId, @RequestParam Map variables, HttpServletRequest request) {
 		try {
@@ -303,12 +270,13 @@ public class TaskApi {
 
 	/**
 	 * 抛出消息事件
-	 * 
+	 * 该接口已迁移至EventApi
 	 * @param messageName       必填
 	 * @param processInstanceId 必填
 	 * @param variables
 	 * @param request
 	 */
+	@Deprecated
 	@RequestMapping(value = "/messageEventReceived", method = { RequestMethod.GET, RequestMethod.POST })
 	public BaseOutput<String> messageEventReceived(@RequestParam String messageName, String processInstanceId, @RequestParam Map<String, Object> variables, HttpServletRequest request) {
 		try {

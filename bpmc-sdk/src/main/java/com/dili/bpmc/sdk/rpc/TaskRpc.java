@@ -67,17 +67,6 @@ public interface TaskRpc {
 	BaseOutput<String> complete(@ReqParam(value = "taskId") String taskId, @ReqParam(value = "assignee", required = false) String assignee);
 
 	/**
-	 * 抛出消息事件
-	 * 
-	 * @param messageName       必填
-	 * @param processInstanceId 必填
-	 * @param variables
-	 */
-	@POST("/api/task/messageEventReceived")
-	BaseOutput<String> messageEventReceived(@ReqParam(value = "messageName") String messageName, @ReqParam(value = "processInstanceId") String processInstanceId,
-			@ReqParam(value = "variables", required = false) Map<String, Object> variables);
-
-	/**
 	 * 获取任务变量
 	 * 
 	 * @param taskId，必填
@@ -141,16 +130,5 @@ public interface TaskRpc {
 	 */
 	@POST("/api/task/listTaskIdentityByProcessInstanceIds")
 	BaseOutput<List<TaskIdentityDto>> listTaskIdentityByProcessInstanceIds(@VOBody List<String> processInstanceIds);
-
-	/**
-	 * 触发Java接收任务
-	 * @param processInstanceId
-	 * @param activityId
-	 * @param variables
-	 * @return
-	 */
-	@POST("/api/task/signal")
-	BaseOutput<String> signal(@ReqParam(value = "processInstanceId") String processInstanceId, @ReqParam(value = "activityId") String activityId, @ReqParam(value = "variables", required = false) Map<String, String> variables);
-
 
 }
