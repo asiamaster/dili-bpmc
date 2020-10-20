@@ -117,13 +117,14 @@ public class RuntimeApi {
 
     /**
      * 查看进度图片
-     * @param processDefinitionId
+     * 缺少流程定义id性能较差，并且无法查看已完成的流程
+     * @param processDefinitionId 流程定义id
      * @param processInstanceId
      * @param response
      * @throws Exception
      */
     @RequestMapping(value = "/progress", method = {RequestMethod.GET})
-    public void showImageByProcessInstanceId(@RequestParam String processDefinitionId, @RequestParam String processInstanceId, HttpServletResponse response) throws Exception{
+    public void showImageByProcessInstanceId(@RequestParam(required = false) String processDefinitionId, @RequestParam String processInstanceId, HttpServletResponse response) throws Exception{
         activitiService.processTracking(processDefinitionId, processInstanceId, response.getOutputStream());
     }
 

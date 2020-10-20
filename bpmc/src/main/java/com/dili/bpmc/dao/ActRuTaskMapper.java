@@ -31,7 +31,7 @@ public interface ActRuTaskMapper {
 	/**
 	 * 根据流程id批量查询任务候选组、候选人、办理人
 	 * 
-	 * @param processIntanceIds
+	 * @param processInstanceIds
 	 * @return
 	 */
 	List<TaskIdentityDto> listTaskIdentityByProcessInstanceIds(List<String> processInstanceIds);

@@ -2,6 +2,8 @@ package com.dili.bpmc.api;
 
 import com.alibaba.fastjson.JSON;
 import com.dili.bpmc.dao.ActRuTaskMapper;
+import com.dili.bpmc.dao.EventSubscriptionMapper;
+import com.dili.bpmc.sdk.domain.EventSubscriptionMapping;
 import com.dili.bpmc.sdk.domain.TaskMapping;
 import com.dili.bpmc.sdk.dto.TaskDto;
 import com.dili.bpmc.sdk.dto.TaskIdentityDto;
@@ -9,11 +11,13 @@ import com.dili.ss.domain.BaseOutput;
 import com.dili.ss.dto.DTOUtils;
 import com.google.common.collect.Lists;
 import org.activiti.engine.FormService;
+import org.activiti.engine.RepositoryService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
 import org.activiti.engine.form.TaskFormData;
 import org.activiti.engine.runtime.Execution;
 import org.activiti.engine.task.DelegationState;
+import org.activiti.engine.task.Event;
 import org.activiti.engine.task.Task;
 import org.activiti.engine.task.TaskQuery;
 import org.apache.commons.lang3.StringUtils;
@@ -47,6 +51,57 @@ public class TaskApi {
 	private FormService formService;
 	@Autowired
 	private ActRuTaskMapper actRuTaskMapper;
+	@Autowired
+	private RepositoryService repositoryService;
+	@Autowired
+	private EventSubscriptionMapper eventSubscriptionMapper;
+	/**
+	 * 根据流程实例id查询运行中的任务
+	 *
+	 * @param processInstanceId 必填
+	 */
+	@RequestMapping(value = "/listRunningTasks", method = { RequestMethod.GET, RequestMethod.POST })
+	public BaseOutput<List<TaskMapping>> listRunningTasks(@RequestParam String processInstanceId) {
+		try {
+			List<Task> list = taskService.createTaskQuery().processInstanceId(processInstanceId).active().list();
+			return BaseOutput.successData(DTOUtils.as(list, TaskMapping.class));
+		} catch (Exception e) {
+			return BaseOutput.failure(e.getMessage());
+		}
+	}
+
+	/**
+	 * 根据任务id查询边界事件
+	 *
+	 * @param processInstanceId 必填
+	 */
+	@RequestMapping(value = "/listEventSubscription", method = { RequestMethod.GET, RequestMethod.POST })
+	public BaseOutput<List<EventSubscriptionMapping>> listEventSubscription(@RequestParam String processInstanceId) {
+		try {
+			EventSubscriptionMapping eventSubscriptionMapping = DTOUtils.newInstance(EventSubscriptionMapping.class);
+			eventSubscriptionMapping.setProcessInstanceId(processInstanceId);
+			List<EventSubscriptionMapping> list = eventSubscriptionMapper.select(eventSubscriptionMapping);
+			return BaseOutput.successData(list);
+		} catch (Exception e) {
+			return BaseOutput.failure(e.getMessage());
+		}
+	}
+
+	/**
+	 * 根据流程实例id查询运行中的唯一任务的边界事件
+	 *
+	 * @param processInstanceId 必填
+	 */
+	@RequestMapping(value = "/listTaskEventsByProcessInstanceId", method = { RequestMethod.GET, RequestMethod.POST })
+	public BaseOutput<List<Event>> listTaskEventsByProcessInstanceId(@RequestParam String processInstanceId) {
+		try {
+			Task task = taskService.createTaskQuery().processInstanceId(processInstanceId).active().singleResult();
+			List<Event> taskEvents = taskService.getTaskEvents(task.getId());
+			return BaseOutput.successData(taskEvents);
+		} catch (Exception e) {
+			return BaseOutput.failure(e.getMessage());
+		}
+	}
 
 	/**
 	 * 申领(签收)任务
@@ -332,7 +387,7 @@ public class TaskApi {
 		if(task == null){
 			return BaseOutput.failure("任务不存在");
 		}
-		return BaseOutput.success().setData(DTOUtils.as(task, TaskMapping.class));
+		return BaseOutput.successData(DTOUtils.as(task, TaskMapping.class));
 	}
 
 	/**
