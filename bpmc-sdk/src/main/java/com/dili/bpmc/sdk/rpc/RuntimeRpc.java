@@ -5,7 +5,6 @@ import com.dili.ss.domain.BaseOutput;
 import com.dili.ss.retrofitful.annotation.GET;
 import com.dili.ss.retrofitful.annotation.ReqParam;
 import com.dili.ss.retrofitful.annotation.Restful;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.Map;
 
@@ -14,6 +13,26 @@ import java.util.Map;
  */
 @Restful("${bpmc.server.address}")
 public interface RuntimeRpc {
+
+	/**
+	 * 根据流程实例id或businessKey查询进行中的流程实例
+	 * 两个参数至少传一个
+	 * @param processInstanceId
+	 * @param businessKey
+	 * @return
+	 */
+	@GET("/api/runtime/findActiveProcessInstance")
+	BaseOutput<ProcessInstanceMapping> findActiveProcessInstance(@ReqParam(value = "processInstanceId", required = false) String processInstanceId, @ReqParam(value = "businessKey", required = false) String businessKey);
+
+	/**
+	 * 根据流程实例id或businessKey查询流程实例
+	 * 两个参数至少传一个
+	 * @param processInstanceId
+	 * @param businessKey
+	 * @return
+	 */
+	@GET("/api/runtime/findProcessInstance")
+	BaseOutput<ProcessInstanceMapping> findProcessInstance(@ReqParam(value = "processInstanceId", required = false) String processInstanceId, @ReqParam(value = "businessKey", required = false) String businessKey);
 
 	/**
 	 * 根据流程实例id更新businessKey

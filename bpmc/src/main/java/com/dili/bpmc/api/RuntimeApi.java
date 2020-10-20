@@ -5,8 +5,12 @@ import com.dili.ss.activiti.service.ActivitiService;
 import com.dili.ss.domain.BaseOutput;
 import com.dili.ss.dto.DTOUtils;
 import org.activiti.engine.*;
+import org.activiti.engine.history.HistoricProcessInstance;
+import org.activiti.engine.history.HistoricProcessInstanceQuery;
 import org.activiti.engine.history.HistoricTaskInstance;
 import org.activiti.engine.runtime.ProcessInstance;
+import org.activiti.engine.runtime.ProcessInstanceQuery;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +46,58 @@ public class RuntimeApi {
     private IdentityService identityService;
     @Autowired
     private ActivitiService activitiService;
+
+    /**
+     * 根据流程实例id或businessKey查询进行中的流程实例
+     * 两个参数至少传一个
+     * @param processInstanceId
+     * @param businessKey
+     * @return
+     */
+    @RequestMapping(value = "/findActiveProcessInstance", method = {RequestMethod.GET, RequestMethod.POST})
+    public BaseOutput<ProcessInstanceMapping> findActiveProcessInstance(@RequestParam(required = false) String processInstanceId, @RequestParam(required = false) String businessKey){
+        if(StringUtils.isBlank(processInstanceId) && StringUtils.isBlank(businessKey)){
+            return BaseOutput.failure("processInstanceId或businessKey不能为空");
+        }
+        ProcessInstanceQuery processInstanceQuery = runtimeService.createProcessInstanceQuery();
+        if(StringUtils.isNotBlank(processInstanceId)){
+            processInstanceQuery.processInstanceId(processInstanceId);
+        }
+        if(StringUtils.isNotBlank(businessKey)){
+            processInstanceQuery.processInstanceBusinessKey(businessKey);
+        }
+        ProcessInstance processInstance = processInstanceQuery.singleResult();
+        if(processInstance == null){
+            return BaseOutput.success("未查询到流程实例");
+        }
+        return BaseOutput.successData(DTOUtils.as(processInstance, ProcessInstanceMapping.class));
+    }
+
+    /**
+     * 根据流程实例id或businessKey查询流程实例
+     * 两个参数至少传一个
+     * @param processInstanceId
+     * @param businessKey
+     * @return
+     */
+    @RequestMapping(value = "/findProcessInstance", method = {RequestMethod.GET, RequestMethod.POST})
+    public BaseOutput<ProcessInstanceMapping> findProcessInstance(@RequestParam(required = false) String processInstanceId, @RequestParam(required = false) String businessKey){
+        if(StringUtils.isBlank(processInstanceId) && StringUtils.isBlank(businessKey)){
+            return BaseOutput.failure("processInstanceId或businessKey不能为空");
+        }
+        HistoricProcessInstanceQuery historicProcessInstanceQuery = historyService.createHistoricProcessInstanceQuery();
+        if(StringUtils.isNotBlank(processInstanceId)){
+            historicProcessInstanceQuery.processInstanceId(processInstanceId);
+        }
+        if(StringUtils.isNotBlank(businessKey)){
+            historicProcessInstanceQuery.processInstanceBusinessKey(businessKey);
+        }
+        HistoricProcessInstance historicProcessInstance = historicProcessInstanceQuery.singleResult();
+        if(historicProcessInstance == null){
+            return BaseOutput.success("未查询到流程实例");
+        }
+        return BaseOutput.successData(DTOUtils.as(historicProcessInstance, ProcessInstanceMapping.class));
+    }
 
     /**
      * 根据流程实例id更新businessKey
