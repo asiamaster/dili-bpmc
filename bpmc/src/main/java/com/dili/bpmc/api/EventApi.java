@@ -41,7 +41,7 @@ public class EventApi {
 	private EventSubscriptionMapper eventSubscriptionMapper;
 
 	/**
-	 * 根据条件查询边界事件
+	 * 根据条件查询运行时边界事件
 	 * @return
 	 */
 	@RequestMapping(value = "/listEventSubscription", method = { RequestMethod.GET, RequestMethod.POST })
