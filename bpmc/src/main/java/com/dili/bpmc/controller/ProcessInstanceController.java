@@ -3,7 +3,7 @@ package com.dili.bpmc.controller;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.serializer.SerializerFeature;
-import com.dili.bpmc.domain.ProcessInstanceQueryDto;
+import com.dili.bpmc.sdk.dto.ProcessInstanceQueryDto;
 import com.dili.ss.activiti.service.ActivitiService;
 import com.dili.ss.domain.BaseOutput;
 import com.dili.ss.domain.EasyuiPageOutput;
@@ -179,14 +179,20 @@ public class ProcessInstanceController {
         EasyuiPageOutput easyuiPageOutput = new EasyuiPageOutput();
         int firstResult = (param.getPage()-1)*param.getRows();
         ProcessInstanceQuery query = runtimeService.createProcessInstanceQuery().active();
-        if(StringUtils.isNotEmpty(param.getProcessInstanceId())){
+        if(StringUtils.isNotBlank(param.getProcessInstanceId())){
             query.processInstanceId(param.getProcessInstanceId());
         }
-        if(StringUtils.isNotEmpty(param.getProcessDefinitionKey())){
+        if(StringUtils.isNotBlank(param.getProcessDefinitionKey())){
             query.processDefinitionKey(param.getProcessDefinitionKey());
         }
-        if(StringUtils.isNotEmpty(param.getBusinessKey())){
+        if(StringUtils.isNotBlank(param.getProcessDefinitionId())){
+            query.processDefinitionId(param.getProcessDefinitionId());
+        }
+        if(StringUtils.isNotBlank(param.getBusinessKey())){
             query.processInstanceBusinessKey(param.getBusinessKey());
+        }
+        if(StringUtils.isNotBlank(param.getSuperProcessInstanceId())){
+            query.superProcessInstanceId(param.getSuperProcessInstanceId());
         }
         //按流程实例id降序查询
         List<ProcessInstance> processInstances = query.orderByProcessInstanceId().desc().listPage(firstResult, param.getRows());

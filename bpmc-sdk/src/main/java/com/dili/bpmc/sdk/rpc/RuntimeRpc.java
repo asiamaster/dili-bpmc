@@ -1,10 +1,13 @@
 package com.dili.bpmc.sdk.rpc;
 
 import com.dili.bpmc.sdk.domain.ProcessInstanceMapping;
+import com.dili.bpmc.sdk.dto.HistoricProcessInstanceQueryDto;
+import com.dili.bpmc.sdk.dto.ProcessInstanceQueryDto;
 import com.dili.ss.domain.BaseOutput;
 import com.dili.ss.retrofitful.annotation.GET;
 import com.dili.ss.retrofitful.annotation.ReqParam;
 import com.dili.ss.retrofitful.annotation.Restful;
+import com.dili.ss.retrofitful.annotation.VOBody;
 
 import java.util.Map;
 
@@ -25,14 +28,22 @@ public interface RuntimeRpc {
 	BaseOutput<ProcessInstanceMapping> findActiveProcessInstance(@ReqParam(value = "processInstanceId", required = false) String processInstanceId, @ReqParam(value = "businessKey", required = false) String businessKey);
 
 	/**
-	 * 根据流程实例id或businessKey查询流程实例
+	 * 根据流程实例id或businessKey查询历史流程实例
 	 * 两个参数至少传一个
 	 * @param processInstanceId
 	 * @param businessKey
 	 * @return
 	 */
-	@GET("/api/runtime/findProcessInstance")
-	BaseOutput<ProcessInstanceMapping> findProcessInstance(@ReqParam(value = "processInstanceId", required = false) String processInstanceId, @ReqParam(value = "businessKey", required = false) String businessKey);
+	@GET("/api/runtime/findHistoricProcessInstance")
+	BaseOutput<ProcessInstanceMapping> findHistoricProcessInstance(@ReqParam(value = "processInstanceId", required = false) String processInstanceId, @ReqParam(value = "businessKey", required = false) String businessKey);
+
+	/**
+	 * 查询历史流程实例列表
+	 * @param historicProcessInstanceQueryDto
+	 * @return
+	 */
+	@GET("/api/runtime/listHistoricProcessInstance")
+	BaseOutput<ProcessInstanceMapping> listHistoricProcessInstance(@VOBody HistoricProcessInstanceQueryDto historicProcessInstanceQueryDto);
 
 	/**
 	 * 根据流程实例id更新businessKey
