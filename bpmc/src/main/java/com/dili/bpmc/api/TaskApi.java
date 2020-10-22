@@ -1,5 +1,35 @@
 package com.dili.bpmc.api;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.activiti.engine.FormService;
+import org.activiti.engine.IdentityService;
+import org.activiti.engine.RepositoryService;
+import org.activiti.engine.RuntimeService;
+import org.activiti.engine.TaskService;
+import org.activiti.engine.form.TaskFormData;
+import org.activiti.engine.identity.Group;
+import org.activiti.engine.runtime.Execution;
+import org.activiti.engine.task.DelegationState;
+import org.activiti.engine.task.Task;
+import org.activiti.engine.task.TaskQuery;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.alibaba.fastjson.JSON;
 import com.dili.bpmc.dao.ActRuTaskMapper;
 import com.dili.bpmc.dao.EventSubscriptionMapper;
@@ -9,25 +39,6 @@ import com.dili.bpmc.sdk.dto.TaskIdentityDto;
 import com.dili.ss.domain.BaseOutput;
 import com.dili.ss.dto.DTOUtils;
 import com.google.common.collect.Lists;
-import org.activiti.engine.FormService;
-import org.activiti.engine.RepositoryService;
-import org.activiti.engine.RuntimeService;
-import org.activiti.engine.TaskService;
-import org.activiti.engine.form.TaskFormData;
-import org.activiti.engine.runtime.Execution;
-import org.activiti.engine.task.DelegationState;
-import org.activiti.engine.task.Task;
-import org.activiti.engine.task.TaskQuery;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-
-import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
 
 /**
  * 任务接口
@@ -53,6 +64,8 @@ public class TaskApi {
 	private RepositoryService repositoryService;
 	@Autowired
 	private EventSubscriptionMapper eventSubscriptionMapper;
+	@Autowired
+	private IdentityService identityService;
 	/**
 	 * 根据流程实例id查询运行中的任务
 	 *
@@ -107,7 +120,7 @@ public class TaskApi {
 		if (StringUtils.isBlank(task.getAssignee())) {
 			return BaseOutput.failure("任务还未认领");
 		}
-		taskService.complete(taskId, (Map)variables);
+		taskService.complete(taskId, (Map) variables);
 		return BaseOutput.successData(taskId);
 	}
 
@@ -203,7 +216,7 @@ public class TaskApi {
 	public BaseOutput<String> resolve(@RequestParam String taskId, @RequestParam Map variables, HttpServletRequest request) {
 		// 根据taskId提取任务
 		Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
-		if(task == null){
+		if (task == null) {
 			return BaseOutput.failure("任务不存在");
 		}
 		if (StringUtils.isNotBlank(task.getOwner())) {
@@ -330,7 +343,6 @@ public class TaskApi {
 		return BaseOutput.success();
 	}
 
-
 	/**
 	 * 获取任务变量
 	 * 
@@ -352,7 +364,7 @@ public class TaskApi {
 	@RequestMapping(value = "/getById", method = { RequestMethod.GET, RequestMethod.POST })
 	public BaseOutput<TaskMapping> getById(@RequestParam String taskId) {
 		Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
-		if(task == null){
+		if (task == null) {
 			return BaseOutput.failure("任务不存在");
 		}
 		return BaseOutput.successData(DTOUtils.as(task, TaskMapping.class));
@@ -385,6 +397,9 @@ public class TaskApi {
 		}
 		if (StringUtils.isNotBlank(taskDto.getCandidateUser())) {
 			taskQuery.taskCandidateUser(taskDto.getCandidateUser());
+		}
+		if (CollectionUtils.isNotEmpty(taskDto.getCandidateGroups())) {
+			taskQuery.taskCandidateGroupIn(taskDto.getCandidateGroups());
 		}
 		if (taskDto.getProcessVariables() != null) {
 			for (Map.Entry<String, Object> entry : taskDto.getProcessVariables().entrySet()) {
@@ -442,6 +457,41 @@ public class TaskApi {
 	@PostMapping("/listTaskIdentityByProcessInstanceId")
 	public BaseOutput<List<TaskIdentityDto>> listTaskIdentityByProcessInstanceId(@RequestBody String processIntanceIds) {
 		return BaseOutput.successData(this.actRuTaskMapper.listTaskIdentityByProcessInstanceIds(Lists.newArrayList(processIntanceIds)));
+	}
+
+	/**
+	 * 查询用户任务
+	 * 
+	 * @param userId               用户id
+	 * @param processDefinitionKey 流程定义key
+	 * @return
+	 */
+	@RequestMapping(value = "/listUserTask", method = { RequestMethod.GET, RequestMethod.POST })
+	public BaseOutput<List<TaskMapping>> listUserTask(@RequestParam Long userId, @RequestParam String processDefinitionKey) {
+		TaskQuery taskQuery = taskService.createTaskQuery();
+		if (StringUtils.isNotBlank(processDefinitionKey)) {
+			taskQuery.processDefinitionKey(processDefinitionKey);
+		}
+		taskQuery.taskAssignee(userId.toString());
+		List<Task> taskList = taskQuery.list();
+		taskQuery = taskService.createTaskQuery();
+		if (StringUtils.isNotBlank(processDefinitionKey)) {
+			taskQuery.processDefinitionKey(processDefinitionKey);
+		}
+		taskQuery.taskCandidateUser(userId.toString());
+		taskList.addAll(taskQuery.list());
+		List<Group> list = identityService.createGroupQuery().groupMember(userId.toString()).list();
+		List<String> roleIds = new ArrayList<String>(list.size());
+		list.forEach(r -> roleIds.add(r.getId().toString()));
+		if (CollectionUtils.isNotEmpty(roleIds)) {
+			taskQuery = taskService.createTaskQuery();
+			if (StringUtils.isNotBlank(processDefinitionKey)) {
+				taskQuery.processDefinitionKey(processDefinitionKey);
+			}
+			taskQuery.taskCandidateGroupIn(roleIds);
+			taskList.addAll(taskQuery.list());
+		}
+		return BaseOutput.success().setData(DTOUtils.asInstance(taskList, TaskMapping.class));
 	}
 
 }

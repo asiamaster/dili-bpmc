@@ -87,6 +87,7 @@ public interface TaskRpc {
 
 	/**
 	 * 设置本地任务变量
+	 * 
 	 * @param taskId
 	 * @param variables
 	 * @return
@@ -130,5 +131,20 @@ public interface TaskRpc {
 	 */
 	@POST("/api/task/listTaskIdentityByProcessInstanceIds")
 	BaseOutput<List<TaskIdentityDto>> listTaskIdentityByProcessInstanceIds(@VOBody List<String> processInstanceIds);
+
+	/**
+	 * 触发Java接收任务
+	 * 
+	 * @param processInstanceId
+	 * @param activityId
+	 * @param variables
+	 * @return
+	 */
+	@POST("/api/task/signal")
+	BaseOutput<String> signal(@ReqParam(value = "processInstanceId") String processInstanceId, @ReqParam(value = "activityId") String activityId,
+			@ReqParam(value = "variables", required = false) Map<String, String> variables);
+
+	@POST("/api/task/listUserTask")
+	BaseOutput<List<TaskMapping>> listUserTask(@ReqParam("userId") Long userId, @ReqParam(value = "processDefinitionKey") String processDefinitionKey);
 
 }
