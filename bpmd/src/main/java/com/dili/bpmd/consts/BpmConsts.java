@@ -19,6 +19,11 @@ public class BpmConsts {
     public static final String PROCESS_DEFINITION_KEY = "rentalOrderProcess";
 
     /**
+     * 订单动态业务流程标识，用于启动流程
+     */
+    public static final String DYNA_PROCESS_DEFINITION_KEY = "rentalBusinessProcess";
+
+    /**
      * 订单生效时间
      */
     public static final String FIRE_TIME = "fireTime";

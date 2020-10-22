@@ -12,6 +12,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -77,6 +78,7 @@ public class EventApi {
 	 * @param variables
 	 */
 	@RequestMapping(value = "/signal", method = { RequestMethod.GET, RequestMethod.POST })
+	@Transactional
 	public BaseOutput<String> signal(@RequestParam String activityId, @RequestParam String processInstanceId, @RequestParam Map variables) {
 		try {
 			Execution execution = runtimeService.createExecutionQuery().processInstanceId(processInstanceId).activityId(activityId)// 当前活动的id，对应receiveTask.bpmn文件中的活动节点的id的属性值
@@ -101,6 +103,7 @@ public class EventApi {
 	 * @param variables
 	 */
 	@RequestMapping(value = "/signalEventReceived", method = { RequestMethod.GET, RequestMethod.POST })
+	@Transactional
 	public BaseOutput<String> signalEventReceived(@RequestParam String signalName, @RequestParam(required = false) String executionId, @RequestParam(required = false) String processInstanceId, @RequestParam Map variables) {
 		try {
 			//首先根据executionId触发信号事件
@@ -131,6 +134,7 @@ public class EventApi {
 	 * @param variables
 	 */
 	@RequestMapping(value = "/messageEventReceived", method = { RequestMethod.GET, RequestMethod.POST })
+	@Transactional
 	public BaseOutput<String> messageEventReceived(@RequestParam String messageName,@RequestParam String processInstanceId, @RequestParam Map<String, Object> variables) {
 		try {
 			Execution execution = runtimeService.createExecutionQuery().messageEventSubscriptionName(messageName).processInstanceId(processInstanceId).singleResult();

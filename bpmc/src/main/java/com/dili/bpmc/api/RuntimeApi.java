@@ -1,20 +1,23 @@
 package com.dili.bpmc.api;
 
 import com.dili.bpmc.sdk.domain.ProcessInstanceMapping;
+import com.dili.bpmc.sdk.dto.HistoricProcessInstanceQueryDto;
 import com.dili.ss.activiti.service.ActivitiService;
 import com.dili.ss.domain.BaseOutput;
 import com.dili.ss.dto.DTOUtils;
 import org.activiti.engine.*;
 import org.activiti.engine.history.HistoricProcessInstance;
 import org.activiti.engine.history.HistoricProcessInstanceQuery;
-import org.activiti.engine.history.HistoricTaskInstance;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.runtime.ProcessInstanceQuery;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -55,7 +58,7 @@ public class RuntimeApi {
      * @return
      */
     @RequestMapping(value = "/findActiveProcessInstance", method = {RequestMethod.GET, RequestMethod.POST})
-    public BaseOutput<ProcessInstanceMapping> findActiveProcessInstance(@RequestParam(required = false) String processInstanceId, @RequestParam(required = false) String businessKey){
+    public BaseOutput<ProcessInstanceMapping> findActiveProcessInstance(@RequestParam(required = false) String processInstanceId, @RequestParam(required = false) String businessKey, @RequestParam(required = false) String superProcessInstanceId){
         if(StringUtils.isBlank(processInstanceId) && StringUtils.isBlank(businessKey)){
             return BaseOutput.failure("processInstanceId或businessKey不能为空");
         }
@@ -66,11 +69,14 @@ public class RuntimeApi {
         if(StringUtils.isNotBlank(businessKey)){
             processInstanceQuery.processInstanceBusinessKey(businessKey);
         }
+        if(StringUtils.isNotBlank(superProcessInstanceId)){
+            processInstanceQuery.superProcessInstanceId(superProcessInstanceId);
+        }
         ProcessInstance processInstance = processInstanceQuery.singleResult();
         if(processInstance == null){
             return BaseOutput.success("未查询到流程实例");
         }
-        return BaseOutput.successData(DTOUtils.as(processInstance, ProcessInstanceMapping.class));
+        return BaseOutput.successData(DTOUtils.asInstance(processInstance, ProcessInstanceMapping.class));
     }
 
     /**
@@ -78,10 +84,11 @@ public class RuntimeApi {
      * 两个参数至少传一个
      * @param processInstanceId
      * @param businessKey
+     * @param superProcessInstanceId 父流程实例id
      * @return
      */
-    @RequestMapping(value = "/findProcessInstance", method = {RequestMethod.GET, RequestMethod.POST})
-    public BaseOutput<ProcessInstanceMapping> findProcessInstance(@RequestParam(required = false) String processInstanceId, @RequestParam(required = false) String businessKey){
+    @RequestMapping(value = "/findHistoricProcessInstance", method = {RequestMethod.GET, RequestMethod.POST})
+    public BaseOutput<ProcessInstanceMapping> findHistoricProcessInstance(@RequestParam(required = false) String processInstanceId, @RequestParam(required = false) String businessKey, @RequestParam(required = false) String superProcessInstanceId){
         if(StringUtils.isBlank(processInstanceId) && StringUtils.isBlank(businessKey)){
             return BaseOutput.failure("processInstanceId或businessKey不能为空");
         }
@@ -92,11 +99,47 @@ public class RuntimeApi {
         if(StringUtils.isNotBlank(businessKey)){
             historicProcessInstanceQuery.processInstanceBusinessKey(businessKey);
         }
+        if(StringUtils.isNotBlank(superProcessInstanceId)){
+            historicProcessInstanceQuery.superProcessInstanceId(superProcessInstanceId);
+        }
         HistoricProcessInstance historicProcessInstance = historicProcessInstanceQuery.singleResult();
         if(historicProcessInstance == null){
             return BaseOutput.success("未查询到流程实例");
         }
-        return BaseOutput.successData(DTOUtils.as(historicProcessInstance, ProcessInstanceMapping.class));
+        return BaseOutput.successData(DTOUtils.asInstance(historicProcessInstance, ProcessInstanceMapping.class));
+    }
+
+    /**
+     * 查询历史流程实例列表
+     * @param historicProcessInstanceQueryDto
+     * @return
+     */
+    @RequestMapping(value = "/listHistoricProcessInstance", method = {RequestMethod.GET, RequestMethod.POST})
+    public BaseOutput<List<ProcessInstanceMapping>> listProcessInstance(HistoricProcessInstanceQueryDto historicProcessInstanceQueryDto){
+        HistoricProcessInstanceQuery historicProcessInstanceQuery = historyService.createHistoricProcessInstanceQuery();
+        if(StringUtils.isNotBlank(historicProcessInstanceQueryDto.getProcessInstanceId())){
+            historicProcessInstanceQuery.processInstanceId(historicProcessInstanceQueryDto.getProcessInstanceId());
+        }
+        if(StringUtils.isNotBlank(historicProcessInstanceQueryDto.getProcessDefinitionKey())){
+            historicProcessInstanceQuery.processDefinitionKey(historicProcessInstanceQueryDto.getProcessDefinitionKey());
+        }
+        if(StringUtils.isNotBlank(historicProcessInstanceQueryDto.getProcessDefinitionId())){
+            historicProcessInstanceQuery.processDefinitionId(historicProcessInstanceQueryDto.getProcessDefinitionId());
+        }
+        if(StringUtils.isNotBlank(historicProcessInstanceQueryDto.getBusinessKey())){
+            historicProcessInstanceQuery.processInstanceBusinessKey(historicProcessInstanceQueryDto.getBusinessKey());
+        }
+        if(StringUtils.isNotBlank(historicProcessInstanceQueryDto.getSuperProcessInstanceId())){
+            historicProcessInstanceQuery.superProcessInstanceId(historicProcessInstanceQueryDto.getSuperProcessInstanceId());
+        }
+        if(historicProcessInstanceQueryDto.getFinished() != null){
+            if(historicProcessInstanceQueryDto.getFinished()){
+                historicProcessInstanceQuery.finished();
+            }else{
+                historicProcessInstanceQuery.unfinished();
+            }
+        }
+        return BaseOutput.successData(DTOUtils.asInstance(historicProcessInstanceQuery.list(), ProcessInstanceMapping.class));
     }
 
     /**
@@ -126,7 +169,7 @@ public class RuntimeApi {
 //        用来设置启动流程的人员ID，引擎会自动把用户ID保存到activiti:initiator中
         identityService.setAuthenticatedUserId(userId);
         ProcessInstance processInstance = runtimeService.startProcessInstanceByKey(processDefinitionKey, businessKey, variables);
-        return BaseOutput.success().setData(DTOUtils.as(processInstance, ProcessInstanceMapping.class));
+        return BaseOutput.success().setData(DTOUtils.asInstance(processInstance, ProcessInstanceMapping.class));
     }
 
     /**
@@ -143,7 +186,7 @@ public class RuntimeApi {
 //        用来设置启动流程的人员ID，引擎会自动把用户ID保存到activiti:initiator中
         identityService.setAuthenticatedUserId(userId);
         ProcessInstance processInstance = runtimeService.startProcessInstanceById(processDefinitionId, businessKey, variables);
-        return BaseOutput.success().setData(DTOUtils.as(processInstance, ProcessInstanceMapping.class));
+        return BaseOutput.success().setData(DTOUtils.asInstance(processInstance, ProcessInstanceMapping.class));
     }
 
     /**

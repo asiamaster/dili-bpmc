@@ -18,7 +18,6 @@ import com.dili.ss.base.BaseServiceImpl;
 import com.dili.ss.constant.ResultCode;
 import com.dili.ss.domain.BaseOutput;
 import com.dili.ss.dto.DTOUtils;
-import com.dili.ss.exception.AppException;
 import com.dili.ss.exception.BusinessException;
 import com.dili.ss.exception.ParamErrorException;
 import com.dili.uap.sdk.domain.UserTicket;
@@ -73,7 +72,7 @@ public class OrdersServiceImpl extends BaseServiceImpl<Orders, Long> implements 
             throw new NotLoginException();
         }
         //流程启动参数设置
-        Map<String, Object> variables = new HashMap<>(1);
+        Map<String, Object> variables = new HashMap<>(2);
         variables.put(BpmConsts.ORDER_CODE_KEY, orders.getCode());
         // 启动流程，因为订单要设置流程实例id,所以先启动流程
         // 如果插入订单失败，该流程作废，不影响订单下次创建。
@@ -88,6 +87,59 @@ public class OrdersServiceImpl extends BaseServiceImpl<Orders, Long> implements 
         //创建订单，记录流程实例id和流程定义id
         insertSelective(orders);
         return BaseOutput.success("新增成功");
+    }
+
+    @Override
+    @Transactional
+    public BaseOutput createDyna(Orders orders) {
+        UserTicket userTicket = SessionContext.getSessionContext().getUserTicket();
+        if (userTicket == null) {
+            throw new NotLoginException();
+        }
+        //流程启动参数设置
+        Map<String, Object> variables = new HashMap<>(2);
+        variables.put("businessKey", orders.getCode());
+        // 启动流程，因为订单要设置流程实例id,所以先启动流程
+        // 如果插入订单失败，该流程作废，不影响订单下次创建。
+        BaseOutput<ProcessInstanceMapping> processInstanceOutput = runtimeRpc.startProcessInstanceByKey(BpmConsts.DYNA_PROCESS_DEFINITION_KEY, orders.getCode(), userTicket.getId().toString(), variables);
+        if(!processInstanceOutput.isSuccess()){
+            return BaseOutput.failure(processInstanceOutput.getMessage());
+        }
+        ProcessInstanceMapping processInstance = processInstanceOutput.getData();
+        orders.setProcessDefinitionId(processInstance.getProcessDefinitionId());
+        orders.setProcessInstanceId(processInstance.getProcessInstanceId());
+        orders.setState(OrderState.Create.getCode());
+        //创建订单，记录流程实例id和流程定义id
+        insertSelective(orders);
+        return BaseOutput.success("新增成功");
+    }
+
+    @Override
+    @Transactional
+    public BaseOutput submitDyna(String code, String processInstanceId) {
+        Orders orders = DTOUtils.newInstance(Orders.class);
+        orders.setState(OrderState.Submit.getCode());
+        updateSelectiveByCode(code, orders);
+        HashMap<String, String> param = new HashMap<>(2);
+        param.put("content", "提交订单["+code+"]");
+        return eventRpc.messageEventReceived("submitEvent", processInstanceId, null);
+    }
+
+    @Override
+    @Transactional
+    public BaseOutput submitApproval(String code, String processInstanceId) {
+        UserTicket userTicket = SessionContext.getSessionContext().getUserTicket();
+        if (userTicket == null) {
+            throw new NotLoginException();
+        }
+        Orders orders = DTOUtils.newInstance(Orders.class);
+        orders.setState(OrderState.Approval.getCode());
+        updateSelectiveByCode(code, orders);
+        HashMap<String, String> param = new HashMap<>(4);
+        param.put("content", "提交审批，编号["+code+"]");
+        param.put("firmId", userTicket.getFirmId().toString());
+        param.put("businessKey", code);
+        return eventRpc.messageEventReceived("submitApprovalEvent", processInstanceId, null);
     }
 
     @Override
@@ -107,11 +159,11 @@ public class OrdersServiceImpl extends BaseServiceImpl<Orders, Long> implements 
     @Transactional
     public BaseOutput settle(String code, Date effectiveTime, Date deadTime, String taskId) {
         Orders orders = DTOUtils.newInstance(Orders.class);
-        orders.setState(OrderState.Payed.getCode());
+        orders.setState(OrderState.Paid.getCode());
         orders.setEffectiveTime(effectiveTime);
         orders.setDeadTime(deadTime);
         updateSelectiveByCode(code, orders);
-        Map<String, String> variables = new HashMap<>(2);
+        Map<String, String> variables = new HashMap<>(4);
         variables.put(BpmConsts.ORDER_CODE_KEY, code);
         //设置ISO8601格式的订单生效时间，用于流程中的定时器
         variables.put(BpmConsts.FIRE_TIME, DateUtils.getISO8601TimeDate(effectiveTime));
@@ -120,6 +172,42 @@ public class OrdersServiceImpl extends BaseServiceImpl<Orders, Long> implements 
         localVariables.put("agree", "true");
         taskRpc.setVariablesLocal(taskId, localVariables);
         return taskRpc.complete(taskId, variables);
+    }
+
+    @Override
+    @Transactional
+    public BaseOutput paid(Long id, String processInstanceId) {
+        Orders orders = DTOUtils.newInstance(Orders.class);
+        orders.setState(OrderState.Paid.getCode());
+        orders.setId(id);
+        updateSelective(orders);
+        return eventRpc.messageEventReceived("paidEvent", processInstanceId, null);
+    }
+
+    @Override
+    @Transactional
+    public BaseOutput expired(Long id, String processInstanceId) {
+        Orders orders = DTOUtils.newInstance(Orders.class);
+        orders.setState(OrderState.Expired.getCode());
+        orders.setId(id);
+        updateSelective(orders);
+        return eventRpc.signal(processInstanceId, "notActive", null);
+    }
+
+    @Override
+    @Transactional
+    public BaseOutput supplement(String processInstanceId) {
+        return eventRpc.messageEventReceived("supplementEvent", processInstanceId, null);
+    }
+
+    @Override
+    @Transactional
+    public BaseOutput withdraw(Long id, String processInstanceId) {
+        Orders orders = DTOUtils.newInstance(Orders.class);
+        orders.setState(OrderState.Create.getCode());
+        orders.setId(id);
+        updateSelective(orders);
+        return eventRpc.messageEventReceived("withdrawEvent", processInstanceId, null);
     }
 
     @Override
@@ -175,6 +263,17 @@ public class OrdersServiceImpl extends BaseServiceImpl<Orders, Long> implements 
 //        if(!output.isSuccess()){
 //            throw new BusinessException(ResultCode.DATA_ERROR, output.getMessage());
 //        }
+    }
+
+    @Override
+    @Transactional
+    public BaseOutput cancelDyna(Long id, String processInstanceId) {
+        Orders orders = DTOUtils.newInstance(Orders.class);
+        orders.setState(OrderState.Cancel.getCode());
+        orders.setId(id);
+        updateSelective(orders);
+        //发送消息通知流程
+        return eventRpc.messageEventReceived("cancelEvent", processInstanceId, null);
     }
 
     @Override

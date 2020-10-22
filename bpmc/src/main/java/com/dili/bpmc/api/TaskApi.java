@@ -62,7 +62,7 @@ public class TaskApi {
 	public BaseOutput<List<TaskMapping>> listRunningTasks(@RequestParam String processInstanceId) {
 		try {
 			List<Task> list = taskService.createTaskQuery().processInstanceId(processInstanceId).active().list();
-			return BaseOutput.successData(DTOUtils.as(list, TaskMapping.class));
+			return BaseOutput.successData(DTOUtils.asInstance(list, TaskMapping.class));
 		} catch (Exception e) {
 			return BaseOutput.failure(e.getMessage());
 		}
@@ -355,7 +355,7 @@ public class TaskApi {
 		if(task == null){
 			return BaseOutput.failure("任务不存在");
 		}
-		return BaseOutput.successData(DTOUtils.as(task, TaskMapping.class));
+		return BaseOutput.successData(DTOUtils.asInstance(task, TaskMapping.class));
 	}
 
 	/**

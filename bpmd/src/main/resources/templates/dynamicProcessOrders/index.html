@@ -1,0 +1,121 @@
+<#bs4Body>
+<style>
+    .w-200px{width: 200px!important;}
+    .w-100px{width: 100px!important;}
+</style>
+<!--
+ 内联元素:让元素排成一行显示出来，且高度和宽度由内容决定，不能用css控制
+ 块状元素:独立占一行
+ 内联元素与块状元素对立
+ 内联(inline)表单:表单排在一行显示，只有在from中指定  class="form-inline"即可让表单成内联显示
+      一定要添加 label 标签
+      如果你没有为每个输入控件设置 label 标签，屏幕阅读器将无法正确识别。对于这些内联表单，你可以通过为 label 设置 .sr-only 类将其隐藏。还有一些辅助技术提供label标签的替代方案，比如 aria-label、aria-labelledby 或 title 属性。如果这些都不存在，屏幕阅读器可能会采取使用 placeholder 属性，如果存在的话，使用占位符来替代其他的标记，但要注意，这种方法是不妥当的。
+-->
+<!--注意label中的for 与 input中的保持一致-->
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <nav>
+                <div id="nav" style="padding-left:15px;padding-top:10px;padding-bottom: 10px;" align="left">
+                    <#nav/>
+                </div>
+            </nav>
+            <form id="queryForm" role="form" class="form-inline" novalidate>
+                <div class="form-group mb-2 mr-5">
+                    <label for="code" class="justify-content-end mr-2 w-100px">订单号:</label>
+                    <input type="text" class="form-control" name="code" id="code"/>
+                </div>
+                <div class="form-group mb-2 mr-5">
+                    <label for="processInstanceId" class="justify-content-end mr-2 w-100px">流程实例id:</label>
+                    <input type="text" class="form-control" name="processInstanceId" id="processInstanceId"/>
+                </div>
+                <div class="form-group mb-2 mr-5">
+                    <label for="processDefinitionId" class="justify-content-end mr-2 w-100px">流程定义id:</label>
+                    <input type="text" class="form-control" name="processDefinitionId" id="processDefinitionId"/>
+                </div>
+                <div class="btn-group mb-2">
+                    <button id="query" type="button" class="btn btn-success mr-1" onclick="queryDataHandler()"><i class="fa fa-search"></i> 查询</button>
+                    <button id="clear" type="button" class="btn btn-danger" onclick="javascript:$('#queryForm')[0].reset();"><i class="fa fa-trash-o"></i> 清除</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <div id="toolbar" class="btn-group" role="group" aria-label="Toolbar with button groups">
+                <button id="btn_add" type="button" class="btn btn-primary" onclick="openInsertHandler()"><i class="fa fa-plus"></i> 新增</button>
+                <button id="btn_edit" type="button" class="btn btn-primary" onclick="openUpdateHandler()"><i class="fa fa-pencil-square-o"></i> 修改</button>
+                <button id="btn_submit" type="button" class="btn btn-primary" onclick="doSubmitHandler()"><i class="fa fa-paper-plane"></i> 提交付款</button>
+                <button id="btn_submitApproval" type="button" class="btn btn-primary" onclick="doSubmitApprovalHandler()"><i class="fa fa-paper-plane"></i> 提交审批</button>
+                <button id="btn_cancel" type="button" class="btn btn-primary" onclick="doCancelHandler()"><i class="fa fa-ban"></i> 取消</button>
+                <button id="btn_progress" type="button" class="btn btn-primary" onclick="showProgress()"><i class="fa fa-eye"></i> 查看流程</button>
+                <button id="btn_paid" type="button" class="btn btn-primary" onclick="doPaidHandler()"><i class="fa fa-paper-plane"></i> 确认付款</button>
+                <button id="btn_supplement" type="button" class="btn btn-primary" onclick="doSupplementHandler()"><i class="fa fa-paint-brush"></i> 补录</button>
+                <button id="btn_withdraw" type="button" class="btn btn-primary" onclick="doWithdrawHandler()"><i class="fa fa-undo"></i> 撤回</button>
+                <button id="btn_expired" type="button" class="btn btn-primary" onclick="doExpiredHandler()"><i class="fa fa-hourglass-end"></i> 到期</button>
+            </div>
+            <table id="grid" data-toggle="table" data-title="业务号规则" class="table" data-toolbar="#toolbar" data-pagination="true" data-page-number="1" data-page-size="10"
+                   data-query-params="queryParams" data-side-pagination="server" data-method="POST" data-content-type="application/x-www-form-urlencoded" data-single-select="true"
+                   data-click-to-select="true" data-checkbox-header="true" data-unique-id="id" data-sort-name="id" data-sort-order="desc"  data-icons="bui.variable.icons" data-buttons-class="primary"
+                   data-show-refresh="true" data-show-fullscreen="true" data-show-columns="true" data-detail-view="false">
+                <thead>
+                <tr>
+                    <th data-width-unit="%" data-width="2" data-radio="true"></th>
+                    <th data-width-unit="%" data-width="10" data-field="code" data-sortable="true" data-align="center">
+                        订单号
+                    </th>
+                    <th data-width-unit="%" data-width="15" data-field="processInstanceId" data-sortable="true" data-align="center">
+                        流程实例id
+                    </th>
+                    <th data-width-unit="%" data-width="20" data-field="processDefinitionId" data-sortable="true" data-align="center">
+                        流程定义id
+                    </th>
+                    <th data-width-unit="%" data-width="8" data-provider="orderStateProvider" data-field="state" data-sortable="true" data-align="center" >
+                        订单状态
+                    </th>
+                    <th data-width-unit="%" data-width="15" data-field="created" data-sortable="true" data-align="center" data-provider="datetimeProvider">
+                        创建时间
+                    </th>
+                    <th data-width-unit="%" data-width="15" data-field="modified" data-sortable="true" data-align="center" data-provider="datetimeProvider">
+                        修改时间
+                    </th>
+                </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="_modal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <!--modal-lg modal-sm(默认) 通过设置mw大小调整宽度（如mw-100） modal-dialog-centered垂直居中-->
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <!-- 标题 -->
+                    <h5 class="modal-title" id="exampleModalLabel"></h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="_form" method="post" class="form-horizontal" action="">
+                        <input name="_id" id="_id" type="hidden">
+                        <div class="form-group row">
+                            <label class="col-2 col-form-label text-right" for="_code">订单号<i class="red">*</i></label>
+                            <div class="col-10">
+                                <input type="text" class="form-control" id="_code" name="_code" minlength="2" maxlength="20" placeholder="如：202010210001" required/>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                    <button type="button" class="btn btn-primary" onclick="saveOrUpdateHandler()">提交</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+</#bs4Body>
+<#dpo_js />

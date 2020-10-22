@@ -9,10 +9,12 @@ package com.dili.bpmd.consts;
 public enum OrderState {
     Create(1,"创建"),
     Submit(2,"已提交"),
-    Payed(3,"已缴费"),
+    Paid(3,"已缴费"),
     Valid(4,"已生效"),
     Cancel(5,"已取消"),
-    Invalid(6,"已作废");
+    Invalid(6,"已作废"),
+    Expired(7,"已到期"),
+    Approval(8,"审批中");
 
     private Integer code ;
 

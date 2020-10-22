@@ -15,6 +15,14 @@ import java.util.Date;
 public interface OrdersService extends BaseService<Orders, Long> {
 
     /**
+     * 根据订单号提交订单
+     * @param code
+     * @return
+     */
+    BaseOutput submit(String code, String taskId);
+
+
+    /**
      * 根据订单号查询
      * @param code
      * @return
@@ -25,22 +33,6 @@ public interface OrdersService extends BaseService<Orders, Long> {
      * @return
      */
     BaseOutput create(Orders orders);
-
-    /**
-     * 根据订单号提交订单
-     * @param code
-     * @return
-     */
-    BaseOutput submit(String code, String taskId);
-
-    /**
-     * 根据订单号结算订单
-     * @param code
-     * @param effectiveTime 生效时间
-     * @param deadTime 失败时间
-     * @return
-     */
-    BaseOutput settle(String code, Date effectiveTime, Date deadTime, String taskId);
 
     /**
      * 订单生效
@@ -70,6 +62,7 @@ public interface OrdersService extends BaseService<Orders, Long> {
      */
     BaseOutput cancel(Long id) throws BusinessException;
 
+
     /**
      * 插手处理流程
      * @param code 订单号
@@ -86,4 +79,81 @@ public interface OrdersService extends BaseService<Orders, Long> {
      * @return
      */
     BaseOutput<String> validateBusinessKey(String businessKey);
+
+    /**
+     * 根据订单号结算订单
+     * @param code
+     * @param effectiveTime 生效时间
+     * @param deadTime 失败时间
+     * @return
+     */
+    BaseOutput settle(String code, Date effectiveTime, Date deadTime, String taskId);
+
+
+    // ------------------------      动态业务流分割线     ------------------------
+
+    /**
+     * 动态业务流创建订单
+     * @param orders
+     * @return
+     */
+    BaseOutput createDyna(Orders orders);
+
+    /**
+     * 动态业务流提交订单
+     * @param code
+     * @param processInstanceId
+     * @return
+     */
+    BaseOutput submitDyna(String code, String processInstanceId);
+
+    /**
+     * 动态业务流提交审批
+     * @param code
+     * @param processInstanceId
+     * @return
+     */
+    BaseOutput submitApproval(String code, String processInstanceId);
+
+    /**
+     * 取消动态业务订单
+     * @param id
+     * @param processInstanceId
+     * @return
+     */
+    BaseOutput cancelDyna(Long id, String processInstanceId) throws BusinessException;
+
+    /**
+     * 动态业务流确认付款
+     * @param id
+     * @param processInstanceId
+     * @return
+     */
+    BaseOutput paid(Long id, String processInstanceId);
+
+    /**
+     * 动态业务流到期
+     * @param id
+     * @param processInstanceId
+     * @return
+     */
+    BaseOutput expired(Long id, String processInstanceId);
+
+    /**
+     * 动态业务流补录
+     * @param processInstanceId
+     * @return
+     */
+    BaseOutput supplement(String processInstanceId);
+
+    /**
+     * 动态业务流撤回
+     * @param id
+     * @param processInstanceId
+     * @return
+     */
+    BaseOutput withdraw(Long id, String processInstanceId);
+
+
+
 }
