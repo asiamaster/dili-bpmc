@@ -18,10 +18,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -71,7 +68,7 @@ public class DeploymentController {
      * @param response
      * @throws Exception
      */
-    @RequestMapping(value = "/img.action", method = {RequestMethod.GET})
+    @GetMapping(value = "/img.action")
     public void showImageByDeploymentId(@RequestParam String deploymentId, HttpServletResponse response) throws Exception{
         activitiService.showImageByDeploymentId(deploymentId, response);
 //        List<String> list = repositoryService.getDeploymentResourceNames(deploymentId);
@@ -100,7 +97,7 @@ public class DeploymentController {
      * @param deploymentId
      * @return
      */
-    @RequestMapping(value = "/delete.action", method = {RequestMethod.GET})
+    @GetMapping(value = "/delete.action")
     public void deleteDeployment(@RequestParam String deploymentId, HttpServletRequest request, HttpServletResponse response) throws IOException {
         activitiService.deleteDeployment(deploymentId);
         response.sendRedirect(request.getContextPath() + INDEX);
@@ -112,7 +109,7 @@ public class DeploymentController {
      * @return
      * @throws Exception
      */
-    @RequestMapping(value = "/deploy.action", method = {RequestMethod.GET})
+    @GetMapping(value = "/deploy.action")
     public void deploy(@RequestParam("modelId")String modelId, HttpServletRequest request, HttpServletResponse response) throws IOException, BusinessException {
         try {
             activitiService.deployByModelId(modelId);
@@ -131,7 +128,7 @@ public class DeploymentController {
      * @return
      * @throws IOException
      */
-    @RequestMapping(value = "/deployForm.action", method = {RequestMethod.GET})
+    @GetMapping(value = "/deployForm.action")
     @ResponseBody
     public BaseOutput<String> deployForm(@RequestParam("modelId")String modelId, HttpServletRequest request, HttpServletResponse response) throws IOException {
         Deployment deployment = activitiService.deployFormByModelId(modelId);
@@ -146,7 +143,7 @@ public class DeploymentController {
      * @param response
      * @throws IOException
      */
-    @RequestMapping(value = "/getRenderedStartForm.html", method = {RequestMethod.GET})
+    @GetMapping(value = "/getRenderedStartForm.html")
     public void getRenderedStartForm(@RequestParam("processDefinitionId")String processDefinitionId, HttpServletResponse response) throws IOException {
         Object template = formService.getRenderedStartForm(processDefinitionId);
         StringTemplateResourceLoader resourceLoader = new

@@ -6,8 +6,6 @@ import com.dili.ss.domain.BaseOutput;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
 import org.activiti.engine.runtime.Execution;
-import org.activiti.engine.task.Event;
-import org.activiti.engine.task.Task;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 事件接口
@@ -55,16 +54,14 @@ public class EventApi {
 	}
 
 	/**
-	 * 根据流程实例id查询运行中的唯一任务的边界事件
-	 *
-	 * @param processInstanceId 必填
+	 * 根据条件查询运行时边界事件名称列表
+	 * @return
 	 */
-	@RequestMapping(value = "/listTaskEventsByProcessInstanceId", method = { RequestMethod.GET, RequestMethod.POST })
-	public BaseOutput<List<Event>> listTaskEventsByProcessInstanceId(@RequestParam String processInstanceId) {
+	@RequestMapping(value = "/listEventName", method = { RequestMethod.GET, RequestMethod.POST })
+	public BaseOutput<List<String>> listEventName(EventSubscriptionMapping eventSubscriptionMapping) {
 		try {
-			Task task = taskService.createTaskQuery().processInstanceId(processInstanceId).active().singleResult();
-			List<Event> taskEvents = taskService.getTaskEvents(task.getId());
-			return BaseOutput.successData(taskEvents);
+			List<String> list = eventSubscriptionMapper.select(eventSubscriptionMapping).stream().map(t -> t.getEventName()).collect(Collectors.toList());
+			return BaseOutput.successData(list);
 		} catch (Exception e) {
 			return BaseOutput.failure(e.getMessage());
 		}
