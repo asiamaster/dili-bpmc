@@ -4,6 +4,7 @@ import com.dili.bpmc.sdk.rpc.EventRpc;
 import com.dili.bpmc.sdk.rpc.FormRpc;
 import com.dili.bpmc.sdk.rpc.HistoryRpc;
 import com.dili.bpmc.sdk.rpc.TaskRpc;
+import com.dili.bpmd.cache.BpmdCache;
 import com.dili.bpmd.domain.Orders;
 import com.dili.bpmd.service.OrdersService;
 import com.dili.ss.domain.BaseOutput;
@@ -12,6 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * 动态流转订单显示
@@ -55,6 +58,27 @@ public class DynamicProcessOrdersController {
     public @ResponseBody String listPage(Orders orders) throws Exception {
         orders.setYn(true);
         return ordersService.listEasyuiPageByExample(orders, true).toString();
+    }
+
+    /**
+     * 根据流程实例id查询当前事件名称列表
+     * @param processInstanceId
+     * @param state
+     * @return BaseOutput
+     */
+    @PostMapping(value="/listEventName.action")
+    @ResponseBody
+    public BaseOutput<List<String>> listEventName(@RequestParam String processInstanceId, @RequestParam Integer state) {
+        String cacheKey = processInstanceId + "_" + state;
+        if(BpmdCache.ordersEventCache.containsKey(cacheKey)){
+            return BaseOutput.successData(BpmdCache.ordersEventCache.get(cacheKey));
+        }
+        BaseOutput<List<String>> listBaseOutput = eventRpc.listEventName(processInstanceId);
+        if(!listBaseOutput.isSuccess()){
+            return BaseOutput.failure("调用流控中心远程接口失败:" + listBaseOutput.getMessage());
+        }
+        BpmdCache.ordersEventCache.put(cacheKey, listBaseOutput.getData());
+        return listBaseOutput;
     }
 
     /**

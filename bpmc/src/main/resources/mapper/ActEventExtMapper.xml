@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dili.bpmc.dao.ActEventExtMapper">
+  <resultMap id="BaseResultMap" type="com.dili.bpmc.domain.ActEventExt">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="activity_id" jdbcType="VARCHAR" property="activityId" />
+    <result column="event_type" jdbcType="VARCHAR" property="eventType" />
+    <result column="event_name" jdbcType="VARCHAR" property="eventName" />
+    <result column="process_definition_id" jdbcType="VARCHAR" property="processDefinitionId" />
+    <result column="process_definition_key" jdbcType="VARCHAR" property="processDefinitionKey" />
+    <result column="creater_id" jdbcType="BIGINT" property="createrId" />
+    <result column="modifier_id" jdbcType="BIGINT" property="modifierId" />
+    <result column="created" jdbcType="TIMESTAMP" property="created" />
+    <result column="modified" jdbcType="TIMESTAMP" property="modified" />
+    <result column="resource_code" jdbcType="VARCHAR" property="resourceCode" />
+    <result column="check_menu" jdbcType="TINYINT" property="checkMenu" />
+    <result column="html" jdbcType="VARCHAR" property="html" />
+    <result column="script" jdbcType="VARCHAR" property="script" />
+    <result column="handler_url" jdbcType="VARCHAR" property="handlerUrl" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    id, activity_id, event_type, event_name, process_definition_id, process_definition_key, 
+    creater_id, modifier_id, created, modified, resource_code, check_menu, html, script, 
+    handler_url
+  </sql>
+  <select id="selectBy" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    select 
+    <include refid="Base_Column_List" />
+    from act_event_ext
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <update id="updateBy" parameterType="com.dili.bpmc.domain.ActEventExt">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    update act_event_ext
+    <set>
+      <if test="activityId != null">
+        activity_id = #{activityId,jdbcType=VARCHAR},
+      </if>
+      <if test="eventType != null">
+        event_type = #{eventType,jdbcType=VARCHAR},
+      </if>
+      <if test="eventName != null">
+        event_name = #{eventName,jdbcType=VARCHAR},
+      </if>
+      <if test="processDefinitionId != null">
+        process_definition_id = #{processDefinitionId,jdbcType=VARCHAR},
+      </if>
+      <if test="processDefinitionKey != null">
+        process_definition_key = #{processDefinitionKey,jdbcType=VARCHAR},
+      </if>
+      <if test="createrId != null">
+        creater_id = #{createrId,jdbcType=BIGINT},
+      </if>
+      <if test="modifierId != null">
+        modifier_id = #{modifierId,jdbcType=BIGINT},
+      </if>
+      <if test="created != null">
+        created = #{created,jdbcType=TIMESTAMP},
+      </if>
+      <if test="modified != null">
+        modified = #{modified,jdbcType=TIMESTAMP},
+      </if>
+      <if test="resourceCode != null">
+        resource_code = #{resourceCode,jdbcType=VARCHAR},
+      </if>
+      <if test="checkMenu != null">
+        check_menu = #{checkMenu,jdbcType=TINYINT},
+      </if>
+      <if test="html != null">
+        html = #{html,jdbcType=VARCHAR},
+      </if>
+      <if test="script != null">
+        script = #{script,jdbcType=VARCHAR},
+      </if>
+      <if test="handlerUrl != null">
+        handler_url = #{handlerUrl,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+</mapper>

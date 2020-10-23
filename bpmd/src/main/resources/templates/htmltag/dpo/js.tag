@@ -251,6 +251,41 @@
         openUpdateHandler(row);
     });
 
-
+    //选中行事件
+    _grid.on('check.bs.table', function (e, row, $element) {
+        //先禁用所有按键
+        $('#toolbar button').attr('disabled', true);
+        //允许新增按钮
+        $('#btn_add').attr('disabled', false);
+        //有流程实例id就可以查看流程图
+        if(row.processInstanceId) {
+            $("#btn_progress").attr('disabled', false);
+        }
+        var url = "${contextPath}/dynamicProcessOrders/listEventName.action";
+        $.ajax({
+            type: "POST",
+            url: url,
+            data: {processInstanceId: row.processInstanceId, state: row.$_state},
+            processData: true,
+            dataType: "json",
+            async: true,
+            success: function (output) {
+                bui.loading.hide();
+                if (output.success) {
+                    for(var i in output.data){
+                        $("."+output.data[i]).attr('disabled', false);
+                    }
+                    _grid.bootstrapTable('refresh');
+                    _modal.modal('hide');
+                } else {
+                    bs4pop.alert(output.result, {type: 'error'});
+                }
+            },
+            error: function (a, b, c) {
+                bui.loading.hide();
+                bs4pop.alert('远程访问失败', {type: 'error'});
+            }
+        });
+    });
     /*****************************************自定义事件区 end**************************************/
 </script>
