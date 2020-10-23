@@ -144,6 +144,12 @@ public interface TaskRpc {
 	BaseOutput<String> signal(@ReqParam(value = "processInstanceId") String processInstanceId, @ReqParam(value = "activityId") String activityId,
 			@ReqParam(value = "variables", required = false) Map<String, String> variables);
 
+	/**
+	 * 查询用户任务
+	 * @param userId	用户id
+	 * @param processDefinitionKey	流程定义key
+	 * @return
+	 */
 	@POST("/api/task/listUserTask")
 	BaseOutput<List<TaskMapping>> listUserTask(@ReqParam("userId") Long userId, @ReqParam(value = "processDefinitionKey") String processDefinitionKey);
 
