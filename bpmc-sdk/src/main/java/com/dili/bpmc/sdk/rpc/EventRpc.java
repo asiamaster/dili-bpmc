@@ -27,7 +27,15 @@ public interface EventRpc {
 	 * @param processInstanceId 必填
 	 */
 	@GET("/api/event/listEventSubscription")
-	BaseOutput<List<EventSubscriptionMapping>> listEventSubscription(@ReqVOParam String processInstanceId);
+	BaseOutput<List<EventSubscriptionMapping>> listEventSubscription(@ReqParam("processInstanceId") String processInstanceId);
+
+	/**
+	 * 根据流程实例id查询边界事件名称列表
+	 *
+	 * @param processInstanceId 必填
+	 */
+	@GET("/api/event/listEventName")
+	BaseOutput<List<String>> listEventName(@ReqParam("processInstanceId") String processInstanceId);
 
 	/**
 	 * 抛出消息事件
