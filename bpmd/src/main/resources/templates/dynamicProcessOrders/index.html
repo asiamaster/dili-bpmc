@@ -52,7 +52,7 @@
                 <button id="btn_paid" type="button" class="btn btn-primary paidEvent" onclick="doPaidHandler()"><i class="fa fa-paper-plane"></i> 确认付款</button>
                 <button id="btn_supplement" type="button" class="btn btn-primary supplementEvent" onclick="doSupplementHandler()"><i class="fa fa-paint-brush"></i> 补录</button>
                 <button id="btn_withdraw" type="button" class="btn btn-primary withdrawEvent" onclick="doWithdrawHandler()"><i class="fa fa-undo"></i> 撤回</button>
-                <button id="btn_expired" type="button" class="btn btn-primary expiredEvent" onclick="doExpiredHandler()"><i class="fa fa-hourglass-end"></i> 到期</button>
+                <button id="btn_expired" type="button" class="btn btn-primary" onclick="doExpiredHandler()"><i class="fa fa-hourglass-end"></i> 到期</button>
             </div>
             <table id="grid" data-toggle="table" data-title="业务号规则" class="table" data-toolbar="#toolbar" data-pagination="true" data-page-number="1" data-page-size="10"
                    data-query-params="queryParams" data-side-pagination="server" data-method="POST" data-content-type="application/x-www-form-urlencoded" data-single-select="true"
@@ -100,6 +100,7 @@
                 <div class="modal-body">
                     <form id="_form" method="post" class="form-horizontal" action="">
                         <input name="_id" id="_id" type="hidden">
+                        <input name="_processInstanceId" id="_processInstanceId" type="hidden">
                         <div class="form-group row">
                             <label class="col-2 col-form-label text-right" for="_code">订单号<i class="red">*</i></label>
                             <div class="col-10">

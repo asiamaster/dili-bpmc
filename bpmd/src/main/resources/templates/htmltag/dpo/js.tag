@@ -257,10 +257,12 @@
         $('#toolbar button').attr('disabled', true);
         //允许新增按钮
         $('#btn_add').attr('disabled', false);
+        //允许到期按钮
+        $('#btn_expired').attr('disabled', false);
         //有流程实例id就可以查看流程图
-        if(row.processInstanceId) {
-            $("#btn_progress").attr('disabled', false);
-        }
+        // if(row.processInstanceId) {
+        //     $("#btn_progress").attr('disabled', false);
+        // }
         var url = "${contextPath}/dynamicProcessOrders/listEventName.action";
         $.ajax({
             type: "POST",

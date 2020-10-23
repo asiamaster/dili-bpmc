@@ -122,6 +122,9 @@ public class OrdersServiceImpl extends BaseServiceImpl<Orders, Long> implements 
         updateSelectiveByCode(code, orders);
         HashMap<String, String> param = new HashMap<>(2);
         param.put("content", "提交订单["+code+"]");
+//        runtimeRpc.setVariable(processInstanceId, "created", "action", "submit");
+//        runtimeRpc.setVariables(processInstanceId, "created", param);
+//        System.out.println(runtimeRpc.getVariables(processInstanceId, null).getData());
         return eventRpc.messageEventReceived("submitEvent", processInstanceId, null);
     }
 

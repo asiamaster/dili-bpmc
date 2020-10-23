@@ -8,8 +8,12 @@ import com.dili.ss.dto.DTOUtils;
 import org.activiti.engine.*;
 import org.activiti.engine.history.HistoricProcessInstance;
 import org.activiti.engine.history.HistoricProcessInstanceQuery;
+import org.activiti.engine.impl.persistence.entity.ExecutionEntity;
+import org.activiti.engine.runtime.Execution;
+import org.activiti.engine.runtime.ExecutionQuery;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.runtime.ProcessInstanceQuery;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -49,6 +54,104 @@ public class RuntimeApi {
     private IdentityService identityService;
     @Autowired
     private ActivitiService activitiService;
+
+    /**
+     * 获取流程变量
+     * @param processInstanceId
+     * @param activityId
+     * @return
+     */
+    @RequestMapping(value = "/getVariables", method = {RequestMethod.GET, RequestMethod.POST})
+    public BaseOutput<Map<String, Object>> getVariables(@RequestParam String processInstanceId, @RequestParam(required = false) String activityId){
+        try {
+            // 当前活动的id，对应receiveTask.bpmn文件中的活动节点的id的属性值
+            ExecutionQuery executionQuery = runtimeService.createExecutionQuery().processInstanceId(processInstanceId);
+            if(StringUtils.isNotBlank(activityId)){
+                executionQuery.activityId(activityId);
+            }
+            List<Execution> list = executionQuery.list();
+            if (CollectionUtils.isEmpty(list)) {
+                return BaseOutput.failure("执行["+processInstanceId + "." + activityId+"]不存在");
+            }
+            HashMap<String, Object> stringObjectHashMap = new HashMap<>();
+            list.forEach(t -> {
+                if(t.getActivityId() == null){
+                    return;
+                }
+                Map<String, Object> variables = runtimeService.getVariables(t.getId());
+                stringObjectHashMap.putAll(variables);
+            });
+            return BaseOutput.successData(stringObjectHashMap);
+        } catch (Exception e) {
+            return BaseOutput.failure(e.getMessage());
+        }
+    }
+
+    /**
+     * 设置流程变量
+     * @param processInstanceId
+     * @param activityId
+     * @param variables
+     * @return
+     */
+    @RequestMapping(value = "/setVariables", method = {RequestMethod.GET, RequestMethod.POST})
+    public BaseOutput setVariables(@RequestParam String processInstanceId, @RequestParam String activityId, @RequestParam Map<String, String> variables){
+        try {
+            // 当前活动的id，对应receiveTask.bpmn文件中的活动节点的id的属性值
+            Execution execution = runtimeService.createExecutionQuery().processInstanceId(processInstanceId).activityId(activityId)
+                    .singleResult();
+            if (execution == null) {
+                return BaseOutput.failure("执行["+processInstanceId + "." + activityId+"]不存在");
+            }
+            runtimeService.setVariables(execution.getId(), variables);
+            return BaseOutput.success();
+        } catch (Exception e) {
+            return BaseOutput.failure(e.getMessage());
+        }
+    }
+
+    /**
+     * 设置流程变量
+     * @param processInstanceId
+     * @param activityId
+     * @param key
+     * @param value
+     * @return
+     */
+    @RequestMapping(value = "/setVariable", method = {RequestMethod.GET, RequestMethod.POST})
+    public BaseOutput setVariable(@RequestParam String processInstanceId, @RequestParam String activityId, @RequestParam String key, @RequestParam String value){
+        try {
+            // 当前活动的id，对应receiveTask.bpmn文件中的活动节点的id的属性值
+            Execution execution = runtimeService.createExecutionQuery().processInstanceId(processInstanceId).activityId(activityId)
+                    .singleResult();
+            if (execution == null) {
+                return BaseOutput.failure("执行["+processInstanceId + "." + activityId+"]不存在");
+            }
+            runtimeService.setVariable(execution.getId(), key, value);
+            return BaseOutput.success();
+        } catch (Exception e) {
+            return BaseOutput.failure(e.getMessage());
+        }
+    }
+
+//    @RequestMapping(value = "/setVariables", method = {RequestMethod.GET, RequestMethod.POST})
+//    public BaseOutput setVariables(@RequestParam String executionId, @RequestParam Map<String, String> variables){
+//        try {
+//            runtimeService.setVariables(executionId, variables);
+//            return BaseOutput.success();
+//        } catch (Exception e) {
+//            return BaseOutput.failure(e.getMessage());
+//        }
+//    }
+//    @RequestMapping(value = "/setVariable", method = {RequestMethod.GET, RequestMethod.POST})
+//    public BaseOutput setVariables(@RequestParam String executionId, @RequestParam String key, @RequestParam String value){
+//        try {
+//            runtimeService.setVariable(executionId, key, value);
+//            return BaseOutput.success();
+//        } catch (Exception e) {
+//            return BaseOutput.failure(e.getMessage());
+//        }
+//    }
 
     /**
      * 根据流程实例id或businessKey查询进行中的流程实例

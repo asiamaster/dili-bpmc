@@ -4,10 +4,8 @@ import com.dili.bpmc.sdk.domain.ProcessInstanceMapping;
 import com.dili.bpmc.sdk.dto.HistoricProcessInstanceQueryDto;
 import com.dili.bpmc.sdk.dto.ProcessInstanceQueryDto;
 import com.dili.ss.domain.BaseOutput;
-import com.dili.ss.retrofitful.annotation.GET;
-import com.dili.ss.retrofitful.annotation.ReqParam;
-import com.dili.ss.retrofitful.annotation.Restful;
-import com.dili.ss.retrofitful.annotation.VOBody;
+import com.dili.ss.retrofitful.annotation.*;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.Map;
 
@@ -16,6 +14,36 @@ import java.util.Map;
  */
 @Restful("${bpmc.server.address}")
 public interface RuntimeRpc {
+
+	/**
+	 * 获取流程变量
+	 * @param processInstanceId
+	 * @param activityId
+	 * @return
+	 */
+	@GET("/api/runtime/getVariables")
+	BaseOutput<Map<String, Object>> getVariables(@ReqParam(value = "processInstanceId") String processInstanceId, @ReqParam(value = "activityId", required = false) String activityId);
+
+	/**
+	 * 设置流程变量
+	 * @param processInstanceId
+	 * @param activityId
+	 * @param variables
+	 * @return
+	 */
+	@POST("/api/runtime/setVariables")
+	BaseOutput setVariables(@ReqParam(value = "processInstanceId") String processInstanceId, @ReqParam(value = "activityId") String activityId, @ReqParam(value = "variables") Map<String, String> variables);
+
+	/**
+	 * 设置流程变量
+	 * @param processInstanceId
+	 * @param activityId
+	 * @param key
+	 * @param value
+	 * @return
+	 */
+	@GET("/api/runtime/setVariable")
+	BaseOutput setVariable(@ReqParam(value = "processInstanceId") String processInstanceId, @ReqParam(value = "activityId") String activityId, @ReqParam(value = "key") String key, @ReqParam(value = "value") String value);
 
 	/**
 	 * 根据流程实例id或businessKey查询进行中的流程实例

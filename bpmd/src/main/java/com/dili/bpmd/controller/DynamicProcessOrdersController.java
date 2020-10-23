@@ -1,9 +1,6 @@
 package com.dili.bpmd.controller;
 
-import com.dili.bpmc.sdk.rpc.EventRpc;
-import com.dili.bpmc.sdk.rpc.FormRpc;
-import com.dili.bpmc.sdk.rpc.HistoryRpc;
-import com.dili.bpmc.sdk.rpc.TaskRpc;
+import com.dili.bpmc.sdk.rpc.*;
 import com.dili.bpmd.cache.BpmdCache;
 import com.dili.bpmd.domain.Orders;
 import com.dili.bpmd.service.OrdersService;
@@ -14,7 +11,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 动态流转订单显示
@@ -37,7 +36,9 @@ public class DynamicProcessOrdersController {
     @SuppressWarnings("all")
     @Autowired
     EventRpc eventRpc;
-
+    @SuppressWarnings("all")
+    @Autowired
+    RuntimeRpc runtimeRpc;
     /**
      * 订单查询页面
      * @param modelMap
@@ -113,6 +114,11 @@ public class DynamicProcessOrdersController {
     @PostMapping(value="/update.action")
     @ResponseBody
     public BaseOutput update(Orders orders) {
+//        runtimeRpc.setVariable(orders.getProcessInstanceId(), "created", "action", "update");
+//        Map<String ,String> param = new HashMap<>();
+//        param.put("code", orders.getCode());
+//        runtimeRpc.setVariables(orders.getProcessInstanceId(), "created", param);
+//        System.out.println(runtimeRpc.getVariables(orders.getProcessInstanceId(), null));
         ordersService.updateSelective(orders);
         return BaseOutput.success("修改成功");
     }
