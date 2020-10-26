@@ -177,7 +177,7 @@ public class TaskController {
         List results = ValueProviderUtils.buildDataByProvider(param, list);
         easyuiPageOutput.setRows(results);
         Long total = taskQuery.count();
-        easyuiPageOutput.setTotal(total.intValue());
+        easyuiPageOutput.setTotal(total);
         return JSON.toJSONString(easyuiPageOutput, SerializerFeature.IgnoreErrorGetter);
     }
 
