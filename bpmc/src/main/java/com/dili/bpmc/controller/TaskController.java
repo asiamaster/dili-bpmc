@@ -1,6 +1,5 @@
 package com.dili.bpmc.controller;
 
-import bsh.StringUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -16,20 +15,17 @@ import com.dili.ss.activiti.service.ActivitiService;
 import com.dili.ss.domain.BaseOutput;
 import com.dili.ss.domain.EasyuiPageOutput;
 import com.dili.ss.dto.DTOUtils;
-import com.dili.ss.dto.IDTO;
-import com.dili.ss.exception.AppException;
 import com.dili.ss.metadata.ValueProviderUtils;
 import com.dili.ss.util.DateUtils;
-import com.dili.uap.sdk.domain.Role;
 import com.dili.uap.sdk.domain.UserTicket;
 import com.dili.uap.sdk.exception.NotLoginException;
-import com.dili.uap.sdk.rpc.RoleRpc;
 import com.dili.uap.sdk.session.SessionContext;
 import org.activiti.engine.*;
 import org.activiti.engine.form.TaskFormData;
 import org.activiti.engine.history.HistoricProcessInstance;
 import org.activiti.engine.history.HistoricTaskInstance;
 import org.activiti.engine.history.HistoricTaskInstanceQuery;
+import org.activiti.engine.identity.Group;
 import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.engine.runtime.Execution;
 import org.activiti.engine.runtime.ProcessInstance;
@@ -80,9 +76,6 @@ public class TaskController {
     private ActivitiService activitiService;
     @Autowired
     private ActFormService actFormService;
-    @Autowired
-    @SuppressWarnings("all")
-    private RoleRpc roleRpc;
     @Autowired
     @SuppressWarnings("all")
     private ActRuTaskMapper actRuTaskMapper;
@@ -514,30 +507,26 @@ public class TaskController {
 //        属主的任务
 //        （委托人）：受理人委托其他人操作该TASK的时候，受理人就成了委托人OWNER_，其他人就成了受理人ASSIGNEE_
         long tasksCount = taskService.createTaskQuery().taskOwner(userId).count();
-        BaseOutput<List<Role>> rolesOutput = roleRpc.listByUser(Long.valueOf(userId), null);
-        if(!rolesOutput.isSuccess()){
-            throw new AppException("远程查询角色失败");
-        }
+        List<Group> roles = identityService.createGroupQuery().groupMember(userId).list();
         //设置选择类别，用于高亮显示被选中的类别
         request.setAttribute("category", category);
         //队列任务
 //        候选用户组下的任务
         long queuedCount = 0;
-        List<Role> roles = rolesOutput.getData();
 
         //记录当前用户的所有用户组，用于查询左侧任务列表显示
         String[] groupIds = new String[roles.size()];
         for(int i=0; i<roles.size(); i++) {
-            Role role = roles.get(i);
-            groupIds[i] = role.getId().toString();
+            Group role = roles.get(i);
+            groupIds[i] = role.getId();
         }
         //用户组信息，用于队列右键菜单显示(注意，在用户有多个角色，并且多个角色都有相同的任务时会重复)
         Map<String, String> groupMap = new HashMap<>(roles.size());
         //统计每个用户组的任务数
-        for(Role role : roles) {
-            long count = taskService.createTaskQuery().taskCandidateGroup(role.getId().toString()).count();
+        for(Group role : roles) {
+            long count = taskService.createTaskQuery().taskCandidateGroup(role.getId()).count();
             queuedCount += count;
-            groupMap.put(role.getId().toString(), new StringBuilder().append(role.getRoleName()).append("[").append(count).append("]").toString());
+            groupMap.put(role.getId(), new StringBuilder().append(role.getName()).append("[").append(count).append("]").toString());
         }
         //队列右键菜单
         request.setAttribute("groupMap", groupMap);
@@ -648,7 +637,7 @@ public class TaskController {
             JSONObject jo = new JSONObject();
             jo.put("id", taskInfo.getId());
             if(taskInfo.getId().equals(taskId) || (StringUtils.isBlank(taskId) && i == 0)){
-                jo.put("text", "<div><div style=\"color:#007dc3;font-weight:bold;\"><b>·</b> " + taskInfo.getName() + "</div><span style=\"font-size:6px;\">" + DateUtils.format(taskInfo.getCreateTime()) + "</span></div>");
+                jo.put("text", "<div><div style=\"font-weight:bold;\"><b>·</b> " + taskInfo.getName() + "</div><span style=\"font-size:6px;\">" + DateUtils.format(taskInfo.getCreateTime()) + "</span></div>");
             }else {
                 jo.put("text", "<div><div><b>·</b> " + taskInfo.getName() + "</div><span style=\"font-size:6px;\">" + DateUtils.format(taskInfo.getCreateTime()) + "</span></div>");
             }
