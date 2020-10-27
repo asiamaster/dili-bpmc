@@ -5,17 +5,22 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import com.alibaba.fastjson.serializer.SerializerFeature;
+import com.dili.bpmc.cache.BpmcCache;
 import com.dili.bpmc.consts.BpmcConsts;
 import com.dili.bpmc.consts.TaskCategory;
 import com.dili.bpmc.dao.ActRuTaskMapper;
+import com.dili.bpmc.domain.ActTaskTitle;
+import com.dili.bpmc.dto.ActTaskTitleDto;
 import com.dili.bpmc.sdk.domain.ActForm;
 import com.dili.bpmc.sdk.dto.TaskDto;
 import com.dili.bpmc.service.ActFormService;
+import com.dili.bpmc.service.ActTaskTitleService;
 import com.dili.ss.activiti.service.ActivitiService;
 import com.dili.ss.domain.BaseOutput;
 import com.dili.ss.domain.EasyuiPageOutput;
 import com.dili.ss.dto.DTOUtils;
 import com.dili.ss.metadata.ValueProviderUtils;
+import com.dili.ss.util.BeanConver;
 import com.dili.ss.util.DateUtils;
 import com.dili.uap.sdk.domain.UserTicket;
 import com.dili.uap.sdk.exception.NotLoginException;
@@ -25,6 +30,7 @@ import org.activiti.engine.form.TaskFormData;
 import org.activiti.engine.history.HistoricProcessInstance;
 import org.activiti.engine.history.HistoricTaskInstance;
 import org.activiti.engine.history.HistoricTaskInstanceQuery;
+import org.activiti.engine.history.HistoricVariableInstance;
 import org.activiti.engine.identity.Group;
 import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.engine.runtime.Execution;
@@ -35,6 +41,8 @@ import org.activiti.engine.task.TaskInfo;
 import org.activiti.engine.task.TaskQuery;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.beetl.core.GroupTemplate;
+import org.beetl.core.Template;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +50,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -79,6 +88,11 @@ public class TaskController {
     @Autowired
     @SuppressWarnings("all")
     private ActRuTaskMapper actRuTaskMapper;
+    @Autowired
+    private ActTaskTitleService actTaskTitleService;
+
+    @Resource(name="StringGroupTemplate")
+    private GroupTemplate stringGroupTemplate;
 
     private final String INDEX = "/task/index.html";
 
@@ -112,7 +126,7 @@ public class TaskController {
                         @RequestParam(defaultValue = "inbox") String category,
                         @RequestParam(required = false) String groupId,
                          @RequestParam(required = false) String businessKey,
-                        HttpServletRequest request) {
+                        HttpServletRequest request) throws Exception {
         handleTaskCategory(category, taskId, groupId, businessKey, request);
         return "process/taskCenter";
     }
@@ -493,7 +507,7 @@ public class TaskController {
      * @param groupId 受邀用户组
      * @param businessKey 查询的业务号
      */
-    private void handleTaskCategory(String category, String taskId, String groupId, String businessKey, HttpServletRequest request){
+    private void handleTaskCategory(String category, String taskId, String groupId, String businessKey, HttpServletRequest request) throws Exception {
         UserTicket userTicket = SessionContext.getSessionContext().getUserTicket();
         if(userTicket == null){
             throw new NotLoginException();
@@ -507,7 +521,7 @@ public class TaskController {
 //        属主的任务
 //        （委托人）：受理人委托其他人操作该TASK的时候，受理人就成了委托人OWNER_，其他人就成了受理人ASSIGNEE_
         long tasksCount = taskService.createTaskQuery().taskOwner(userId).count();
-        List<Group> roles = identityService.createGroupQuery().groupMember(userId).list();
+        List<Group> groups = identityService.createGroupQuery().groupMember(userId).list();
         //设置选择类别，用于高亮显示被选中的类别
         request.setAttribute("category", category);
         //队列任务
@@ -515,15 +529,15 @@ public class TaskController {
         long queuedCount = 0;
 
         //记录当前用户的所有用户组，用于查询左侧任务列表显示
-        String[] groupIds = new String[roles.size()];
-        for(int i=0; i<roles.size(); i++) {
-            Group role = roles.get(i);
+        String[] groupIds = new String[groups.size()];
+        for(int i=0; i<groups.size(); i++) {
+            Group role = groups.get(i);
             groupIds[i] = role.getId();
         }
         //用户组信息，用于队列右键菜单显示(注意，在用户有多个角色，并且多个角色都有相同的任务时会重复)
-        Map<String, String> groupMap = new HashMap<>(roles.size());
+        Map<String, String> groupMap = new HashMap<>(groups.size());
         //统计每个用户组的任务数
-        for(Group role : roles) {
+        for(Group role : groups) {
             long count = taskService.createTaskQuery().taskCandidateGroup(role.getId()).count();
             queuedCount += count;
             groupMap.put(role.getId(), new StringBuilder().append(role.getName()).append("[").append(count).append("]").toString());
@@ -548,7 +562,7 @@ public class TaskController {
         //设置当前显示的任务，用于在点击时直接跳转到该任务
         TaskInfo task = null;
         //组装左侧任务列表
-        JSONArray ja;
+        JSONArray ja = null;
         //先判断是否已归档类型，单独处理
         if(TaskCategory.ARCHIVED.getCode().equals(category)){
             HistoricTaskInstanceQuery historicTaskInstanceQuery = historyService.createHistoricTaskInstanceQuery();
@@ -557,16 +571,22 @@ public class TaskController {
             }
             //只查50条已归档数据;
             List<HistoricTaskInstance> historicTaskInstances = historicTaskInstanceQuery.taskAssignee(userId).finished().orderByTaskCreateTime().desc().listPage(0, 50);
-            task = findTaskById(historicTaskInstances, taskId);
-            ja = buildTaskTreeList(historicTaskInstances, taskId);
+            if(CollectionUtils.isNotEmpty(historicTaskInstances)) {
+                task = findTaskById(historicTaskInstances, taskId);
+                ja = buildTaskTreeList(historicTaskInstances, taskId);
+            }
         }else {
             //判断有groupId，并且当前用户也有该组权限, 没有groupId则列出当前用户组下所有任务
             List<Task> tasks = containsGroupId(groupIds, groupId) ? listTaskByCategory(category, userId, businessKey, groupId) : listTaskByCategory(category, userId, businessKey, groupIds);
-            task = findTaskById(tasks, taskId);
-            ja = buildTaskTreeList(tasks, taskId);
+            if(CollectionUtils.isNotEmpty(tasks)) {
+                task = findTaskById(tasks, taskId);
+                ja = buildTaskTreeList(tasks, taskId);
+            }
         }
         //设置左侧任务列表
-        request.setAttribute("tasks", ja.toJSONString());
+        if(ja != null) {
+            request.setAttribute("tasks", ja.toJSONString());
+        }
         if (task == null) {
             return;
         }
@@ -587,6 +607,7 @@ public class TaskController {
         //查询并设置任务所属流程名称
         ProcessDefinition processDefinition = repositoryService.createProcessDefinitionQuery().processDefinitionId(task.getProcessDefinitionId()).singleResult();
         request.setAttribute("processDefinitionName", processDefinition == null || processDefinition.getName() == null ? "无所属流程定义" :processDefinition.getName());
+        request.setAttribute("processDefinitionId", processDefinition == null || processDefinition.getId() == null ? null :processDefinition.getId());
         //非归档任务才显示表单信息
         if(!TaskCategory.ARCHIVED.getCode().equals(category)) {
             //表单key，用于显示任务内容
@@ -627,19 +648,33 @@ public class TaskController {
      * @param <T>
      * @return
      */
-    private <T extends TaskInfo> JSONArray buildTaskTreeList(List<T> tasks, String taskId){
-        //组装左侧任务列表
+    private <T extends TaskInfo> JSONArray buildTaskTreeList(List<T> tasks, String taskId) throws Exception {
+        // 组装左侧任务列表
         JSONArray ja = new JSONArray();
         Map<String, String> processDefinitionMap = new HashMap<>();
+        // 获取任务列表中的所有流程定义id
+        List<String> processDefinistionIds = getProcessDefinistionIds(tasks);
+        ActTaskTitleDto actTaskTitleDto = DTOUtils.newInstance(ActTaskTitleDto.class);
+        actTaskTitleDto.setProcessDefinistionIds(processDefinistionIds);
+        // 查询任务标题
+        List<ActTaskTitle> actTaskTitles = actTaskTitleService.listByExample(actTaskTitleDto);
+        // ActTaskTitle缓存
+        Map<String, ActTaskTitle> PROCESS_DEFINITION_TASK_TITLE = new HashMap<>();
+        for (ActTaskTitle actTaskTitle : actTaskTitles) {
+            PROCESS_DEFINITION_TASK_TITLE.put(actTaskTitle.getProcessDefinitionId(), actTaskTitle);
+        }
         //用于没有任务id时，高亮显示第一个任务
         int i=0;
+        //任务标题
+        String taskText = null;
         for(TaskInfo taskInfo : tasks){
+            taskText = getTaskText(taskInfo, PROCESS_DEFINITION_TASK_TITLE);
             JSONObject jo = new JSONObject();
             jo.put("id", taskInfo.getId());
             if(taskInfo.getId().equals(taskId) || (StringUtils.isBlank(taskId) && i == 0)){
-                jo.put("text", "<div><div style=\"font-weight:bold;\"><b>·</b> " + taskInfo.getName() + "</div><span style=\"font-size:6px;\">" + DateUtils.format(taskInfo.getCreateTime()) + "</span></div>");
+                jo.put("text", "<div style=\"font-weight:bold;\">"+taskText+"</div>");
             }else {
-                jo.put("text", "<div><div><b>·</b> " + taskInfo.getName() + "</div><span style=\"font-size:6px;\">" + DateUtils.format(taskInfo.getCreateTime()) + "</span></div>");
+                jo.put("text", "<div>"+taskText+"</div>");
             }
             i++;
             jo.put("parentId", taskInfo.getProcessDefinitionId());
@@ -661,6 +696,87 @@ public class TaskController {
 
         }
         return ja;
+    }
+
+    /**
+     * 获取任务列表中的所有流程定义id
+     * @param tasks
+     * @param <T>
+     * @return
+     */
+    private <T extends TaskInfo> List<String> getProcessDefinistionIds(List<T> tasks){
+        //任务列表中的所有流程定义id
+        List<String> processDefinistionIds = new ArrayList<>();
+        for(TaskInfo taskInfo : tasks){
+            if(!processDefinistionIds.contains(taskInfo.getProcessDefinitionId())){
+                processDefinistionIds.add(taskInfo.getProcessDefinitionId());
+            }
+        }
+        return processDefinistionIds;
+    }
+    /**
+     * 获取任务标题
+     * @param taskInfo
+     * @param PROCESS_DEFINITION_TASK_TITLE
+     * @return
+     */
+    private String getTaskText(TaskInfo taskInfo, Map<String, ActTaskTitle> PROCESS_DEFINITION_TASK_TITLE) throws Exception {
+        String taskText = "<div><b>·</b> " + taskInfo.getName() + "</div><span style=\"font-size:6px;\">" + DateUtils.format(taskInfo.getCreateTime()) + "</span>";
+        //如果没有配置ActTaskTitle，使用默认的taskText
+        if(!PROCESS_DEFINITION_TASK_TITLE.containsKey(taskInfo.getProcessDefinitionId())){
+            return taskText;
+        }
+        //空模板使用默认的taskText
+        if(StringUtils.isEmpty(PROCESS_DEFINITION_TASK_TITLE.get(taskInfo.getProcessDefinitionId()).getTitle())){
+            return taskText;
+        }
+        ActTaskTitle actTaskTitle = PROCESS_DEFINITION_TASK_TITLE.get(taskInfo.getProcessDefinitionId());
+        //先使用缓存中的任务标题
+        if(BpmcCache.TASK_TITLE.containsKey(taskInfo.getId()) && !actTaskTitle.getRefresh()){
+            taskText = BpmcCache.TASK_TITLE.get(taskInfo.getId());
+        }else{
+            Template template = stringGroupTemplate.getTemplate(actTaskTitle.getTitle());
+            Map<String, Object> stringObjectMap = BeanConver.transformObjectToMap(taskInfo);
+            //当前流程定义是否加载流程变量
+            if(actTaskTitle.getLoadProcVar()) {
+                //如果数据库没有缓存流程变量或者需要实时更新，则更新流程变量
+                if(StringUtils.isBlank(actTaskTitle.getProcVar()) || actTaskTitle.getRefresh()) {
+                    Map<String, Object> historicVariableInstanceMap = buildHistoricVariableInstanceMap(taskInfo.getProcessInstanceId());
+                    stringObjectMap.putAll(historicVariableInstanceMap);
+                    actTaskTitle.setProcVar(JSON.toJSONString(historicVariableInstanceMap));
+                    //非实时更新才缓存流程变量。 实时更新 不需要更新流程变量到数据库
+                    if(!actTaskTitle.getRefresh()) {
+                        //更新到数据库，下次不用再读取流程变量，如需实时更新，请设置refresh为true
+                        actTaskTitleService.updateSelective(actTaskTitle);
+                    }
+                }else{
+                    //从数据库缓存中获取流程变量
+                    JSONObject historicVariableInstanceMap = JSON.parseObject(actTaskTitle.getProcVar());
+                    stringObjectMap.putAll(historicVariableInstanceMap);
+                }
+            }
+            template.binding(stringObjectMap);
+            taskText = template.render();
+            //如果不强制刷新，则缓存任务标题
+            if(!actTaskTitle.getRefresh()) {
+                BpmcCache.TASK_TITLE.put(taskInfo.getId(), taskText);
+            }
+        }
+        return taskText;
+    }
+
+    /**
+     * 构建流程实例参数
+     * @param processInstanceId
+     * @return
+     */
+    private Map<String, Object> buildHistoricVariableInstanceMap(String processInstanceId){
+        List<HistoricVariableInstance> historicVariableInstances = historyService.createHistoricVariableInstanceQuery().processInstanceId(processInstanceId).list();
+        Map<String, Object> map = new HashMap<>();
+        for (HistoricVariableInstance historicVariableInstance : historicVariableInstances) {
+            map.put(historicVariableInstance.getVariableName(), historicVariableInstance.getValue());
+        }
+        return map;
     }
 
     /**

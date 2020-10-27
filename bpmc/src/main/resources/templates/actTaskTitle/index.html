@@ -1,0 +1,304 @@
+ <#body>
+    <div class="easyui-layout" fit="true">
+        <!-- ====================================================================================================================== -->
+        <!-- 上方布局 -->
+        <!-- ====================================================================================================================== -->
+        <div region="north" height="auto" align="center" border="false">
+            <div id="nav" style="padding-left:15px;padding-top:10px;" align="left">
+            <#nav/>
+            </div>
+            <!-- =========================================================表单========================================================= -->
+            <div class="easyui-panel" style="width:100%;" align="left">
+                <form id="form" class="easyui-form" method="post" fit="true">
+                    <div class="search-wrap">
+                        <div class="search-item">
+                            <input class="easyui-textbox" name="processDefinitionId" id="processDefinitionId" style="width:100%" labelAlign="right" data-options="label:'流程定义id:', validType:'length[0,64]'" />
+                        </div>
+                        <div class="search-wrap-btn">
+                            <a href="#" class="easyui-linkbutton" iconCls="icon-search" id="queryBtn"
+                               onclick="queryGrid()">查询</a>&nbsp;&nbsp;
+                            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-clear" onclick="clearForm()">清除</a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <!-- ====================================================================================================================== -->
+        <!-- 中央布局 -->
+        <!-- ====================================================================================================================== -->
+        <!-- 表格 -->
+        <div region="center" style="width:100%;" height="auto">
+            <!-- =========================================================表格========================================================= -->
+            <table class="easyui-datagrid" title="任务标题配置" id="grid" fitColumns="true" noheader="true"
+                   pagination="true" pageSize="30" pageNumber="1" pagePosition="top" rownumbers="false" remoteSort="false"
+                   loadMsg="数据加载中..." singleSelect="true" method="post" multiSort="false" sortName="title"
+                   align="center" fit="true" striped="true" idField="id" data-options="onDblClickRow:openUpdate, onHeaderContextMenu:headerContextMenu">
+                <thead>
+                    <tr>
+                        <th width="260" data-options="field:'title',   sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
+                            标题模板
+                        </th>
+                                            <th width="420" data-options="field:'processDefinitionId',   sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
+                            流程定义id
+                        </th>
+                                            <th width="100" data-options="field:'refresh', _provider:'ynProvider',   sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
+                            实时更新
+                        </th>
+                                            <th width="140" data-options="field:'loadProcVar', _provider:'ynProvider',   sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
+                            加载流程变量
+                        </th>
+                                            <th width="280" data-options="field:'procVar',   sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
+                            流程变量json
+                        </th>
+                                            <th width="120" data-options="field:'createrId',  _provider:'userProvider',  sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
+                            创建人
+                        </th>
+                                            <th width="120" data-options="field:'modifierId', _provider:'userProvider',   sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
+                            修改人
+                        </th>
+                                            <th width="150" data-options="field:'created',  _provider:'datetimeProvider', sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
+                            创建时间
+                        </th>
+                                            <th width="150" data-options="field:'modified',  _provider:'datetimeProvider', sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
+                            修改时间
+                        </th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+    <!-- 隐藏编辑框 -->
+    <div id="dlg" class="easyui-dialog" resizable="false" constrain="true" shadow="true" draggable="false" title="ActTaskTitle信息" style="padding:20px" modal="true" border="thin" closed="true"
+         data-options="
+				iconCls: 'icon-save',
+				height: 480,
+				buttons: [{
+					text:'确认',
+					iconCls:'icon-ok',
+					handler:saveOrUpdate
+				},{
+					text:'取消',
+					iconCls:'icon-cancel',
+					handler:function(){
+						$('#dlg').dialog('close');
+					}
+				}]
+			">
+    <form id="_form" class="easyui-form" method="post" fit="true">
+        <input name="_id" id="_id" type="hidden">
+        <table width="1080px">
+            <tr>
+                <td style="padding:5px;">
+                    <input class="easyui-textbox" name="_processDefinitionId" id="_processDefinitionId" style="width:480px" data-options="label:'流程定义id:', validType:'length[0,64]'" />
+                </td>
+                <td style="padding:5px;width: 280px;">
+                    <input name="_loadProcVar" id="_loadProcVar" panelHeight="auto" labelWidth="100" data-options="label:'加载流程变量:',required:true, editable:false" />
+                    <#comboProvider _id="_loadProcVar" _provider="ynProvider" _queryParams="{required:true}"/>
+                </td>
+                <td style="padding:5px; width: 280px;">
+                    <input name="_refresh" id="_refresh" panelHeight="auto"  data-options="label:'实时更新:',required:true, editable:false" />
+                    <#comboProvider _id="_refresh" _provider="ynProvider" _queryParams="{required:true}"/>
+                </td>
+            </tr>
+            <tr>
+                <td style="padding:5px;">
+                    <input class="easyui-textbox" name="_title" id="_title" style="width:480px;height:290px" data-options="label:'标题模板:', multiline:true, validType:'length[0,500]'" />
+                </td>
+                <td style="padding:5px;" colspan="2">
+                    <input class="easyui-textbox" name="_procVar" id="_procVar" style="width:100%;height:290px" labelWidth="100" data-options="label:'流程变量json:', multiline:true, validType:'length[0,500]'" />
+                </td>
+            </tr>
+        </table>
+    </form>
+
+    </div>
+    <!-- ====================================================================================================================== -->
+    <!-- style & script 分隔线 -->
+    <!-- ====================================================================================================================== -->
+    <script type="text/javascript">
+        //打开新增窗口
+        function openInsert(){
+            $('#dlg').dialog('open');
+            $('#dlg').dialog('center');
+            $('#_form').form('clear');
+            formFocus("_form", "_title");
+        }
+
+        //打开修改窗口
+        function openUpdate(){
+            var selected = $("#grid").datagrid("getSelected");
+            if (null == selected) {
+                swal('警告','请选中一条数据', 'warning');
+                return;
+            }
+            $('#dlg').dialog('open');
+            $('#dlg').dialog('center');
+            formFocus("_form", "_title");
+            var formData = $.extend({},selected);
+            formData = addKeyStartWith(getOriginalData(formData),"_");
+            $('#_form').form('load', formData);
+        }
+
+        function saveOrUpdate(){
+            if(!$('#_form').form("validate")){
+                return;
+            }
+            var _formData = removeKeyStartWith($("#_form").serializeObject(),"_");
+            var _url = null;
+            //没有id就新增
+            if(_formData.id == null || _formData.id==""){
+                _url = "${contextPath}/actTaskTitle/insert.action";
+            }else{//有id就修改
+                _url = "${contextPath}/actTaskTitle/update.action";
+            }
+            $.ajax({
+                type: "POST",
+                url: _url,
+                data: _formData,
+                processData:true,
+                dataType: "json",
+                async : true,
+                success: function (data) {
+                    if(data.code=="200"){
+                        $("#grid").datagrid("reload");
+                        $('#dlg').dialog('close');
+                    }else{
+                        swal('错误',data.result, 'error');
+                    }
+                },
+                error: function(){
+                    swal('错误', '远程访问失败', 'error');
+                }
+            });
+        }
+
+        //根据主键删除
+        function del() {
+            var selected = $("#grid").datagrid("getSelected");
+            if (null == selected) {
+                swal('警告','请选中一条数据', 'warning');
+                return;
+            }
+            <#swalConfirm swalTitle="您确认想要删除记录吗？">
+                    $.ajax({
+                        type: "POST",
+                        url: "${contextPath}/actTaskTitle/delete.action",
+                        data: {id:selected.id},
+                        processData:true,
+                        dataType: "json",
+                        async : true,
+                        success: function (data) {
+                            if(data.code=="200"){
+                                $("#grid").datagrid("reload");
+                                $('#dlg').dialog('close');
+                            }else{
+                                swal('错误',data.result, 'error');
+                            }
+                        },
+                        error: function(){
+                            swal('错误', '远程访问失败', 'error');
+                        }
+                    });
+            </#swalConfirm>
+        }
+        //表格查询
+        function queryGrid() {
+            var opts = $("#grid").datagrid("options");
+            if (null == opts.url || "" == opts.url) {
+                opts.url = "${contextPath}/actTaskTitle/listPage.action";
+            }
+            if(!$('#form').form("validate")){
+                return;
+            }
+            $("#grid").datagrid("load", bindGridMeta2Form("grid", "form"));
+        }
+
+
+        //清空表单
+        function clearForm() {
+            $('#form').form('clear');
+        }
+
+        //表格表头右键菜单
+        function headerContextMenu(e, field){
+            e.preventDefault();
+            if (!cmenu){
+                createColumnMenu("grid");
+            }
+            cmenu.menu('show', {
+                left:e.pageX,
+                top:e.pageY
+            });
+        }
+
+        //全局按键事件
+        function getKey(e){
+            e = e || window.event;
+            var keycode = e.which ? e.which : e.keyCode;
+            if(keycode == 46){ //如果按下删除键
+                var selected = $("#grid").datagrid("getSelected");
+                if(selected && selected!= null){
+                    del();
+                }
+            }
+        }
+
+        /**
+         * 绑定页面回车事件，以及初始化页面时的光标定位
+         * @formId
+         *          表单ID
+         * @elementName
+         *          光标定位在指点表单元素的name属性的值
+         * @submitFun
+         *          表单提交需执行的任务
+         */
+        $(function () {
+            bindFormEvent("form", "title", queryGrid);
+            bindFormEvent("_form", "_title", saveOrUpdate, function (){$('#dlg').dialog('close');});
+            if (document.addEventListener) {
+                document.addEventListener("keyup",getKey,false);
+            } else if (document.attachEvent) {
+                document.attachEvent("onkeyup",getKey);
+            } else {
+                document.onkeyup = getKey;
+            }
+            var pager = $('#grid').datagrid('getPager');    // get the pager of treegrid
+                pager.pagination({
+                    <#controls_paginationOpts/>,
+                    buttons:[
+                    {
+                        iconCls:'icon-add',
+                        text:'新增',
+                        handler:function(){
+                            openInsert();
+                        }
+                    },
+                    {
+                        iconCls:'icon-edit',
+                        text:'修改',
+                        handler:function(){
+                            openUpdate();
+                        }
+                    },
+                    {
+                        iconCls:'icon-remove',
+                        text:'删除',
+                        handler:function(){
+                            del();
+                        }
+                    },
+                    {
+                        iconCls:'icon-export',
+                        text:'导出',
+                        handler:function(){
+                            doExport('grid');
+                        }
+                    }
+                ]
+            });
+            //表格仅显示下边框
+            $('#grid').datagrid('getPanel').removeClass('lines-both lines-no lines-right lines-bottom').addClass("lines-bottom");
+            queryGrid();
+        })
+    </script>
+</#body>

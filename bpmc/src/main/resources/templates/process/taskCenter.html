@@ -6,7 +6,7 @@
 <link rel="stylesheet" href="/resources/bui/lib/font-awesome-4.7.0/css/font-awesome.min.css">
 <style>
     .sidemenu .tree-node {
-        height: 45px;
+        height: 41px;
     }
     .sidemenu .tree-title{
         margin: 1px 0;
@@ -141,6 +141,7 @@
                         <%}else{%>
                         办理人: ${task.~assigneeName}
                         <%}%>
+                        <span style="opacity:0.06;filter:alpha(opacity=6)">${processDefinitionId}</span>
                     </div>
                 </div>
             </div>
@@ -221,7 +222,7 @@
                     width:1366,
                     height: 640
                 ">
-                <img id="processInstanceImg" />
+                <img id="processInstanceImg" title="${processDefinitionId}"/>
             </div>
         <%}%>
     </div>

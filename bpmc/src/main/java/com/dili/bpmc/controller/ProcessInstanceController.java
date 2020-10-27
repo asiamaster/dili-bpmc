@@ -198,7 +198,7 @@ public class ProcessInstanceController {
         List<ProcessInstance> processInstances = query.orderByProcessInstanceId().desc().listPage(firstResult, param.getRows());
         easyuiPageOutput.setRows(processInstances);
         Long total = query.count();
-        easyuiPageOutput.setTotal(total.intValue());
+        easyuiPageOutput.setTotal(total);
         return JSON.toJSONString(easyuiPageOutput, SerializerFeature.IgnoreErrorGetter);
     }
 

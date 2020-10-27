@@ -49,7 +49,7 @@ public class ModelController {
         int page = 1;
         List<Model> list = repositoryService.createModelQuery().listPage(rowSize * (page - 1), rowSize);
         EasyuiPageOutput easyuiPageOutput = new EasyuiPageOutput();
-        easyuiPageOutput.setTotal(list.size());
+        easyuiPageOutput.setTotal(new Long(list.size()));
         easyuiPageOutput.setRows(list);
         request.setAttribute("models", JSON.toJSONString(easyuiPageOutput, SerializerFeature.WriteDateUseDateFormat));
         return "process/model";

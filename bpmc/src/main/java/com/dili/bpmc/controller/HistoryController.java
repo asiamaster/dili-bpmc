@@ -184,7 +184,7 @@ public class HistoryController {
         EasyuiPageOutput easyuiPageOutput = new EasyuiPageOutput();
         List results = ValueProviderUtils.buildDataByProvider(param, list);
         easyuiPageOutput.setRows(results);
-        easyuiPageOutput.setTotal((int)total);
+        easyuiPageOutput.setTotal(total);
         return JSON.toJSONString(easyuiPageOutput, SerializerFeature.IgnoreErrorGetter);
     }
 

@@ -28,16 +28,9 @@
 		<java.version>1.8</java.version>
 		<!-- MyBatis Generator -->
 		<!-- Java接口和实体类 -->
-		<targetJavaProject>${basedir}/src/main/java</targetJavaProject>
-		<targetMapperPackage>com.dili.bpmc.dao</targetMapperPackage>
-		<targetModelPackage>com.dili.bpmc.domain</targetModelPackage>
-		<targetServicePackage>com.dili.bpmc.service</targetServicePackage>
-		<targetProviderPackage>com.dili.bpmc.provider</targetProviderPackage>
-		<targetControllerPackage>com.dili.bpmc.controller</targetControllerPackage>
 		<templateRootDir>${basedir}/mbg-templates</templateRootDir>
 		<projectdir>${basedir}</projectdir>
 		<!-- XML生成路径 -->
-		<targetResourcesProject>${basedir}/src/main/resources</targetResourcesProject>
 		<targetXMLPackage>mapper</targetXMLPackage>
 	</properties>
 

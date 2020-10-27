@@ -1,5 +1,6 @@
 package com.dili.bpmc.provider;
 
+import com.dili.bpmc.glossary.YesOrNoEnum;
 import com.dili.ss.activiti.glossary.Yn;
 import com.dili.ss.metadata.FieldMeta;
 import com.dili.ss.metadata.ValuePair;
@@ -21,9 +22,9 @@ public class YnProvider implements ValueProvider {
     private static final List<ValuePair<?>> BUFFER;
 
     static {
-    	BUFFER = Stream.of(Yn.values())
+    	BUFFER = Stream.of(YesOrNoEnum.values())
     			//enum 转换为ValuePair
-    			.map(e->new ValuePairImpl<String>(e.getName(), e.getCode().toString()))
+    			.map(e->new ValuePairImpl<Boolean>(e.getName(), e.getCode()))
     			.collect(Collectors.toList());
     }
 
@@ -38,7 +39,7 @@ public class YnProvider implements ValueProvider {
             return null;
         }
         for(ValuePair<?> valuePair : BUFFER){
-            if(obj.toString().equals(valuePair.getValue())){
+            if(obj.equals(valuePair.getValue())){
                 return valuePair.getText();
             }
         }
