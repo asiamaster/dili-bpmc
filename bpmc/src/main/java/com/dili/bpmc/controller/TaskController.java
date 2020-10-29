@@ -679,7 +679,7 @@ public class TaskController {
             i++;
             jo.put("parentId", taskInfo.getProcessDefinitionId());
             ja.add(jo);
-            //转换流程定义id为名称
+            //转换流程定义id为名称(按流程定义分组)
             if(!processDefinitionMap.containsKey(taskInfo.getProcessDefinitionId())){
                 ProcessDefinition processDefinition = repositoryService.createProcessDefinitionQuery().processDefinitionId(taskInfo.getProcessDefinitionId()).singleResult();
                 //流程定义可能被删除了，所以要判空

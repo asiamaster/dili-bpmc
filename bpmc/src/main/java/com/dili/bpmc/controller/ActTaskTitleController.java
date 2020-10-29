@@ -75,7 +75,7 @@ public class ActTaskTitleController {
             return BaseOutput.failure("登录超时");
         }
         actTaskTitle.setModifierId(userTicket.getId());
-        actTaskTitleService.updateSelective(actTaskTitle);
+        actTaskTitleService.updateExactSimple(actTaskTitle);
         return BaseOutput.success("修改成功");
     }
 

@@ -1,6 +1,7 @@
 package com.dili.bpmc.domain;
 
 import com.dili.ss.dto.IBaseDomain;
+import com.dili.ss.dto.IMybatisForceParams;
 import com.dili.ss.metadata.FieldEditor;
 import com.dili.ss.metadata.annotation.EditMode;
 import com.dili.ss.metadata.annotation.FieldDef;
@@ -17,7 +18,7 @@ import javax.persistence.Id;
  * This file was generated on 2020-10-27 09:40:40.
  */
 @Table(name = "`act_task_title`")
-public interface ActTaskTitle extends IBaseDomain {
+public interface ActTaskTitle extends IBaseDomain, IMybatisForceParams {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "`id`")

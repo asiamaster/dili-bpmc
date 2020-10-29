@@ -56,7 +56,7 @@ public interface EventRpc {
 	 * @return
 	 */
 	@POST("/api/event/signal")
-	BaseOutput<String> signal(@ReqParam(value = "processInstanceId") String processInstanceId, @ReqParam(value = "activityId") String activityId, @ReqParam(value = "variables", required = false) Map<String, String> variables);
+	BaseOutput<String> signal(@ReqParam(value = "processInstanceId") String processInstanceId, @ReqParam(value = "activityId") String activityId, @ReqParam(value = "variables", required = false) Map<String, Object> variables);
 
 
 }
