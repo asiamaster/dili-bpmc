@@ -2750,11 +2750,11 @@ LABL 0 新宋体,8,N</a:FontList>
 </o:Column>
 <o:Column Id="o92">
 <a:ObjectID>77CA8E7A-B529-47AC-8C30-D5F4EBFB629C</a:ObjectID>
-<a:Name>状态</a:Name>
+<a:Name>是否可用</a:Name>
 <a:Code>available</a:Code>
 <a:CreationDate>1604027336</a:CreationDate>
 <a:Creator>asiamaster</a:Creator>
-<a:ModificationDate>1604027534</a:ModificationDate>
+<a:ModificationDate>1604028921</a:ModificationDate>
 <a:Modifier>asiamaster</a:Modifier>
 <a:Comment>可用状态: false禁用，true可用</a:Comment>
 <a:DataType>boolean</a:DataType>
