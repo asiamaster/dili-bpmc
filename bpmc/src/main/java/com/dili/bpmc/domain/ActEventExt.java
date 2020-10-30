@@ -62,6 +62,11 @@ public interface ActEventExt extends IBaseDomain {
 
     void setProcessDefinitionKey(String processDefinitionKey);
 
+    @Column(name = "`available`")
+    @FieldDef(label="是否可用")
+    Boolean getAvailable();
+    void setAvailable(Boolean available);
+
     @Column(name = "`creater_id`")
     @FieldDef(label="创建人")
     @EditMode(editor = FieldEditor.Number, required = false)

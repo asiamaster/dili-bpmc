@@ -3,7 +3,7 @@
         <!-- ====================================================================================================================== -->
         <!-- 上方布局 -->
         <!-- ====================================================================================================================== -->
-        <div region="north" height="auto" align="center">
+        <div region="north" height="auto" align="center" border="false">
             <div id="nav" style="padding-left:15px;padding-top:10px;" align="left">
             <#nav/>
             </div>
@@ -25,33 +25,6 @@
                         </div>
                         <div class="search-item">
                             <input class="easyui-textbox" name="processDefinitionKey" id="processDefinitionKey" style="width:100%" labelAlign="right" data-options="label:'流程定义key:', validType:'length[0,64]'" />
-                        </div>
-                        <div class="search-item">
-                            <input class="easyui-numberbox" name="createrId" id="createrId" style="width:100%" labelAlign="right" data-options="label:'创建人:', validType:'length[0,19]'" />
-                        </div>
-                        <div class="search-item">
-                            <input class="easyui-numberbox" name="modifierId" id="modifierId" style="width:100%" labelAlign="right" data-options="label:'修改人:', validType:'length[0,19]'" />
-                        </div>
-                        <div class="search-item">
-                            <input class="easyui-datetimebox" name="created" id="created" style="width:100%" labelAlign="right" data-options="label:'创建时间:'" />
-                        </div>
-                        <div class="search-item">
-                            <input class="easyui-datetimebox" name="modified" id="modified" style="width:100%" labelAlign="right" data-options="label:'修改时间:'" />
-                        </div>
-                        <div class="search-item">
-                            <input class="easyui-textbox" name="resourceCode" id="resourceCode" style="width:100%" labelAlign="right" data-options="label:'资源编码:', validType:'length[0,50]'" />
-                        </div>
-                        <div class="search-item">
-                            <input class="easyui-textbox" name="checkMenu" id="checkMenu" style="width:100%" labelAlign="right" data-options="label:'是否检查资源菜单:', validType:'length[0,3]'" />
-                        </div>
-                        <div class="search-item">
-                            <input class="easyui-textbox" name="html" id="html" style="width:100%" labelAlign="right" data-options="label:'HTML:', validType:'length[0,500]'" />
-                        </div>
-                        <div class="search-item">
-                            <input class="easyui-textbox" name="script" id="script" style="width:100%" labelAlign="right" data-options="label:'js脚本:', validType:'length[0,1000]'" />
-                        </div>
-                        <div class="search-item">
-                            <input class="easyui-textbox" name="handlerUrl" id="handlerUrl" style="width:100%" labelAlign="right" data-options="label:'处理URL:', validType:'length[0,120]'" />
                         </div>
                         <div class="search-wrap-btn">
                             <a href="#" class="easyui-linkbutton" iconCls="icon-search" id="queryBtn"
@@ -77,46 +50,48 @@
                         <th width="7.214285714285714%" data-options="field:'activityId',   sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
                             活动id
                         </th>
-                                            <th width="7.214285714285714%" data-options="field:'eventType',   sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
+                        <th width="7.214285714285714%" data-options="field:'eventType',   sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
                             事件类型(message和signal)
                         </th>
-                                            <th width="7.214285714285714%" data-options="field:'eventName',   sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
+                        <th width="7.214285714285714%" data-options="field:'eventName',   sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
                             事件名称
                         </th>
-                                            <th width="7.214285714285714%" data-options="field:'processDefinitionId',   sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
+                        <th width="7.214285714285714%" data-options="field:'processDefinitionId',   sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
                             流程定义id
                         </th>
-                                            <th width="7.214285714285714%" data-options="field:'processDefinitionKey',   sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
+                        <th width="7.214285714285714%" data-options="field:'processDefinitionKey',   sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
                             流程定义key
                         </th>
-                                            <th width="7.214285714285714%" data-options="field:'createrId',   sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
-                            创建人
+                        <th width="7.214285714285714%" data-options="field:'available',   sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
+                            是否可用
                         </th>
-                                            <th width="7.214285714285714%" data-options="field:'modifierId',   sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
-                            修改人
-                        </th>
-                                            <th width="7.214285714285714%" data-options="field:'created',  _provider:'datetimeProvider', sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
-                            创建时间
-                        </th>
-                                            <th width="7.214285714285714%" data-options="field:'modified',  _provider:'datetimeProvider', sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
-                            修改时间
-                        </th>
-                                            <th width="7.214285714285714%" data-options="field:'resourceCode',   sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
+                        <th width="7.214285714285714%" data-options="field:'resourceCode',   sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
                             资源编码
                         </th>
-                                            <th width="7.214285714285714%" data-options="field:'checkMenu',   sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
+                        <th width="7.214285714285714%" data-options="field:'checkMenu',   sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
                             是否检查资源菜单
                         </th>
-                                            <th width="7.214285714285714%" data-options="field:'html',   sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
+                        <th width="7.214285714285714%" data-options="field:'html',   sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
                             HTML
                         </th>
-                                            <th width="7.214285714285714%" data-options="field:'script',   sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
+                        <th width="7.214285714285714%" data-options="field:'script',   sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
                             js脚本
                         </th>
-                                            <th width="7.214285714285714%" data-options="field:'handlerUrl',   sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
+                        <th width="7.214285714285714%" data-options="field:'handlerUrl',   sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
                             处理URL
                         </th>
-                     // if end
+                        <th width="7.214285714285714%" data-options="field:'createrId',   sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
+                            创建人
+                        </th>
+                        <th width="7.214285714285714%" data-options="field:'modifierId',   sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
+                            修改人
+                        </th>
+                        <th width="7.214285714285714%" data-options="field:'created',  _provider:'datetimeProvider', sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
+                            创建时间
+                        </th>
+                        <th width="7.214285714285714%" data-options="field:'modified',  _provider:'datetimeProvider', sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
+                            修改时间
+                        </th>
                     </tr>
                 </thead>
             </table>
