@@ -67,6 +67,16 @@ public interface ActTaskTitle extends IBaseDomain, IMybatisForceParams {
 
     void setProcVar(String procVar);
 
+    /**
+     * 是否可用
+     * @return
+     */
+    @Column(name = "`available`")
+    @FieldDef(label="是否可用")
+    Boolean getAvailable();
+
+    void setAvailable(Boolean available);
+
     @Column(name = "`creater_id`")
     @FieldDef(label="创建人")
     @EditMode(editor = FieldEditor.Number, required = false)

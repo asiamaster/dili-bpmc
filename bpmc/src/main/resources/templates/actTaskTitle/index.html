@@ -38,28 +38,31 @@
                         <th width="260" data-options="field:'title',   sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
                             标题模板
                         </th>
-                                            <th width="420" data-options="field:'processDefinitionId',   sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
+                        <th width="420" data-options="field:'processDefinitionId',   sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
                             流程定义id
                         </th>
-                                            <th width="100" data-options="field:'refresh', _provider:'ynProvider',   sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
+                        <th width="100" data-options="field:'refresh', _provider:'ynProvider',   sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
                             实时更新
                         </th>
-                                            <th width="140" data-options="field:'loadProcVar', _provider:'ynProvider',   sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
+                        <th width="140" data-options="field:'loadProcVar', _provider:'ynProvider',   sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
                             加载流程变量
                         </th>
-                                            <th width="280" data-options="field:'procVar',   sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
+                        <th width="180" data-options="field:'procVar',   sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
                             流程变量json
                         </th>
-                                            <th width="120" data-options="field:'createrId',  _provider:'userProvider',  sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
+                        <th width="100" data-options="field:'available', _provider:'ynProvider',   sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
+                            是否可用
+                        </th>
+                        <th width="120" data-options="field:'createrId',  _provider:'userProvider',  sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
                             创建人
                         </th>
-                                            <th width="120" data-options="field:'modifierId', _provider:'userProvider',   sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
+                        <th width="120" data-options="field:'modifierId', _provider:'userProvider',   sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
                             修改人
                         </th>
-                                            <th width="150" data-options="field:'created',  _provider:'datetimeProvider', sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
+                        <th width="150" data-options="field:'created',  _provider:'datetimeProvider', sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
                             创建时间
                         </th>
-                                            <th width="150" data-options="field:'modified',  _provider:'datetimeProvider', sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
+                        <th width="150" data-options="field:'modified',  _provider:'datetimeProvider', sortable:true, order:'asc', align:'center', resizable:'true', fixed:'false'">
                             修改时间
                         </th>
                     </tr>
@@ -86,25 +89,25 @@
 			">
     <form id="_form" class="easyui-form" method="post" fit="true">
         <input name="_id" id="_id" type="hidden">
-        <table width="1080px">
+        <table width="1120px">
             <tr>
-                <td style="padding:5px;">
+                <td style="padding:5px;" style="width:600px;height:290px" >
                     <input class="easyui-textbox" name="_processDefinitionId" id="_processDefinitionId" style="width:480px" data-options="label:'流程定义id:', validType:'length[0,64]'" />
                 </td>
-                <td style="padding:5px;width: 280px;">
+                <td style="padding:5px;width: 600px;">
                     <input name="_loadProcVar" id="_loadProcVar" panelHeight="auto" labelWidth="100" data-options="label:'加载流程变量:',required:true, editable:false" />
                     <#comboProvider _id="_loadProcVar" _provider="ynProvider" _queryParams="{required:true}"/>
-                </td>
-                <td style="padding:5px; width: 280px;">
                     <input name="_refresh" id="_refresh" panelHeight="auto"  data-options="label:'实时更新:',required:true, editable:false" />
                     <#comboProvider _id="_refresh" _provider="ynProvider" _queryParams="{required:true}"/>
+                    <input name="_available" id="_available" panelHeight="auto"  data-options="label:'是否可用:',required:true, editable:false" />
+                    <#comboProvider _id="_available" _provider="ynProvider" _queryParams="{required:true}"/>
                 </td>
             </tr>
             <tr>
                 <td style="padding:5px;">
                     <input class="easyui-textbox" name="_title" id="_title" style="width:480px;height:290px" data-options="label:'标题模板:', multiline:true, validType:'length[0,500]'" />
                 </td>
-                <td style="padding:5px;" colspan="2">
+                <td style="padding:5px;">
                     <input class="easyui-textbox" name="_procVar" id="_procVar" style="width:100%;height:290px" labelWidth="100" data-options="label:'流程变量json:', multiline:true, validType:'length[0,500]'" />
                 </td>
             </tr>

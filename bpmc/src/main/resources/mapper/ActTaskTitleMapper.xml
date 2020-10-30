@@ -10,6 +10,7 @@
     <result column="process_definition_id" jdbcType="VARCHAR" property="processDefinitionId" />
     <result column="refresh" jdbcType="BIT" property="refresh" />
     <result column="load_proc_var" jdbcType="BIT" property="loadProcVar" />
+    <result column="available" jdbcType="BIT" property="available" />
     <result column="proc_var" jdbcType="VARCHAR" property="procVar" />
     <result column="creater_id" jdbcType="BIGINT" property="createrId" />
     <result column="modifier_id" jdbcType="BIGINT" property="modifierId" />
@@ -20,52 +21,8 @@
     <!--
       WARNING - @mbg.generated
     -->
-    id, title, process_definition_id, refresh, load_proc_var, proc_var, creater_id, modifier_id, 
+    id, title, process_definition_id, refresh, load_proc_var, available, proc_var, creater_id, modifier_id,
     created, modified
   </sql>
-  <select id="selectBy" parameterType="java.lang.Long" resultMap="BaseResultMap">
-    <!--
-      WARNING - @mbg.generated
-    -->
-    select 
-    <include refid="Base_Column_List" />
-    from act_task_title
-    where id = #{id,jdbcType=BIGINT}
-  </select>
-  <update id="updateBy" parameterType="com.dili.bpmc.domain.ActTaskTitle">
-    <!--
-      WARNING - @mbg.generated
-    -->
-    update act_task_title
-    <set>
-      <if test="title != null">
-        title = #{title,jdbcType=VARCHAR},
-      </if>
-      <if test="processDefinitionId != null">
-        process_definition_id = #{processDefinitionId,jdbcType=VARCHAR},
-      </if>
-      <if test="refresh != null">
-        refresh = #{refresh,jdbcType=BIT},
-      </if>
-      <if test="loadProcVar != null">
-        load_proc_var = #{loadProcVar,jdbcType=BIT},
-      </if>
-      <if test="procVar != null">
-        proc_var = #{procVar,jdbcType=VARCHAR},
-      </if>
-      <if test="createrId != null">
-        creater_id = #{createrId,jdbcType=BIGINT},
-      </if>
-      <if test="modifierId != null">
-        modifier_id = #{modifierId,jdbcType=BIGINT},
-      </if>
-      <if test="created != null">
-        created = #{created,jdbcType=TIMESTAMP},
-      </if>
-      <if test="modified != null">
-        modified = #{modified,jdbcType=TIMESTAMP},
-      </if>
-    </set>
-    where id = #{id,jdbcType=BIGINT}
-  </update>
+
 </mapper>

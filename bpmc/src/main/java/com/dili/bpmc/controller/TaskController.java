@@ -656,6 +656,7 @@ public class TaskController {
         List<String> processDefinistionIds = getProcessDefinistionIds(tasks);
         ActTaskTitleDto actTaskTitleDto = DTOUtils.newInstance(ActTaskTitleDto.class);
         actTaskTitleDto.setProcessDefinistionIds(processDefinistionIds);
+        actTaskTitleDto.setAvailable(true);
         // 查询任务标题
         List<ActTaskTitle> actTaskTitles = actTaskTitleService.listByExample(actTaskTitleDto);
         // ActTaskTitle缓存
@@ -745,6 +746,7 @@ public class TaskController {
                     stringObjectMap.putAll(historicVariableInstanceMap);
                     actTaskTitle.setProcVar(JSON.toJSONString(historicVariableInstanceMap));
                     //非实时更新才缓存流程变量。 实时更新 不需要更新流程变量到数据库
+                    //用于多机部署，并且不实时刷新，第一台bpmc已经加载过流程变量了，这时只需要从数据库直接获取流程变量的json，并反序列化即可
                     if(!actTaskTitle.getRefresh()) {
                         //更新到数据库，下次不用再读取流程变量，如需实时更新，请设置refresh为true
                         actTaskTitleService.updateSelective(actTaskTitle);
