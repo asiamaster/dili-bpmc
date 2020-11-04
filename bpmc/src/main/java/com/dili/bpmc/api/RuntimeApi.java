@@ -175,11 +175,15 @@ public class RuntimeApi {
         if(StringUtils.isNotBlank(superProcessInstanceId)){
             processInstanceQuery.superProcessInstanceId(superProcessInstanceId);
         }
-        ProcessInstance processInstance = processInstanceQuery.singleResult();
-        if(processInstance == null){
-            return BaseOutput.success("未查询到流程实例");
+        try {
+            ProcessInstance processInstance = processInstanceQuery.singleResult();
+            if(processInstance == null){
+                return BaseOutput.success("未查询到流程实例");
+            }
+            return BaseOutput.successData(DTOUtils.asInstance(processInstance, ProcessInstanceMapping.class));
+        } catch (Exception e) {
+            return BaseOutput.failure(e.getMessage());
         }
-        return BaseOutput.successData(DTOUtils.asInstance(processInstance, ProcessInstanceMapping.class));
     }
 
     /**
@@ -205,11 +209,15 @@ public class RuntimeApi {
         if(StringUtils.isNotBlank(superProcessInstanceId)){
             historicProcessInstanceQuery.superProcessInstanceId(superProcessInstanceId);
         }
-        HistoricProcessInstance historicProcessInstance = historicProcessInstanceQuery.singleResult();
-        if(historicProcessInstance == null){
-            return BaseOutput.success("未查询到流程实例");
+        try {
+            HistoricProcessInstance historicProcessInstance = historicProcessInstanceQuery.singleResult();
+            if(historicProcessInstance == null){
+                return BaseOutput.success("未查询到流程实例");
+            }
+            return BaseOutput.successData(DTOUtils.asInstance(historicProcessInstance, ProcessInstanceMapping.class));
+        } catch (Exception e) {
+            return BaseOutput.failure(e.getMessage());
         }
-        return BaseOutput.successData(DTOUtils.asInstance(historicProcessInstance, ProcessInstanceMapping.class));
     }
 
     /**
