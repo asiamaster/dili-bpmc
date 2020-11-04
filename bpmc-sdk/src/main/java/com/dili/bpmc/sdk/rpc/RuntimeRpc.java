@@ -46,6 +46,16 @@ public interface RuntimeRpc {
 	BaseOutput setVariable(@ReqParam(value = "processInstanceId") String processInstanceId, @ReqParam(value = "activityId") String activityId, @ReqParam(value = "key") String key, @ReqParam(value = "value") String value);
 
 	/**
+	 * 删除流程变量
+	 * @param processInstanceId
+	 * @param activityId
+	 * @param key
+	 * @return
+	 */
+	@GET("/api/runtime/removeVariable")
+	BaseOutput removeVariable(@ReqParam(value = "processInstanceId") String processInstanceId, @ReqParam(value = "activityId") String activityId, @ReqParam(value = "key") String key);
+
+	/**
 	 * 根据流程实例id或businessKey查询进行中的流程实例
 	 * 两个参数至少传一个
 	 * @param processInstanceId

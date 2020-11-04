@@ -88,7 +88,8 @@ public class RuntimeApi {
     }
 
     /**
-     * 设置流程变量
+     * 根据实例id和活动id获取唯一的执行id，设置流程变量
+     *
      * @param processInstanceId
      * @param activityId
      * @param variables
@@ -97,6 +98,9 @@ public class RuntimeApi {
     @RequestMapping(value = "/setVariables", method = {RequestMethod.GET, RequestMethod.POST})
     public BaseOutput setVariables(@RequestParam String processInstanceId, @RequestParam String activityId, @RequestParam Map<String, String> variables){
         try {
+            //去掉RequestParameter
+            variables.remove("processInstanceId");
+            variables.remove("activityId");
             // 当前活动的id，对应receiveTask.bpmn文件中的活动节点的id的属性值
             Execution execution = runtimeService.createExecutionQuery().processInstanceId(processInstanceId).activityId(activityId)
                     .singleResult();
@@ -104,6 +108,29 @@ public class RuntimeApi {
                 return BaseOutput.failure("执行["+processInstanceId + "." + activityId+"]不存在");
             }
             runtimeService.setVariables(execution.getId(), variables);
+            return BaseOutput.success();
+        } catch (Exception e) {
+            return BaseOutput.failure(e.getMessage());
+        }
+    }
+
+    /**
+     * 删除流程变量
+     * @param processInstanceId
+     * @param activityId
+     * @param key
+     * @return
+     */
+    @RequestMapping(value = "/removeVariable", method = {RequestMethod.GET, RequestMethod.POST})
+    public BaseOutput removeVariable(@RequestParam String processInstanceId, @RequestParam String activityId, @RequestParam String key){
+        try {
+            // 当前活动的id，对应receiveTask.bpmn文件中的活动节点的id的属性值
+            Execution execution = runtimeService.createExecutionQuery().processInstanceId(processInstanceId).activityId(activityId)
+                    .singleResult();
+            if (execution == null) {
+                return BaseOutput.failure("执行["+processInstanceId + "." + activityId+"]不存在");
+            }
+            runtimeService.removeVariable(execution.getId(), key);
             return BaseOutput.success();
         } catch (Exception e) {
             return BaseOutput.failure(e.getMessage());
