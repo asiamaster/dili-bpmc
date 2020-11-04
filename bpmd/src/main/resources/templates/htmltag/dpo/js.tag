@@ -275,6 +275,7 @@
                 bui.loading.hide();
                 if (output.success) {
                     for(var i in output.data){
+                        //根据事件名的class启用按钮
                         $("."+output.data[i]).attr('disabled', false);
                     }
                     _grid.bootstrapTable('refresh');

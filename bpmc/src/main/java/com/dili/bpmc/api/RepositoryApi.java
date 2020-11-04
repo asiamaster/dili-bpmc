@@ -1,9 +1,13 @@
 package com.dili.bpmc.api;
 
+import com.dili.bpmc.sdk.domain.MessageMapping;
 import com.dili.bpmc.sdk.domain.ProcessDefinitionMapping;
+import com.dili.bpmc.sdk.domain.SignalMapping;
 import com.dili.ss.domain.BaseOutput;
 import com.dili.ss.dto.DTOUtils;
 import org.activiti.bpmn.model.BpmnModel;
+import org.activiti.bpmn.model.Message;
+import org.activiti.bpmn.model.Signal;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.repository.ProcessDefinition;
 import org.slf4j.Logger;
@@ -13,6 +17,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * 流程部署接口
@@ -27,6 +35,45 @@ public class RepositoryApi {
     private RepositoryService repositoryService;
 
     /**
+     * 根据流程定义id查询消息定义
+     * @param processDefinitionId
+     */
+    @RequestMapping(value = "/listMessages", method = {RequestMethod.GET, RequestMethod.POST})
+    public BaseOutput<List<MessageMapping>> listMessages(@RequestParam String processDefinitionId){
+        try {
+            BpmnModel bpmnModel = repositoryService.getBpmnModel(processDefinitionId);
+            Collection<Message> messages = bpmnModel.getMessages();
+            List<MessageMapping> messageMappings = new ArrayList<>();
+            messages.forEach(t-> {
+                messageMappings.add(DTOUtils.asInstance(t, MessageMapping.class));
+            });
+            return BaseOutput.successData(messageMappings);
+        } catch (Exception e) {
+            return BaseOutput.failure(e.getMessage());
+        }
+    }
+
+    /**
+     * 根据流程定义id查询信号定义
+     * @param processDefinitionId
+     */
+    @RequestMapping(value = "/listSignals", method = {RequestMethod.GET, RequestMethod.POST})
+    public BaseOutput<List<SignalMapping>> listSignals(@RequestParam String processDefinitionId){
+        try {
+            BpmnModel bpmnModel = repositoryService.getBpmnModel(processDefinitionId);
+            Collection<Signal> signals = bpmnModel.getSignals();
+            List<SignalMapping> signalMappings = new ArrayList<>();
+            signalMappings.forEach(t-> {
+                signalMappings.add(DTOUtils.asInstance(signals, SignalMapping.class));
+            });
+            return BaseOutput.successData(signalMappings);
+        } catch (Exception e) {
+            return BaseOutput.failure(e.getMessage());
+        }
+
+    }
+
+    /**
      * 根据流程定义id查询部署信息
      * @param processDefinitionId
      * @throws Exception
@@ -35,6 +82,8 @@ public class RepositoryApi {
     public BaseOutput<BpmnModel> getBpmnModel(@RequestParam String processDefinitionId){
         return BaseOutput.successData(repositoryService.getBpmnModel(processDefinitionId));
     }
+
+
 
     /**
      * 查询流程定义
