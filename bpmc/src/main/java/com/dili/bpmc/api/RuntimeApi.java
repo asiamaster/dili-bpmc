@@ -1,5 +1,7 @@
 package com.dili.bpmc.api;
 
+import com.dili.bpmc.dao.EventSubscriptionMapper;
+import com.dili.bpmc.sdk.domain.ExecutionMapping;
 import com.dili.bpmc.sdk.domain.ProcessInstanceMapping;
 import com.dili.bpmc.sdk.dto.HistoricProcessInstanceQueryDto;
 import com.dili.ss.activiti.service.ActivitiService;
@@ -54,6 +56,18 @@ public class RuntimeApi {
     private IdentityService identityService;
     @Autowired
     private ActivitiService activitiService;
+
+    /**
+     * 根据实例id查询进行中的执行
+     *
+     * @param processInstanceId
+     * @return
+     */
+    @RequestMapping(value = "/listExecution", method = {RequestMethod.GET, RequestMethod.POST})
+    public BaseOutput<List<ExecutionMapping>> listExecution(@RequestParam String processInstanceId){
+        List<Execution> executionList = runtimeService.createExecutionQuery().processInstanceId(processInstanceId).list();
+        return BaseOutput.successData(DTOUtils.as(executionList, ExecutionMapping.class));
+    }
 
     /**
      * 获取流程变量

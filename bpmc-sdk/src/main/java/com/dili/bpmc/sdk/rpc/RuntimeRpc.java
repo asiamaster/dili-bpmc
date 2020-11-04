@@ -1,5 +1,6 @@
 package com.dili.bpmc.sdk.rpc;
 
+import com.dili.bpmc.sdk.domain.ExecutionMapping;
 import com.dili.bpmc.sdk.domain.ProcessInstanceMapping;
 import com.dili.bpmc.sdk.dto.HistoricProcessInstanceQueryDto;
 import com.dili.bpmc.sdk.dto.ProcessInstanceQueryDto;
@@ -7,6 +8,7 @@ import com.dili.ss.domain.BaseOutput;
 import com.dili.ss.retrofitful.annotation.*;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -14,6 +16,14 @@ import java.util.Map;
  */
 @Restful("${bpmc.server.address}")
 public interface RuntimeRpc {
+
+	/**
+	 * 根据实例id查询进行中的执行
+	 * @param processInstanceId
+	 * @return
+	 */
+	@GET("/api/runtime/listExecution")
+	BaseOutput<List<ExecutionMapping>> listExecution(@ReqParam(value = "processInstanceId") String processInstanceId);
 
 	/**
 	 * 获取流程变量
