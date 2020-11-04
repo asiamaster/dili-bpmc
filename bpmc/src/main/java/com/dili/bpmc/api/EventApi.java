@@ -96,7 +96,7 @@ public class EventApi {
 	 * 
 	 * @param signalName  必填
 	 * @param executionId 选填
-	 * @param processInstanceId 选填
+	 * @param processInstanceId 选填, 没有executionId，则根据processInstanceId和signalName获取executionId
 	 * @param variables
 	 */
 	@RequestMapping(value = "/signalEventReceived", method = { RequestMethod.GET, RequestMethod.POST })

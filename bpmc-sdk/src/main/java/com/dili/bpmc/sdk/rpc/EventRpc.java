@@ -49,6 +49,17 @@ public interface EventRpc {
 			@ReqParam(value = "variables", required = false) Map<String, Object> variables);
 
 	/**
+	 * 根据signalName和executionId触发信号事件 executionId为空，则在全局范围广播，为所有已订阅处理器抛出信号（广播）
+	 * executionId不为空， 只为指定的执行传递信号
+	 * @param signalName       必填
+	 * @param processInstanceId 选填,没有executionId，则根据processInstanceId和signalName获取executionId
+	 * @param variables
+	 */
+	@POST("/api/event/signalEventReceived")
+	BaseOutput<String> signalEventReceived(@ReqParam(value = "signalName") String signalName, @ReqParam(value = "executionId", required = false) String executionId,
+										   @ReqParam(value = "processInstanceId", required = false) String processInstanceId, @ReqParam(value = "variables", required = false) Map<String, Object> variables);
+
+	/**
 	 * 触发Java接收任务
 	 * @param processInstanceId
 	 * @param activityId
