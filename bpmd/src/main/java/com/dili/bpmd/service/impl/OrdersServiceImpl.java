@@ -120,12 +120,12 @@ public class OrdersServiceImpl extends BaseServiceImpl<Orders, Long> implements 
         Orders orders = DTOUtils.newInstance(Orders.class);
         orders.setState(OrderState.Submit.getCode());
         updateSelectiveByCode(code, orders);
-        HashMap<String, String> param = new HashMap<>(2);
+        HashMap<String, Object> param = new HashMap<>(2);
         param.put("content", "提交订单["+code+"]");
 //        runtimeRpc.setVariable(processInstanceId, "created", "action", "submit");
 //        runtimeRpc.setVariables(processInstanceId, "created", param);
 //        System.out.println(runtimeRpc.getVariables(processInstanceId, null).getData());
-        return eventRpc.messageEventReceived("submitEvent", processInstanceId, null);
+        return eventRpc.messageEventReceived("submitEvent", processInstanceId, param);
     }
 
     @Override
