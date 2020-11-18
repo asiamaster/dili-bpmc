@@ -70,8 +70,8 @@
 
     <!-- 西侧布局 -->
     <div data-options="region:'west',split:true, hideCollapsedContent:false, expandMode:'dock'" style="width:225px;" >
-        <input id="tt" class="easyui-textbox" <% if(has(showBusinessKey)){%> value="${businessKey}" <%}%> style="width:200px;" data-options="
-                    prompt: '业务编号查询',
+        <input id="tt" class="easyui-textbox" value="${queryString!}" style="width:200px;" data-options="
+                    prompt: '任务查询',
                     iconWidth: 22,
                     icons: [{
                             iconCls:'icon-clear',
@@ -85,7 +85,7 @@
                                 if(v == null || v.trim() == ''){
                                     window.location.href = '${contextPath}/task/taskCenter.html?category=${category}';
                                 }else{
-                                    window.location.href = '${contextPath}/task/taskCenter.html?category=${category}&businessKey='+v;
+                                    window.location.href = '${contextPath}/task/taskCenter.html?category=${category}&queryString='+v;
                                 }
                             }
                         }]

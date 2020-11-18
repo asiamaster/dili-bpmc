@@ -142,7 +142,10 @@ public class OrdersServiceImpl extends BaseServiceImpl<Orders, Long> implements 
         param.put("content", "提交审批，编号["+code+"]");
         param.put("firmId", userTicket.getFirmId().toString());
         param.put("businessKey", code);
-        return eventRpc.messageEventReceived("submitApprovalEvent", processInstanceId, null);
+        BaseOutput<String> output = eventRpc.messageEventReceived("submitApprovalEvent", processInstanceId, null);
+        BaseOutput<ProcessInstanceMapping> activeProcessInstance = runtimeRpc.findActiveProcessInstance(null, code, processInstanceId);
+        System.out.println("审批流程实例id:" + activeProcessInstance.getData().getProcessInstanceId());
+        return output;
     }
 
     @Override

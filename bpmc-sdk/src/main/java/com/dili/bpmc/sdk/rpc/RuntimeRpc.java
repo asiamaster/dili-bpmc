@@ -70,10 +70,11 @@ public interface RuntimeRpc {
 	 * 两个参数至少传一个
 	 * @param processInstanceId
 	 * @param businessKey
+	 * @param superProcessInstanceId
 	 * @return
 	 */
 	@GET("/api/runtime/findActiveProcessInstance")
-	BaseOutput<ProcessInstanceMapping> findActiveProcessInstance(@ReqParam(value = "processInstanceId", required = false) String processInstanceId, @ReqParam(value = "businessKey", required = false) String businessKey);
+	BaseOutput<ProcessInstanceMapping> findActiveProcessInstance(@ReqParam(value = "processInstanceId", required = false) String processInstanceId, @ReqParam(value = "businessKey", required = false) String businessKey, @ReqParam(value = "superProcessInstanceId", required = false) String superProcessInstanceId);
 
 	/**
 	 * 根据流程实例id或businessKey查询历史流程实例

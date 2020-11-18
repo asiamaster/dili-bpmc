@@ -29,7 +29,6 @@ import org.activiti.engine.*;
 import org.activiti.engine.form.TaskFormData;
 import org.activiti.engine.history.HistoricProcessInstance;
 import org.activiti.engine.history.HistoricTaskInstance;
-import org.activiti.engine.history.HistoricTaskInstanceQuery;
 import org.activiti.engine.history.HistoricVariableInstance;
 import org.activiti.engine.identity.Group;
 import org.activiti.engine.repository.ProcessDefinition;
@@ -58,6 +57,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 流程实例controller
@@ -112,23 +112,6 @@ public class TaskController {
 //        }
 //        request.setAttribute("tasks", JSONArray.toJSONString(tasks, SerializerFeature.WriteDateUseDateFormat, SerializerFeature.IgnoreErrorGetter));
         return "process/task";
-    }
-
-    /**
-     * 任务中心页面
-     * @param category 页面类型(inbox(默认), tasks, queued, involved和archived)
-     * @param groupId 当category=queued时，group为用户组id
-     * @param taskId 任务id， 选填，用于显示指定任务详情
-     * @return
-     */
-    @RequestMapping(value = "/taskCenter.html", method = {RequestMethod.GET, RequestMethod.POST})
-    public String taskCenter(@RequestParam(required = false) String taskId,
-                        @RequestParam(defaultValue = "inbox") String category,
-                        @RequestParam(required = false) String groupId,
-                         @RequestParam(required = false) String businessKey,
-                        HttpServletRequest request) throws Exception {
-        handleTaskCategory(category, taskId, groupId, businessKey, request);
-        return "process/taskCenter";
     }
 
 //    /**
@@ -501,17 +484,35 @@ public class TaskController {
     }
 
     /**
+     * 任务中心页面
+     * @param category 页面类型(inbox(默认), tasks, queued, involved和archived)
+     * @param groupId 当category=queued时，group为用户组id
+     * @param taskId 任务id， 选填，用于显示指定任务详情
+     * @return
+     */
+    @RequestMapping(value = "/taskCenter.html", method = {RequestMethod.GET, RequestMethod.POST})
+    public String taskCenter(@RequestParam(required = false) String taskId,
+                             @RequestParam(defaultValue = "inbox") String category,
+                             @RequestParam(required = false) String groupId,
+                             @RequestParam(required = false) String queryString,
+                             HttpServletRequest request) throws Exception {
+        handleTaskCategory(category, taskId, groupId, queryString, request);
+        return "process/taskCenter";
+    }
+
+    /**
      * 统一处理不同类别的任务
      * @param category  任务类别
      * @param taskId 任务id
      * @param groupId 受邀用户组
-     * @param businessKey 查询的业务号
+     * @param queryString 查询的业务号
      */
-    private void handleTaskCategory(String category, String taskId, String groupId, String businessKey, HttpServletRequest request) throws Exception {
+    private void handleTaskCategory(String category, String taskId, String groupId, String queryString, HttpServletRequest request) throws Exception {
         UserTicket userTicket = SessionContext.getSessionContext().getUserTicket();
         if(userTicket == null){
             throw new NotLoginException();
         }
+        request.setAttribute("queryString", queryString);
         //当前用户为办理人
         String userId = userTicket.getId().toString();
         //待办任务
@@ -561,40 +562,41 @@ public class TaskController {
         //查询任务列表，用于左侧任务列表显示
         //设置当前显示的任务，用于在点击时直接跳转到该任务
         TaskInfo task = null;
-        //组装左侧任务列表
-        JSONArray ja = null;
+        //组装左侧任务列表, 包含: id(任务id和流程定义id), parentId, state, iconCls,text
+        JSONArray taskTreeJa = null;
         //先判断是否已归档类型，单独处理
         if(TaskCategory.ARCHIVED.getCode().equals(category)){
-            HistoricTaskInstanceQuery historicTaskInstanceQuery = historyService.createHistoricTaskInstanceQuery();
-            if(StringUtils.isNotBlank(businessKey)){
-                historicTaskInstanceQuery = historicTaskInstanceQuery.processInstanceBusinessKey(businessKey);
-            }
             //只查50条已归档数据;
-            List<HistoricTaskInstance> historicTaskInstances = historicTaskInstanceQuery.taskAssignee(userId).finished().orderByTaskCreateTime().desc().listPage(0, 50);
+            List<HistoricTaskInstance> historicTaskInstances = historyService.createHistoricTaskInstanceQuery().taskAssignee(userId).finished().orderByTaskCreateTime().desc().listPage(0, 50);
             if(CollectionUtils.isNotEmpty(historicTaskInstances)) {
-                task = findTaskById(historicTaskInstances, taskId);
-                ja = buildTaskTreeList(historicTaskInstances, taskId);
+                taskTreeJa = buildTaskTreeList(historicTaskInstances, taskId, queryString);
+                if(containsTask(taskTreeJa, taskId)) {
+                    task = findTaskById(historicTaskInstances, taskId);
+                }else{
+                    task = historicTaskInstances.get(0);
+                }
             }
         }else {
             //判断有groupId，并且当前用户也有该组权限, 没有groupId则列出当前用户组下所有任务
-            List<Task> tasks = containsGroupId(groupIds, groupId) ? listTaskByCategory(category, userId, businessKey, groupId) : listTaskByCategory(category, userId, businessKey, groupIds);
+            List<Task> tasks = containsGroupId(groupIds, groupId) ? listTaskByCategory(category, userId, groupId) : listTaskByCategory(category, userId, groupIds);
             if(CollectionUtils.isNotEmpty(tasks)) {
-                task = findTaskById(tasks, taskId);
-                ja = buildTaskTreeList(tasks, taskId);
+                taskTreeJa = buildTaskTreeList(tasks, taskId, queryString);
+                if(containsTask(taskTreeJa, taskId)) {
+                    task = findTaskById(tasks, taskId);
+                }else{
+                    task = tasks.get(0);
+                }
             }
         }
         //设置左侧任务列表
-        if(ja != null) {
-            request.setAttribute("tasks", ja.toJSONString());
+        if(taskTreeJa != null) {
+            request.setAttribute("tasks", taskTreeJa.toJSONString());
         }
         if (task == null) {
             return;
         }
-        //是否在任务列表的查询框回显业务号，不能和上面的代码交换位置
-        if(StringUtils.isNotBlank(businessKey)) {
-            request.setAttribute("showBusinessKey", true);
-        }
-        //设置流程发起人(这个会稍微影响性能，暂时不开放)
+
+        //设置流程发起人，用于界面回显(这个会稍微影响性能，暂时不开放)
 //        HistoricProcessInstance historicProcessInstance = historyService.createHistoricProcessInstanceQuery().processInstanceId(task.getProcessInstanceId()).singleResult();
 //        request.setAttribute("startUserId", historicProcessInstance.getStartUserId());
         //判断当前用户是否是办理人，如果不是则需要屏蔽任务表单
@@ -643,12 +645,29 @@ public class TaskController {
     }
 
     /**
-     * 构建任务中心左侧菜单任务树形列表数据
-     * @param tasks
-     * @param <T>
+     * 判断任务列表中是否包含任务
+     * @param taskTreeJa
+     * @param taskId
      * @return
      */
-    private <T extends TaskInfo> JSONArray buildTaskTreeList(List<T> tasks, String taskId) throws Exception {
+    private Boolean containsTask(JSONArray taskTreeJa, String taskId){
+        for (Object task : taskTreeJa) {
+            JSONObject jo = (JSONObject)task;
+            if(jo.get("id").equals(taskId)){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 构建任务中心左侧菜单任务树形列表数据
+     * @param tasks
+     * @param taskId 任务详情id
+     * @param queryString 查询串，用于过滤任务
+     * @return
+     */
+    private <T extends TaskInfo> JSONArray buildTaskTreeList(List<T> tasks, String taskId, String queryString) throws Exception {
         // 组装左侧任务列表
         JSONArray ja = new JSONArray();
         Map<String, String> processDefinitionMap = new HashMap<>();
@@ -670,6 +689,10 @@ public class TaskController {
         String taskText = null;
         for(TaskInfo taskInfo : tasks){
             taskText = getTaskText(taskInfo, PROCESS_DEFINITION_TASK_TITLE);
+            //过滤掉不匹配的任务标题
+            if(StringUtils.isNotBlank(queryString) && !taskText.contains(queryString.trim())){
+                continue;
+            }
             JSONObject jo = new JSONObject();
             jo.put("id", taskInfo.getId());
             if(taskInfo.getId().equals(taskId) || (StringUtils.isBlank(taskId) && i == 0)){
@@ -694,7 +717,6 @@ public class TaskController {
                 parentObj.put("text", processDefinitionMap.get(taskInfo.getProcessDefinitionId()));
                 ja.add(parentObj);
             }
-
         }
         return ja;
     }
@@ -813,7 +835,6 @@ public class TaskController {
      * 根据任务id从任务列表获取任务，如果任务id为空，则取第一个任务
      * @param tasks
      * @param taskId
-     * @param <T>
      * @return
      */
     private <T extends TaskInfo> T findTaskById(List<T> tasks, String taskId){
@@ -858,12 +879,8 @@ public class TaskController {
      * @param groupIds 用户组id列表，用于类别是任务队列时。
      * @return
      */
-    private List<Task> listTaskByCategory(String category, String userId, String businessKey, String... groupIds){
-        TaskQuery taskQuery = taskService.createTaskQuery();
-        if(StringUtils.isNotBlank(businessKey)){
-            taskQuery = taskQuery.processInstanceBusinessKey(businessKey);
-        }
-        taskQuery.orderByTaskCreateTime().desc();
+    private List<Task> listTaskByCategory(String category, String userId, String... groupIds){
+        TaskQuery taskQuery = taskService.createTaskQuery().orderByTaskCreateTime().desc();
         List<Task> tasks = new ArrayList<>();
         if(TaskCategory.INBOX.getCode().equals(category)){
             tasks = taskQuery.taskAssignee(userId).list();
