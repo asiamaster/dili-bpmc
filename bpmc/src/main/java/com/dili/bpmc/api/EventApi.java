@@ -132,7 +132,7 @@ public class EventApi {
 	 */
 	@RequestMapping(value = "/messageEventReceived", method = { RequestMethod.GET, RequestMethod.POST })
 	@Transactional
-	public BaseOutput<String> messageEventReceived(@RequestParam String messageName,@RequestParam String processInstanceId, @RequestParam Map<String, Object> variables) {
+	public BaseOutput<String> messageEventReceived(@RequestParam String messageName,@RequestParam String processInstanceId, @RequestParam(required = false) Map<String, Object> variables) {
 		try {
 			Execution execution = runtimeService.createExecutionQuery().messageEventSubscriptionName(messageName).processInstanceId(processInstanceId).singleResult();
 			if (execution == null) {

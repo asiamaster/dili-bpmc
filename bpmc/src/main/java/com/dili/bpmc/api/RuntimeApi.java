@@ -342,7 +342,7 @@ public class RuntimeApi {
     }
 
     /**
-     * 结束流程实例
+     * 结束进行中的流程实例
      * @param processInstanceId
      * @param deleteReason  结束原因
      * @throws IOException
@@ -354,7 +354,7 @@ public class RuntimeApi {
             //顺序不能换
             if (activitiService.isFinished2(processInstanceId)) {
                 historyService.deleteHistoricProcessInstance(processInstanceId);
-                runtimeService.suspendProcessInstanceById(processInstanceId);
+//                runtimeService.suspendProcessInstanceById(processInstanceId);
             } else {//流程没有结束
 //            taskService.addComment(taskId, processInstanceId, comment);//备注
                 runtimeService.deleteProcessInstance(processInstanceId, deleteReason);
