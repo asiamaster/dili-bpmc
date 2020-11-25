@@ -130,6 +130,6 @@ public interface RuntimeRpc {
 	 * @return
 	 */
 	@GET("/api/runtime/stopProcessInstanceById")
-	BaseOutput<ProcessInstanceMapping> stopProcessInstanceById(@ReqParam(value = "processInstanceId") String processInstanceId, @ReqParam(value = "deleteReason", required = false) String deleteReason);
+	BaseOutput stopProcessInstanceById(@ReqParam(value = "processInstanceId") String processInstanceId, @ReqParam(value = "deleteReason", required = false) String deleteReason);
 
 }
