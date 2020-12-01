@@ -2,11 +2,9 @@ package com.dili.bpmc.sdk.rpc;
 
 import com.dili.bpmc.sdk.domain.ExecutionMapping;
 import com.dili.bpmc.sdk.domain.ProcessInstanceMapping;
-import com.dili.bpmc.sdk.dto.HistoricProcessInstanceQueryDto;
-import com.dili.bpmc.sdk.dto.ProcessInstanceQueryDto;
+import com.dili.bpmc.sdk.dto.*;
 import com.dili.ss.domain.BaseOutput;
 import com.dili.ss.retrofitful.annotation.*;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 import java.util.Map;
@@ -36,13 +34,13 @@ public interface RuntimeRpc {
 
 	/**
 	 * 设置流程变量
-	 * @param processInstanceId
-	 * @param activityId
-	 * @param variables
+	 * @param setProcessInstanceVariablesDto processInstanceId
+	 * @param setProcessInstanceVariablesDto activityId
+	 * @param setProcessInstanceVariablesDto variables
 	 * @return
 	 */
 	@POST("/api/runtime/setVariables")
-	BaseOutput setVariables(@ReqParam(value = "processInstanceId") String processInstanceId, @ReqParam(value = "activityId") String activityId, @ReqParam(value = "variables") Map<String, String> variables);
+	BaseOutput setVariables(@VOBody ProcessInstanceVariablesDto setProcessInstanceVariablesDto);
 
 	/**
 	 * 设置流程变量
@@ -105,23 +103,25 @@ public interface RuntimeRpc {
 
 	/**
 	 * 根据key和参数启动流程定义
-	 * @param processDefinitionKey  流程定义key， 必填
-	 * @param businessKey   业务key，选填
-	 * @param variables     启动变量，选填
+	 * @param startProcessInstanceDto processDefinitionKey  流程定义key， 必填
+	 * @param startProcessInstanceDto businessKey   业务key，选填
+	 * @param startProcessInstanceDto userId   用户id，必填
+	 * @param startProcessInstanceDto variables     启动变量，选填
 	 * @return 流程实例对象封装
 	 */
 	@GET("/api/runtime/startProcessInstanceByKey")
-	BaseOutput<ProcessInstanceMapping> startProcessInstanceByKey(@ReqParam(value = "processDefinitionKey") String processDefinitionKey, @ReqParam(value = "businessKey", required = false) String businessKey, @ReqParam(value = "userId") String userId, @ReqParam(value = "variables") Map<String, Object> variables);
+	BaseOutput<ProcessInstanceMapping> startProcessInstanceByKey(@VOBody StartProcessInstanceDto startProcessInstanceDto);
 
 	/**
 	 * 根据流程定义id和参数启动流程定义
-	 * @param processDefinitionId 流程定义id
-	 * @param businessKey   业务key，选填
-	 * @param variables     启动变量，选填
+	 * @param startProcessInstanceDto processDefinitionId 流程定义id, 必填
+	 * @param startProcessInstanceDto businessKey   业务key，选填
+	 * @param startProcessInstanceDto userId   用户id，必填
+	 * @param startProcessInstanceDto variables     启动变量，选填
 	 * @return 流程实例对象封装
 	 */
 	@GET("/api/runtime/startProcessInstanceById")
-	BaseOutput<ProcessInstanceMapping> startProcessInstanceById(@ReqParam(value = "processDefinitionId") String processDefinitionId, @ReqParam(value = "businessKey", required = false) String businessKey, @ReqParam(value = "userId") String userId, @ReqParam(value = "variables") Map<String, Object> variables);
+	BaseOutput<ProcessInstanceMapping> startProcessInstanceById(@VOBody StartProcessInstanceDto startProcessInstanceDto);
 
 	/**
 	 * 结束流程实例

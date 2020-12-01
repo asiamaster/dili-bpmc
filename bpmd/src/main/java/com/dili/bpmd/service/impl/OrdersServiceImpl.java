@@ -3,7 +3,7 @@ package com.dili.bpmd.service.impl;
 import com.dili.bpmc.sdk.domain.ActForm;
 import com.dili.bpmc.sdk.domain.ProcessInstanceMapping;
 import com.dili.bpmc.sdk.domain.TaskMapping;
-import com.dili.bpmc.sdk.dto.TaskDto;
+import com.dili.bpmc.sdk.dto.*;
 import com.dili.bpmc.sdk.rpc.EventRpc;
 import com.dili.bpmc.sdk.rpc.FormRpc;
 import com.dili.bpmc.sdk.rpc.RuntimeRpc;
@@ -74,9 +74,14 @@ public class OrdersServiceImpl extends BaseServiceImpl<Orders, Long> implements 
         //流程启动参数设置
         Map<String, Object> variables = new HashMap<>(2);
         variables.put(BpmConsts.ORDER_CODE_KEY, orders.getCode());
+        StartProcessInstanceDto startProcessInstanceDto = DTOUtils.newInstance(StartProcessInstanceDto.class);
+        startProcessInstanceDto.setProcessDefinitionKey(BpmConsts.PROCESS_DEFINITION_KEY);
+        startProcessInstanceDto.setBusinessKey(orders.getCode());
+        startProcessInstanceDto.setUserId(userTicket.getId().toString());
+        startProcessInstanceDto.setVariables(variables);
         // 启动流程，因为订单要设置流程实例id,所以先启动流程
         // 如果插入订单失败，该流程作废，不影响订单下次创建。
-        BaseOutput<ProcessInstanceMapping> processInstanceOutput = runtimeRpc.startProcessInstanceByKey(BpmConsts.PROCESS_DEFINITION_KEY, orders.getCode(), userTicket.getId().toString(), variables);
+        BaseOutput<ProcessInstanceMapping> processInstanceOutput = runtimeRpc.startProcessInstanceByKey(startProcessInstanceDto);
         if(!processInstanceOutput.isSuccess()){
             return BaseOutput.failure(processInstanceOutput.getMessage());
         }
@@ -99,9 +104,14 @@ public class OrdersServiceImpl extends BaseServiceImpl<Orders, Long> implements 
         //流程启动参数设置
         Map<String, Object> variables = new HashMap<>(2);
         variables.put("businessKey", orders.getCode());
+        StartProcessInstanceDto startProcessInstanceDto = DTOUtils.newInstance(StartProcessInstanceDto.class);
+        startProcessInstanceDto.setProcessDefinitionKey(BpmConsts.PROCESS_DEFINITION_KEY);
+        startProcessInstanceDto.setBusinessKey(orders.getCode());
+        startProcessInstanceDto.setUserId(userTicket.getId().toString());
+        startProcessInstanceDto.setVariables(variables);
         // 启动流程，因为订单要设置流程实例id,所以先启动流程
         // 如果插入订单失败，该流程作废，不影响订单下次创建。
-        BaseOutput<ProcessInstanceMapping> processInstanceOutput = runtimeRpc.startProcessInstanceByKey(BpmConsts.DYNA_PROCESS_DEFINITION_KEY, orders.getCode(), userTicket.getId().toString(), variables);
+        BaseOutput<ProcessInstanceMapping> processInstanceOutput = runtimeRpc.startProcessInstanceByKey(startProcessInstanceDto);
         if(!processInstanceOutput.isSuccess()){
             return BaseOutput.failure(processInstanceOutput.getMessage());
         }
@@ -125,7 +135,11 @@ public class OrdersServiceImpl extends BaseServiceImpl<Orders, Long> implements 
 //        runtimeRpc.setVariable(processInstanceId, "created", "action", "submit");
 //        runtimeRpc.setVariables(processInstanceId, "created", param);
 //        System.out.println(runtimeRpc.getVariables(processInstanceId, null).getData());
-        return eventRpc.messageEventReceived("submitEvent", processInstanceId, param);
+        EventReceivedDto eventReceivedDto = DTOUtils.newInstance(EventReceivedDto.class);
+        eventReceivedDto.setEventName("submitEvent");
+        eventReceivedDto.setProcessInstanceId(processInstanceId);
+        eventReceivedDto.setVariables(param);
+        return eventRpc.messageEventReceived(eventReceivedDto);
     }
 
     @Override
@@ -142,7 +156,10 @@ public class OrdersServiceImpl extends BaseServiceImpl<Orders, Long> implements 
         param.put("content", "提交审批，编号["+code+"]");
         param.put("firmId", userTicket.getFirmId().toString());
         param.put("businessKey", code);
-        BaseOutput<String> output = eventRpc.messageEventReceived("submitApprovalEvent", processInstanceId, null);
+        EventReceivedDto eventReceivedDto = DTOUtils.newInstance(EventReceivedDto.class);
+        eventReceivedDto.setEventName("submitApprovalEvent");
+        eventReceivedDto.setProcessInstanceId(processInstanceId);
+        BaseOutput<String> output = eventRpc.messageEventReceived(eventReceivedDto);
         BaseOutput<ProcessInstanceMapping> activeProcessInstance = runtimeRpc.findActiveProcessInstance(null, code, processInstanceId);
         System.out.println("审批流程实例id:" + activeProcessInstance.getData().getProcessInstanceId());
         return output;
@@ -154,10 +171,13 @@ public class OrdersServiceImpl extends BaseServiceImpl<Orders, Long> implements 
         Orders orders = DTOUtils.newInstance(Orders.class);
         orders.setState(OrderState.Submit.getCode());
         updateSelectiveByCode(code, orders);
-        HashMap<String, String> param = new HashMap<>(2);
+        HashMap<String, Object> param = new HashMap<>(2);
         param.put("content", "提交订单");
         param.put("agree", "true");
-        taskRpc.setVariablesLocal(taskId, param);
+        TaskVariablesDto taskVariablesDto = DTOUtils.newInstance(TaskVariablesDto.class);
+        taskVariablesDto.setTaskId(taskId);
+        taskVariablesDto.setVariables(param);
+        taskRpc.setVariablesLocal(taskVariablesDto);
         return taskRpc.complete(taskId);
     }
 
@@ -169,15 +189,21 @@ public class OrdersServiceImpl extends BaseServiceImpl<Orders, Long> implements 
         orders.setEffectiveTime(effectiveTime);
         orders.setDeadTime(deadTime);
         updateSelectiveByCode(code, orders);
-        Map<String, String> variables = new HashMap<>(4);
+        Map<String, Object> variables = new HashMap<>(4);
         variables.put(BpmConsts.ORDER_CODE_KEY, code);
         //设置ISO8601格式的订单生效时间，用于流程中的定时器
         variables.put(BpmConsts.FIRE_TIME, DateUtils.getISO8601TimeDate(effectiveTime));
         Map<String, String> localVariables = new HashMap<>(4);
         localVariables.put("content", "订单缴费");
         localVariables.put("agree", "true");
-        taskRpc.setVariablesLocal(taskId, localVariables);
-        return taskRpc.complete(taskId, variables);
+        TaskVariablesDto taskVariablesDto = DTOUtils.newInstance(TaskVariablesDto.class);
+        taskVariablesDto.setTaskId(taskId);
+        taskVariablesDto.setVariables(variables);
+        taskRpc.setVariablesLocal(taskVariablesDto);
+        TaskCompleteDto taskCompleteDto = DTOUtils.newInstance(TaskCompleteDto.class);
+        taskCompleteDto.setTaskId(taskId);
+        taskCompleteDto.setVariables(variables);
+        return taskRpc.complete(taskCompleteDto);
     }
 
     @Override
@@ -187,7 +213,10 @@ public class OrdersServiceImpl extends BaseServiceImpl<Orders, Long> implements 
         orders.setState(OrderState.Paid.getCode());
         orders.setId(id);
         updateSelective(orders);
-        return eventRpc.messageEventReceived("paidEvent", processInstanceId, null);
+        EventReceivedDto eventReceivedDto = DTOUtils.newInstance(EventReceivedDto.class);
+        eventReceivedDto.setEventName("paidEvent");
+        eventReceivedDto.setProcessInstanceId(processInstanceId);
+        return eventRpc.messageEventReceived(eventReceivedDto);
     }
 
     @Override
@@ -197,13 +226,18 @@ public class OrdersServiceImpl extends BaseServiceImpl<Orders, Long> implements 
         orders.setState(OrderState.Expired.getCode());
         orders.setId(id);
         updateSelective(orders);
-        return eventRpc.signal(processInstanceId, "notActive", null);
+        EventReceivedDto eventReceivedDto = DTOUtils.newInstance(EventReceivedDto.class);
+        eventReceivedDto.setEventName("notActive");
+        return eventRpc.signal(eventReceivedDto);
     }
 
     @Override
     @Transactional
     public BaseOutput supplement(String processInstanceId) {
-        return eventRpc.messageEventReceived("supplementEvent", processInstanceId, null);
+        EventReceivedDto eventReceivedDto = DTOUtils.newInstance(EventReceivedDto.class);
+        eventReceivedDto.setEventName("supplementEvent");
+        eventReceivedDto.setProcessInstanceId(processInstanceId);
+        return eventRpc.messageEventReceived(eventReceivedDto);
     }
 
     @Override
@@ -213,7 +247,10 @@ public class OrdersServiceImpl extends BaseServiceImpl<Orders, Long> implements 
         orders.setState(OrderState.Create.getCode());
         orders.setId(id);
         updateSelective(orders);
-        return eventRpc.messageEventReceived("withdrawEvent", processInstanceId, null);
+        EventReceivedDto eventReceivedDto = DTOUtils.newInstance(EventReceivedDto.class);
+        eventReceivedDto.setEventName("withdrawEvent");
+        eventReceivedDto.setProcessInstanceId(processInstanceId);
+        return eventRpc.messageEventReceived(eventReceivedDto);
     }
 
     @Override
@@ -234,7 +271,10 @@ public class OrdersServiceImpl extends BaseServiceImpl<Orders, Long> implements 
         updateSelective(orders);
         orders = get(id);
         //发送消息通知流程
-        return eventRpc.messageEventReceived("deleteRentalOrderMsg", orders.getProcessInstanceId(), null);
+        EventReceivedDto eventReceivedDto = DTOUtils.newInstance(EventReceivedDto.class);
+        eventReceivedDto.setEventName("deleteRentalOrderMsg");
+        eventReceivedDto.setProcessInstanceId(orders.getProcessInstanceId());
+        return eventRpc.messageEventReceived(eventReceivedDto);
         //
 //        if(!output.isSuccess()){
 //            throw new BusinessException(ResultCode.DATA_ERROR, output.getMessage());
@@ -250,7 +290,10 @@ public class OrdersServiceImpl extends BaseServiceImpl<Orders, Long> implements 
         updateSelective(orders);
         orders = get(id);
         //发送消息通知流程
-        return eventRpc.messageEventReceived("invalidRentalOrderMsg", orders.getProcessInstanceId(), null);
+        EventReceivedDto eventReceivedDto = DTOUtils.newInstance(EventReceivedDto.class);
+        eventReceivedDto.setEventName("invalidRentalOrderMsg");
+        eventReceivedDto.setProcessInstanceId(orders.getProcessInstanceId());
+        return eventRpc.messageEventReceived(eventReceivedDto);
 //        if(!output.isSuccess()){
 //            throw new BusinessException(ResultCode.DATA_ERROR, output.getMessage());
 //        }
@@ -265,7 +308,10 @@ public class OrdersServiceImpl extends BaseServiceImpl<Orders, Long> implements 
         updateSelective(orders);
         orders = get(id);
         //发送消息通知流程
-        return eventRpc.messageEventReceived("deleteRentalOrderMsg", orders.getProcessInstanceId(), null);
+        EventReceivedDto eventReceivedDto = DTOUtils.newInstance(EventReceivedDto.class);
+        eventReceivedDto.setEventName("deleteRentalOrderMsg");
+        eventReceivedDto.setProcessInstanceId(orders.getProcessInstanceId());
+        return eventRpc.messageEventReceived(eventReceivedDto);
 //        if(!output.isSuccess()){
 //            throw new BusinessException(ResultCode.DATA_ERROR, output.getMessage());
 //        }
@@ -279,7 +325,10 @@ public class OrdersServiceImpl extends BaseServiceImpl<Orders, Long> implements 
         orders.setId(id);
         updateSelective(orders);
         //发送消息通知流程
-        return eventRpc.messageEventReceived("cancelEvent", processInstanceId, null);
+        EventReceivedDto eventReceivedDto = DTOUtils.newInstance(EventReceivedDto.class);
+        eventReceivedDto.setEventName("cancelEvent");
+        eventReceivedDto.setProcessInstanceId(processInstanceId);
+        return eventRpc.messageEventReceived(eventReceivedDto);
     }
 
     @Override

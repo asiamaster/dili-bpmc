@@ -1,16 +1,16 @@
 package com.dili.bpmc.api;
 
-import com.dili.bpmc.dao.EventSubscriptionMapper;
 import com.dili.bpmc.sdk.domain.ExecutionMapping;
 import com.dili.bpmc.sdk.domain.ProcessInstanceMapping;
 import com.dili.bpmc.sdk.dto.HistoricProcessInstanceQueryDto;
+import com.dili.bpmc.sdk.dto.ProcessInstanceVariablesDto;
+import com.dili.bpmc.sdk.dto.StartProcessInstanceDto;
 import com.dili.ss.activiti.service.ActivitiService;
 import com.dili.ss.domain.BaseOutput;
 import com.dili.ss.dto.DTOUtils;
 import org.activiti.engine.*;
 import org.activiti.engine.history.HistoricProcessInstance;
 import org.activiti.engine.history.HistoricProcessInstanceQuery;
-import org.activiti.engine.impl.persistence.entity.ExecutionEntity;
 import org.activiti.engine.runtime.Execution;
 import org.activiti.engine.runtime.ExecutionQuery;
 import org.activiti.engine.runtime.ProcessInstance;
@@ -25,7 +25,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.HashMap;
@@ -104,24 +103,21 @@ public class RuntimeApi {
     /**
      * 根据实例id和活动id获取唯一的执行id，设置流程变量
      *
-     * @param processInstanceId
-     * @param activityId
-     * @param variables
+     * @param setProcessInstanceVariablesDto processInstanceId
+     * @param setProcessInstanceVariablesDto activityId
+     * @param setProcessInstanceVariablesDto variables
      * @return
      */
     @RequestMapping(value = "/setVariables", method = {RequestMethod.GET, RequestMethod.POST})
-    public BaseOutput setVariables(@RequestParam String processInstanceId, @RequestParam String activityId, @RequestParam Map<String, String> variables){
+    public BaseOutput setVariables(ProcessInstanceVariablesDto setProcessInstanceVariablesDto){
         try {
-            //去掉RequestParameter
-            variables.remove("processInstanceId");
-            variables.remove("activityId");
             // 当前活动的id，对应receiveTask.bpmn文件中的活动节点的id的属性值
-            Execution execution = runtimeService.createExecutionQuery().processInstanceId(processInstanceId).activityId(activityId)
+            Execution execution = runtimeService.createExecutionQuery().processInstanceId(setProcessInstanceVariablesDto.getProcessInstanceId()).activityId(setProcessInstanceVariablesDto.getActivityId())
                     .singleResult();
             if (execution == null) {
-                return BaseOutput.failure("执行["+processInstanceId + "." + activityId+"]不存在");
+                return BaseOutput.failure("执行["+setProcessInstanceVariablesDto.getProcessInstanceId() + "." + setProcessInstanceVariablesDto.getActivityId()+"]不存在");
             }
-            runtimeService.setVariables(execution.getId(), variables);
+            runtimeService.setVariables(execution.getId(), setProcessInstanceVariablesDto.getVariables());
             return BaseOutput.success();
         } catch (Exception e) {
             return BaseOutput.failure(e.getMessage());
@@ -308,36 +304,37 @@ public class RuntimeApi {
 
     /**
      * 根据key和参数启动流程定义
-     * @param processDefinitionKey  流程定义key， 必填
-     * @param businessKey   业务key，选填
-     * @param variables     启动变量，选填
-     * @param request
+     * @param startProcessInstanceDto processDefinitionKey  流程定义key， 必填
+     * @param startProcessInstanceDto businessKey   业务key，选填
+     * @param startProcessInstanceDto userId   用户id，必填
+     * @param startProcessInstanceDto variables     启动变量，选填
      * @return 流程实例对象封装
      */
     @RequestMapping(value = "/startProcessInstanceByKey", method = {RequestMethod.GET, RequestMethod.POST})
-    public BaseOutput<ProcessInstanceMapping> startProcessInstanceByKey(@RequestParam String processDefinitionKey, @RequestParam(required = false) String businessKey, @RequestParam String userId, @RequestParam(required = false) Map<String, Object> variables, HttpServletRequest request) throws Exception {
+    public BaseOutput<ProcessInstanceMapping> startProcessInstanceByKey(StartProcessInstanceDto startProcessInstanceDto) throws Exception {
         //流程发起前设置发起人，记录在流程历史中
 //        在流程开始之前设置，会自动在表ACT_HI_PROCINST 中的START_USER_ID_中设置用户ID：
 //        用来设置启动流程的人员ID，引擎会自动把用户ID保存到activiti:initiator中
-        identityService.setAuthenticatedUserId(userId);
-        ProcessInstance processInstance = runtimeService.startProcessInstanceByKey(processDefinitionKey, businessKey, variables);
+        identityService.setAuthenticatedUserId(startProcessInstanceDto.getUserId());
+        ProcessInstance processInstance = runtimeService.startProcessInstanceByKey(startProcessInstanceDto.getProcessDefinitionKey(), startProcessInstanceDto.getBusinessKey(), startProcessInstanceDto.getVariables());
         return BaseOutput.success().setData(DTOUtils.asInstance(processInstance, ProcessInstanceMapping.class));
     }
 
     /**
      * 根据流程定义id和参数启动流程定义
-     * @param processDefinitionId 流程定义id
-     * @param businessKey   业务key，选填
-     * @param variables     启动变量，选填
+     * @param startProcessInstanceDto processDefinitionId 流程定义id, 必填
+     * @param startProcessInstanceDto businessKey   业务key，选填
+     * @param startProcessInstanceDto userId   用户id，必填
+     * @param startProcessInstanceDto variables     启动变量，选填
      * @return 流程实例对象封装
      */
     @RequestMapping(value = "/startProcessInstanceById", method = {RequestMethod.GET, RequestMethod.POST})
-    public BaseOutput<ProcessInstanceMapping> startProcessInstanceById(@RequestParam String processDefinitionId, @RequestParam(required = false) String businessKey, @RequestParam String userId, @RequestParam(required = false) Map<String, Object> variables, HttpServletRequest request) throws Exception {
+    public BaseOutput<ProcessInstanceMapping> startProcessInstanceById(StartProcessInstanceDto startProcessInstanceDto) throws Exception {
         //流程发起前设置发起人，记录在流程历史中
 //        在流程开始之前设置，会自动在表ACT_HI_PROCINST 中的START_USER_ID_中设置用户ID：
 //        用来设置启动流程的人员ID，引擎会自动把用户ID保存到activiti:initiator中
-        identityService.setAuthenticatedUserId(userId);
-        ProcessInstance processInstance = runtimeService.startProcessInstanceById(processDefinitionId, businessKey, variables);
+        identityService.setAuthenticatedUserId(startProcessInstanceDto.getUserId());
+        ProcessInstance processInstance = runtimeService.startProcessInstanceById(startProcessInstanceDto.getProcessDefinitionId(), startProcessInstanceDto.getBusinessKey(), startProcessInstanceDto.getVariables());
         return BaseOutput.success().setData(DTOUtils.asInstance(processInstance, ProcessInstanceMapping.class));
     }
 

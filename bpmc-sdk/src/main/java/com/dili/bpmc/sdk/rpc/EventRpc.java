@@ -1,6 +1,7 @@
 package com.dili.bpmc.sdk.rpc;
 
 import com.dili.bpmc.sdk.domain.EventSubscriptionMapping;
+import com.dili.bpmc.sdk.dto.EventReceivedDto;
 import com.dili.ss.domain.BaseOutput;
 import com.dili.ss.retrofitful.annotation.*;
 
@@ -40,35 +41,31 @@ public interface EventRpc {
 	/**
 	 * 抛出消息事件
 	 * 
-	 * @param messageName       必填
-	 * @param processInstanceId 必填
-	 * @param variables
+	 * @param eventReceivedDto messageName       必填
+	 * @param eventReceivedDto processInstanceId或executionId 必填一项
 	 */
 	@POST("/api/event/messageEventReceived")
-	BaseOutput<String> messageEventReceived(@ReqParam(value = "messageName") String messageName, @ReqParam(value = "processInstanceId") String processInstanceId,
-			@ReqParam(value = "variables", required = false) Map<String, Object> variables);
+	BaseOutput<String> messageEventReceived(@VOBody EventReceivedDto eventReceivedDto);
 
 	/**
 	 * 根据signalName和executionId触发信号事件 executionId为空，则在全局范围广播，为所有已订阅处理器抛出信号（广播）
 	 * executionId不为空， 只为指定的执行传递信号
-	 * 没有executionId，则根据processInstanceId和signalName获取executionId
-	 * @param signalName       必填
-	 * @param processInstanceId 选填
-	 * @param variables
+	 *
+	 * @param eventReceivedDto eventName 必填
+	 * @param eventReceivedDto processInstanceId 选填
 	 */
 	@POST("/api/event/signalEventReceived")
-	BaseOutput<String> signalEventReceived(@ReqParam(value = "signalName") String signalName, @ReqParam(value = "executionId", required = false) String executionId,
-										   @ReqParam(value = "processInstanceId", required = false) String processInstanceId, @ReqParam(value = "variables", required = false) Map<String, Object> variables);
+	BaseOutput<String> signalEventReceived(@VOBody EventReceivedDto eventReceivedDto);
 
 	/**
-	 * 触发Java接收任务
-	 * @param processInstanceId
-	 * @param activityId
-	 * @param variables
+	 * 根据活动id和实例id，触发Java接收任务(Java Receive Task)
+	 *
+	 * @param eventReceivedDto eventName        当前活动的id，对应receiveTask.bpmn文件中的活动节点的id的属性值，必填
+	 * @param eventReceivedDto processInstanceId或executionId 必填一项
 	 * @return
 	 */
 	@POST("/api/event/signal")
-	BaseOutput<String> signal(@ReqParam(value = "processInstanceId") String processInstanceId, @ReqParam(value = "activityId") String activityId, @ReqParam(value = "variables", required = false) Map<String, Object> variables);
+	BaseOutput<String> signal(@VOBody EventReceivedDto eventReceivedDto);
 
 
 }

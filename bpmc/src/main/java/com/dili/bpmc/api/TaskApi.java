@@ -7,6 +7,8 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.dili.bpmc.sdk.dto.TaskCompleteDto;
+import com.dili.bpmc.sdk.dto.TaskVariablesDto;
 import org.activiti.engine.FormService;
 import org.activiti.engine.IdentityService;
 import org.activiti.engine.RepositoryService;
@@ -101,68 +103,68 @@ public class TaskApi {
 	/**
 	 * 完成任务
 	 * 
-	 * @param taskId    必填
-	 * @param assignee  强制插手认领人
-	 * @param variables
+	 * @param taskCompleteDto taskId    必填
+	 * @param taskCompleteDto assignee  强制插手认领人
+	 * @param taskCompleteDto variables
 	 * @throws IOException
 	 * @return taskId
 	 */
 	@RequestMapping(value = "/complete", method = { RequestMethod.GET, RequestMethod.POST })
-	public BaseOutput<String> complete(@RequestParam String taskId, @RequestParam(required = false) String assignee, @RequestParam Map<String, String> variables) {
+	public BaseOutput<String> complete(TaskCompleteDto taskCompleteDto) {
 		// 强制插手人签收任务
-		if (StringUtils.isNotBlank(assignee)) {
-			taskService.claim(taskId, assignee);
+		if (StringUtils.isNotBlank(taskCompleteDto.getAssignee())) {
+			taskService.claim(taskCompleteDto.getTaskId(), taskCompleteDto.getAssignee());
 		}
-		Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
+		Task task = taskService.createTaskQuery().taskId(taskCompleteDto.getTaskId()).singleResult();
 		if (task == null) {
 			return BaseOutput.failure("任务不存在");
 		}
 		if (StringUtils.isBlank(task.getAssignee())) {
 			return BaseOutput.failure("任务还未认领");
 		}
-		taskService.complete(taskId, (Map) variables);
-		return BaseOutput.successData(taskId);
+		taskService.complete(taskCompleteDto.getTaskId(), taskCompleteDto.getVariables());
+		return BaseOutput.successData(taskCompleteDto.getTaskId());
 	}
 
 	/**
 	 * 强制提交任务，使用于无办理人的场景
 	 * 
-	 * @param taskId    必填
-	 * @param variables
+	 * @param taskCompleteDto taskId    必填
+	 * @param taskCompleteDto variables
 	 */
 	@RequestMapping(value = "/completeByForce", method = { RequestMethod.GET, RequestMethod.POST })
-	public BaseOutput<String> completeByForce(@RequestParam String taskId, @RequestParam Map<String, Object> variables) {
-		Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
+	public BaseOutput<String> completeByForce(TaskCompleteDto taskCompleteDto) {
+		Task task = taskService.createTaskQuery().taskId(taskCompleteDto.getTaskId()).singleResult();
 		if (task == null) {
 			return BaseOutput.failure("任务不存在");
 		}
-		taskService.complete(taskId, variables);
+		taskService.complete(taskCompleteDto.getTaskId(), taskCompleteDto.getVariables());
 		return BaseOutput.success();
 	}
 
 	/**
 	 * 提交任务表单
 	 * 
-	 * @param taskId    必填
-	 * @param assignee  强制插手认领人
-	 * @param variables
+	 * @param taskCompleteDto taskId    必填
+	 * @param taskCompleteDto assignee  强制插手认领人
+	 * @param taskCompleteDto variables 该参数是Map<String, String>，而不是Map<String, Object>
 	 * @param request
 	 * @throws IOException
 	 */
 	@RequestMapping(value = "/submitTaskForm", method = { RequestMethod.GET, RequestMethod.POST })
-	public BaseOutput<String> submitTaskForm(@RequestParam String taskId, @RequestParam(required = false) String assignee, @RequestParam Map<String, String> variables, HttpServletRequest request) {
+	public BaseOutput<String> submitTaskForm(TaskCompleteDto taskCompleteDto, HttpServletRequest request) {
 		// 强制插手人签收任务
-		if (StringUtils.isNotBlank(assignee)) {
-			taskService.claim(taskId, assignee);
+		if (StringUtils.isNotBlank(taskCompleteDto.getAssignee())) {
+			taskService.claim(taskCompleteDto.getTaskId(), taskCompleteDto.getAssignee());
 		}
-		Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
+		Task task = taskService.createTaskQuery().taskId(taskCompleteDto.getTaskId()).singleResult();
 		if (task == null) {
 			return BaseOutput.failure("任务不存在");
 		}
 		if (StringUtils.isBlank(task.getAssignee())) {
 			return BaseOutput.failure("任务还未认领");
 		}
-		formService.submitTaskFormData(taskId, variables);
+		formService.submitTaskFormData(taskCompleteDto.getTaskId(), (Map)taskCompleteDto.getVariables());
 		return BaseOutput.success();
 	}
 
@@ -207,15 +209,15 @@ public class TaskApi {
 	 * 而是需要被委托人有完成任务操作时方可进行到下一步，而中国式需求中大多都是解决委托就是完成任务，
 	 * 需要解决这个问题的话可以在调用解决委托后执行一个完成任务代码操作
 	 * 
-	 * @param taskId    任务id，必填
-	 * @param variables
+	 * @param taskVariablesDto taskId    任务id，必填
+	 * @param taskVariablesDto variables
 	 * @param request
 	 * @throws IOException
 	 */
 	@RequestMapping(value = "/resolve", method = { RequestMethod.GET, RequestMethod.POST })
-	public BaseOutput<String> resolve(@RequestParam String taskId, @RequestParam Map variables, HttpServletRequest request) {
+	public BaseOutput<String> resolve(TaskVariablesDto taskVariablesDto, HttpServletRequest request) {
 		// 根据taskId提取任务
-		Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
+		Task task = taskService.createTaskQuery().taskId(taskVariablesDto.getTaskId()).singleResult();
 		if (task == null) {
 			return BaseOutput.failure("任务不存在");
 		}
@@ -225,13 +227,204 @@ public class TaskApi {
 				return BaseOutput.failure("此委托任务已是完结状态");
 			} else if (delegationState.toString().equals(DelegationState.PENDING.name())) {
 				// 如果是委托任务需要做处理
-				taskService.resolveTask(taskId, variables);
+				taskService.resolveTask(taskVariablesDto.getTaskId(), taskVariablesDto.getVariables());
 			} else {
 				return BaseOutput.failure("此任务不是委托任务");
 			}
 		}
 		return BaseOutput.success();
 	}
+
+
+	/**
+	 * 获取activiti原生任务表单信息
+	 *
+	 * @param taskId，必填
+	 * @return List<org.activiti.engine.form.FormProperty>
+	 */
+	@RequestMapping(value = "/getTaskFormData", method = { RequestMethod.GET, RequestMethod.POST })
+	public BaseOutput<String> getTaskFormData(@RequestParam String taskId) {
+		TaskFormData taskFormData = formService.getTaskFormData(taskId);
+		if (taskFormData == null) {
+			return BaseOutput.failure("表单信息不存在");
+		}
+		return BaseOutput.success(JSON.toJSONString(taskFormData.getFormProperties()));
+	}
+
+	/**
+	 * 获取任务变量
+	 *
+	 * @param taskId，必填
+	 * @return
+	 */
+	@RequestMapping(value = "/getVariables", method = { RequestMethod.GET, RequestMethod.POST })
+	public BaseOutput<Map<String, Object>> getVariables(@RequestParam String taskId) {
+		return BaseOutput.success().setData(taskService.getVariables(taskId));
+	}
+
+	/**
+	 * 设置本地任务变量
+	 *
+	 * @param taskVariablesDto，必填
+	 * @return
+	 */
+	@RequestMapping(value = "/setVariablesLocal", method = { RequestMethod.GET, RequestMethod.POST })
+	public BaseOutput setVariablesLocal(TaskVariablesDto taskVariablesDto) {
+		taskService.setVariablesLocal(taskVariablesDto.getTaskId(), taskVariablesDto.getVariables());
+		return BaseOutput.success();
+	}
+
+	/**
+	 * 获取任务变量
+	 *
+	 * @param taskId       任务id，必填
+	 * @param variableName 变量名，必填
+	 * @return
+	 */
+	@RequestMapping(value = "/getVariable", method = { RequestMethod.GET, RequestMethod.POST })
+	public BaseOutput<Object> getVariable(@RequestParam String taskId, @RequestParam String variableName) {
+		return BaseOutput.success().setData(taskService.getVariable(taskId, variableName));
+	}
+
+	/**
+	 * 根据任务id查询任务
+	 *
+	 * @param taskId
+	 * @return
+	 */
+	@RequestMapping(value = "/getById", method = { RequestMethod.GET, RequestMethod.POST })
+	public BaseOutput<TaskMapping> getById(@RequestParam String taskId) {
+		Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
+		if (task == null) {
+			return BaseOutput.failure("任务不存在");
+		}
+		return BaseOutput.successData(DTOUtils.asInstance(task, TaskMapping.class));
+	}
+
+	/**
+	 * 查询任务列表
+	 *
+	 * @param taskDto
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/list", method = { RequestMethod.GET, RequestMethod.POST })
+	public BaseOutput<List<TaskMapping>> list(TaskDto taskDto) {
+		TaskQuery taskQuery = taskService.createTaskQuery();
+		if (StringUtils.isNotBlank(taskDto.getAssignee())) {
+			taskQuery.taskAssignee(taskDto.getAssignee());
+		}
+		if (StringUtils.isNotBlank(taskDto.getProcessDefinitionId())) {
+			taskQuery.processDefinitionId(taskDto.getProcessDefinitionId());
+		}
+		if (StringUtils.isNotBlank(taskDto.getProcessInstanceId())) {
+			taskQuery.processInstanceId(taskDto.getProcessInstanceId());
+		}
+		if (StringUtils.isNotBlank(taskDto.getTaskId())) {
+			taskQuery.taskId(taskDto.getTaskId());
+		}
+		if (StringUtils.isNotBlank(taskDto.getTaskDefinitionKey())) {
+			taskQuery.taskDefinitionKey(taskDto.getTaskDefinitionKey());
+		}
+		if (StringUtils.isNotBlank(taskDto.getCandidateUser())) {
+			taskQuery.taskCandidateUser(taskDto.getCandidateUser());
+		}
+		if (CollectionUtils.isNotEmpty(taskDto.getCandidateGroups())) {
+			taskQuery.taskCandidateGroupIn(taskDto.getCandidateGroups());
+		}
+		if (taskDto.getProcessVariables() != null) {
+			for (Map.Entry<String, Object> entry : taskDto.getProcessVariables().entrySet()) {
+				taskQuery.processVariableValueEquals(entry.getKey(), entry.getValue());
+			}
+		}
+		if (taskDto.getTaskVariables() != null) {
+			for (Map.Entry<String, Object> entry : taskDto.getTaskVariables().entrySet()) {
+				taskQuery.taskVariableValueEquals(entry.getKey(), entry.getValue());
+			}
+		}
+		if (StringUtils.isNotBlank(taskDto.getProcessInstanceBusinessKey())) {
+			taskQuery.processInstanceBusinessKey(taskDto.getProcessInstanceBusinessKey());
+		}
+		List<Task> taskList = taskQuery.list();
+//        List<TaskMapping> taskMappingList = new ArrayList<>(taskList.size());
+//        for(Task task : taskList){
+//            TaskMapping taskMapping = DTOUtils.asInstance(task, TaskMapping.class);
+//            taskMapping.setId(task.getId());
+//            taskMappingList.add(taskMapping);
+//        }
+		return BaseOutput.success().setData(DTOUtils.asInstance(taskList, TaskMapping.class));
+	}
+
+	/**
+	 * 使用mybatis自定义任务查询
+	 *
+	 * @param taskDto 任务查询对象
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/listTaskMapping", method = { RequestMethod.GET, RequestMethod.POST })
+	public BaseOutput<List<TaskMapping>> listTaskMapping(TaskDto taskDto) {
+		List<TaskMapping> list = actRuTaskMapper.list(taskDto);
+		return BaseOutput.success().setData(list);
+	}
+
+	/**
+	 * 根据流程实例id批量查询任务候选人、候选组、办理人
+	 *
+	 * @param processIntanceIds
+	 * @return
+	 */
+	@PostMapping("/listTaskIdentityByProcessInstanceIds")
+	public BaseOutput<List<TaskIdentityDto>> listTaskIdentityByProcessInstanceIds(@RequestBody List<String> processIntanceIds) {
+		return BaseOutput.successData(this.actRuTaskMapper.listTaskIdentityByProcessInstanceIds(processIntanceIds));
+	}
+
+	/**
+	 * 根据流程实例id批量查询任务候选人、候选组、办理人
+	 *
+	 * @param processIntanceIds
+	 * @return
+	 */
+	@PostMapping("/listTaskIdentityByProcessInstanceId")
+	public BaseOutput<List<TaskIdentityDto>> listTaskIdentityByProcessInstanceId(@RequestBody String processIntanceIds) {
+		return BaseOutput.successData(this.actRuTaskMapper.listTaskIdentityByProcessInstanceIds(Lists.newArrayList(processIntanceIds)));
+	}
+
+	/**
+	 * 查询用户任务
+	 *
+	 * @param userId               用户id
+	 * @param processDefinitionKey 流程定义key
+	 * @return
+	 */
+	@RequestMapping(value = "/listUserTask", method = { RequestMethod.GET, RequestMethod.POST })
+	public BaseOutput<List<TaskMapping>> listUserTask(@RequestParam Long userId, @RequestParam String processDefinitionKey) {
+		TaskQuery taskQuery = taskService.createTaskQuery();
+		if (StringUtils.isNotBlank(processDefinitionKey)) {
+			taskQuery.processDefinitionKey(processDefinitionKey);
+		}
+		taskQuery.taskAssignee(userId.toString());
+		List<Task> taskList = taskQuery.list();
+		taskQuery = taskService.createTaskQuery();
+		if (StringUtils.isNotBlank(processDefinitionKey)) {
+			taskQuery.processDefinitionKey(processDefinitionKey);
+		}
+		taskQuery.taskCandidateUser(userId.toString());
+		taskList.addAll(taskQuery.list());
+		List<Group> list = identityService.createGroupQuery().groupMember(userId.toString()).list();
+		List<String> roleIds = new ArrayList<String>(list.size());
+		list.forEach(r -> roleIds.add(r.getId().toString()));
+		if (CollectionUtils.isNotEmpty(roleIds)) {
+			taskQuery = taskService.createTaskQuery();
+			if (StringUtils.isNotBlank(processDefinitionKey)) {
+				taskQuery.processDefinitionKey(processDefinitionKey);
+			}
+			taskQuery.taskCandidateGroupIn(roleIds);
+			taskList.addAll(taskQuery.list());
+		}
+		return BaseOutput.success().setData(DTOUtils.asInstance(taskList, TaskMapping.class));
+	}
+
 
 	/**
 	 * 根据活动id和实例id，触发Java接收任务(Java Receive Task)
@@ -302,196 +495,6 @@ public class TaskApi {
 		} catch (Exception e) {
 			return BaseOutput.failure(e.getMessage());
 		}
-	}
-
-	/**
-	 * 获取activiti原生任务表单信息
-	 * 
-	 * @param taskId，必填
-	 * @return List<org.activiti.engine.form.FormProperty>
-	 */
-	@RequestMapping(value = "/getTaskFormData", method = { RequestMethod.GET, RequestMethod.POST })
-	public BaseOutput<String> getTaskFormData(@RequestParam String taskId) {
-		TaskFormData taskFormData = formService.getTaskFormData(taskId);
-		if (taskFormData == null) {
-			return BaseOutput.failure("表单信息不存在");
-		}
-		return BaseOutput.success(JSON.toJSONString(taskFormData.getFormProperties()));
-	}
-
-	/**
-	 * 获取任务变量
-	 * 
-	 * @param taskId，必填
-	 * @return
-	 */
-	@RequestMapping(value = "/getVariables", method = { RequestMethod.GET, RequestMethod.POST })
-	public BaseOutput<Map<String, Object>> getVariables(@RequestParam String taskId) {
-		return BaseOutput.success().setData(taskService.getVariables(taskId));
-	}
-
-	/**
-	 * 设置本地任务变量
-	 *
-	 * @param taskId，必填
-	 * @return
-	 */
-	@RequestMapping(value = "/setVariablesLocal", method = { RequestMethod.GET, RequestMethod.POST })
-	public BaseOutput setVariablesLocal(@RequestParam String taskId, @RequestParam Map<String, String> variables) {
-		variables.remove("taskId");
-		taskService.setVariablesLocal(taskId, variables);
-		return BaseOutput.success();
-	}
-
-	/**
-	 * 获取任务变量
-	 * 
-	 * @param taskId       任务id，必填
-	 * @param variableName 变量名，必填
-	 * @return
-	 */
-	@RequestMapping(value = "/getVariable", method = { RequestMethod.GET, RequestMethod.POST })
-	public BaseOutput<Object> getVariable(@RequestParam String taskId, @RequestParam String variableName) {
-		return BaseOutput.success().setData(taskService.getVariable(taskId, variableName));
-	}
-
-	/**
-	 * 根据任务id查询任务
-	 * 
-	 * @param taskId
-	 * @return
-	 */
-	@RequestMapping(value = "/getById", method = { RequestMethod.GET, RequestMethod.POST })
-	public BaseOutput<TaskMapping> getById(@RequestParam String taskId) {
-		Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
-		if (task == null) {
-			return BaseOutput.failure("任务不存在");
-		}
-		return BaseOutput.successData(DTOUtils.asInstance(task, TaskMapping.class));
-	}
-
-	/**
-	 * 查询任务列表
-	 * 
-	 * @param taskDto
-	 * @return
-	 * @throws Exception
-	 */
-	@RequestMapping(value = "/list", method = { RequestMethod.GET, RequestMethod.POST })
-	public BaseOutput<List<TaskMapping>> list(TaskDto taskDto) {
-		TaskQuery taskQuery = taskService.createTaskQuery();
-		if (StringUtils.isNotBlank(taskDto.getAssignee())) {
-			taskQuery.taskAssignee(taskDto.getAssignee());
-		}
-		if (StringUtils.isNotBlank(taskDto.getProcessDefinitionId())) {
-			taskQuery.processDefinitionId(taskDto.getProcessDefinitionId());
-		}
-		if (StringUtils.isNotBlank(taskDto.getProcessInstanceId())) {
-			taskQuery.processInstanceId(taskDto.getProcessInstanceId());
-		}
-		if (StringUtils.isNotBlank(taskDto.getTaskId())) {
-			taskQuery.taskId(taskDto.getTaskId());
-		}
-		if (StringUtils.isNotBlank(taskDto.getTaskDefinitionKey())) {
-			taskQuery.taskDefinitionKey(taskDto.getTaskDefinitionKey());
-		}
-		if (StringUtils.isNotBlank(taskDto.getCandidateUser())) {
-			taskQuery.taskCandidateUser(taskDto.getCandidateUser());
-		}
-		if (CollectionUtils.isNotEmpty(taskDto.getCandidateGroups())) {
-			taskQuery.taskCandidateGroupIn(taskDto.getCandidateGroups());
-		}
-		if (taskDto.getProcessVariables() != null) {
-			for (Map.Entry<String, Object> entry : taskDto.getProcessVariables().entrySet()) {
-				taskQuery.processVariableValueEquals(entry.getKey(), entry.getValue());
-			}
-		}
-		if (taskDto.getTaskVariables() != null) {
-			for (Map.Entry<String, Object> entry : taskDto.getTaskVariables().entrySet()) {
-				taskQuery.taskVariableValueEquals(entry.getKey(), entry.getValue());
-			}
-		}
-		if (StringUtils.isNotBlank(taskDto.getProcessInstanceBusinessKey())) {
-			taskQuery.processInstanceBusinessKey(taskDto.getProcessInstanceBusinessKey());
-		}
-		List<Task> taskList = taskQuery.list();
-//        List<TaskMapping> taskMappingList = new ArrayList<>(taskList.size());
-//        for(Task task : taskList){
-//            TaskMapping taskMapping = DTOUtils.asInstance(task, TaskMapping.class);
-//            taskMapping.setId(task.getId());
-//            taskMappingList.add(taskMapping);
-//        }
-		return BaseOutput.success().setData(DTOUtils.asInstance(taskList, TaskMapping.class));
-	}
-
-	/**
-	 * 使用mybatis自定义任务查询
-	 * 
-	 * @param taskDto 任务查询对象
-	 * @return
-	 * @throws Exception
-	 */
-	@RequestMapping(value = "/listTaskMapping", method = { RequestMethod.GET, RequestMethod.POST })
-	public BaseOutput<List<TaskMapping>> listTaskMapping(TaskDto taskDto) {
-		List<TaskMapping> list = actRuTaskMapper.list(taskDto);
-		return BaseOutput.success().setData(list);
-	}
-
-	/**
-	 * 根据流程实例id批量查询任务候选人、候选组、办理人
-	 * 
-	 * @param processIntanceIds
-	 * @return
-	 */
-	@PostMapping("/listTaskIdentityByProcessInstanceIds")
-	public BaseOutput<List<TaskIdentityDto>> listTaskIdentityByProcessInstanceIds(@RequestBody List<String> processIntanceIds) {
-		return BaseOutput.successData(this.actRuTaskMapper.listTaskIdentityByProcessInstanceIds(processIntanceIds));
-	}
-
-	/**
-	 * 根据流程实例id批量查询任务候选人、候选组、办理人
-	 *
-	 * @param processIntanceIds
-	 * @return
-	 */
-	@PostMapping("/listTaskIdentityByProcessInstanceId")
-	public BaseOutput<List<TaskIdentityDto>> listTaskIdentityByProcessInstanceId(@RequestBody String processIntanceIds) {
-		return BaseOutput.successData(this.actRuTaskMapper.listTaskIdentityByProcessInstanceIds(Lists.newArrayList(processIntanceIds)));
-	}
-
-	/**
-	 * 查询用户任务
-	 * 
-	 * @param userId               用户id
-	 * @param processDefinitionKey 流程定义key
-	 * @return
-	 */
-	@RequestMapping(value = "/listUserTask", method = { RequestMethod.GET, RequestMethod.POST })
-	public BaseOutput<List<TaskMapping>> listUserTask(@RequestParam Long userId, @RequestParam String processDefinitionKey) {
-		TaskQuery taskQuery = taskService.createTaskQuery();
-		if (StringUtils.isNotBlank(processDefinitionKey)) {
-			taskQuery.processDefinitionKey(processDefinitionKey);
-		}
-		taskQuery.taskAssignee(userId.toString());
-		List<Task> taskList = taskQuery.list();
-		taskQuery = taskService.createTaskQuery();
-		if (StringUtils.isNotBlank(processDefinitionKey)) {
-			taskQuery.processDefinitionKey(processDefinitionKey);
-		}
-		taskQuery.taskCandidateUser(userId.toString());
-		taskList.addAll(taskQuery.list());
-		List<Group> list = identityService.createGroupQuery().groupMember(userId.toString()).list();
-		List<String> roleIds = new ArrayList<String>(list.size());
-		list.forEach(r -> roleIds.add(r.getId().toString()));
-		if (CollectionUtils.isNotEmpty(roleIds)) {
-			taskQuery = taskService.createTaskQuery();
-			if (StringUtils.isNotBlank(processDefinitionKey)) {
-				taskQuery.processDefinitionKey(processDefinitionKey);
-			}
-			taskQuery.taskCandidateGroupIn(roleIds);
-			taskList.addAll(taskQuery.list());
-		}
-		return BaseOutput.success().setData(DTOUtils.asInstance(taskList, TaskMapping.class));
 	}
 
 }

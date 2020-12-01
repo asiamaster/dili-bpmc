@@ -1,19 +1,15 @@
 package com.dili.bpmc.sdk.rpc;
 
-import java.util.List;
-import java.util.Map;
-
-import com.dili.bpmc.sdk.domain.ProcessInstanceMapping;
 import com.dili.bpmc.sdk.domain.TaskMapping;
+import com.dili.bpmc.sdk.dto.TaskCompleteDto;
+import com.dili.bpmc.sdk.dto.TaskVariablesDto;
 import com.dili.bpmc.sdk.dto.TaskDto;
 import com.dili.bpmc.sdk.dto.TaskIdentityDto;
 import com.dili.ss.domain.BaseOutput;
-import com.dili.ss.retrofitful.annotation.GET;
-import com.dili.ss.retrofitful.annotation.POST;
-import com.dili.ss.retrofitful.annotation.ReqParam;
-import com.dili.ss.retrofitful.annotation.Restful;
-import com.dili.ss.retrofitful.annotation.VOBody;
-import org.springframework.web.bind.annotation.RequestParam;
+import com.dili.ss.retrofitful.annotation.*;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * 任务接口
@@ -41,21 +37,22 @@ public interface TaskRpc {
 	/**
 	 * 完成任务
 	 * 
-	 * @param taskId    任务id 必填
-	 * @param variables
+	 * @param taskCompleteDto taskId    任务id 必填
+	 * @param taskCompleteDto assignee  强制插手认领人
+	 * @param taskCompleteDto variables
 	 * @return 任务id
 	 */
 	@POST("/api/task/complete")
-	BaseOutput<String> complete(@ReqParam(value = "taskId") String taskId, @ReqParam(value = "variables", required = false) Map<String, String> variables);
+	BaseOutput<String> complete(@VOBody TaskCompleteDto taskCompleteDto);
 
 	/**
 	 * 强制提交任务，使用于无办理人的场景
 	 * 
-	 * @param taskId    必填
-	 * @param variables
+	 * @param taskCompleteDto taskId    必填
+	 * @param taskCompleteDto variables
 	 */
 	@POST("/api/task/completeByForce")
-	BaseOutput<String> completeByForce(@ReqParam(value = "taskId") String taskId, @ReqParam(value = "variables", required = false) Map<String, Object> variables);
+	BaseOutput<String> completeByForce(@VOBody TaskCompleteDto taskCompleteDto);
 
 	/**
 	 * 签收并完成任务(无参)
@@ -88,12 +85,12 @@ public interface TaskRpc {
 	/**
 	 * 设置本地任务变量
 	 * 
-	 * @param taskId
-	 * @param variables
+	 * @param setTaskVariablesDto taskId
+	 * @param setTaskVariablesDto variables
 	 * @return
 	 */
 	@POST("/api/task/setVariablesLocal")
-	BaseOutput setVariablesLocal(@ReqParam(value = "taskId") String taskId, @ReqParam(value = "variables") Map<String, String> variables);
+	BaseOutput setVariablesLocal(@VOBody TaskVariablesDto setTaskVariablesDto);
 
 	/**
 	 * 根据任务id查询任务
@@ -133,18 +130,6 @@ public interface TaskRpc {
 	BaseOutput<List<TaskIdentityDto>> listTaskIdentityByProcessInstanceIds(@VOBody List<String> processInstanceIds);
 
 	/**
-	 * 触发Java接收任务
-	 * 
-	 * @param processInstanceId
-	 * @param activityId
-	 * @param variables
-	 * @return
-	 */
-	@POST("/api/task/signal")
-	BaseOutput<String> signal(@ReqParam(value = "processInstanceId") String processInstanceId, @ReqParam(value = "activityId") String activityId,
-			@ReqParam(value = "variables", required = false) Map<String, String> variables);
-
-	/**
 	 * 查询用户任务
 	 * @param userId	用户id
 	 * @param processDefinitionKey	流程定义key
@@ -152,5 +137,18 @@ public interface TaskRpc {
 	 */
 	@POST("/api/task/listUserTask")
 	BaseOutput<List<TaskMapping>> listUserTask(@ReqParam("userId") Long userId, @ReqParam(value = "processDefinitionKey") String processDefinitionKey);
+
+	/**
+	 * 触发Java接收任务
+	 *
+	 * @param processInstanceId
+	 * @param activityId
+	 * @param variables
+	 * @return
+	 */
+	@Deprecated
+	@POST("/api/task/signal")
+	BaseOutput<String> signal(@ReqParam(value = "processInstanceId") String processInstanceId, @ReqParam(value = "activityId") String activityId,
+							  @ReqParam(value = "variables", required = false) Map<String, String> variables);
 
 }
