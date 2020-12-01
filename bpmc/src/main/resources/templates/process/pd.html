@@ -9,6 +9,26 @@
         </div>
     </div>
     <div region="center" style="width:100%;padding-top: 1px" height="auto">
+        <div class="easyui-panel" style="width:100%;" align="left" >
+            <form id="queryForm" class="easyui-form" method="post" fit="true">
+                <div class="search-wrap">
+                    <div class="search-item">
+                        <input class="easyui-textbox" name="id" id="id" style="width:100%" labelAlign="right" data-options="label:'编号:'" />
+                    </div>
+                    <div class="search-item">
+                        <input class="easyui-textbox" name="name" id="name" style="width:100%" labelAlign="right" data-options="label:'名称:'" />
+                    </div>
+                    <div class="search-item">
+                        <input class="easyui-textbox" name="key" id="key" style="width:100%" labelAlign="right" data-options="label:'KEY:'" />
+                    </div>
+                    <div class="search-wrap-btn">
+                        <a href="#" class="easyui-linkbutton" iconCls="icon-search" id="queryBtn"
+                           onclick="queryGrid()">查询</a>&nbsp;&nbsp;
+                        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-clear" onclick="clearForm()">清除</a>
+                    </div>
+                </div>
+            </form>
+        </div>
         <table class="easyui-datagrid" title="流程定义管理" id="processDefinitionGrid" fitColumns="true" noheader="true"
                pagination="false" rownumbers="false" remoteSort="false" toolbar="#processDefinitionGridToolbar"
                loadMsg="数据加载中..." singleSelect="true" method="post" multiSort="false" sortName="id" fit="true"
@@ -61,6 +81,23 @@
 </div>
 
 <script>
+    /**
+     * 表格查询
+     */
+    function queryGrid() {
+        var opts = $("#processDefinitionGrid").datagrid("options");
+        if (null == opts.url || "" == opts.url) {
+            opts.url = "${contextPath}/pd/list.action";
+        }
+        $("#processDefinitionGrid").datagrid("load", bindGridMeta2Form("processDefinitionGrid", "queryForm"));
+    }
+
+    /**
+     * 清空表单
+     */
+    function clearForm() {
+        $('#queryForm').form('clear');
+    }
     /**
      * 启动流程
      */

@@ -2,10 +2,15 @@ package com.dili.bpmc.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.SerializerFeature;
+import com.dili.bpmc.sdk.domain.ModelMapping;
 import com.dili.ss.activiti.service.ActivitiService;
+import com.dili.ss.domain.BaseOutput;
 import com.dili.ss.domain.EasyuiPageOutput;
+import com.dili.ss.metadata.ValueProviderUtils;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.repository.Model;
+import org.activiti.engine.repository.ModelQuery;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +19,7 @@ import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -64,6 +70,31 @@ public class ModelController {
     public void deleteModel(@RequestParam String modelId, HttpServletRequest request, HttpServletResponse response) throws IOException {
         activitiService.deleteModel(modelId);
         response.sendRedirect(request.getContextPath() + "/model/index.html");
+    }
+
+    /**
+     * 查询
+     * @param model
+     * @return
+     */
+    @RequestMapping(value = "/list.action",method = {RequestMethod.GET,RequestMethod.POST})
+    @ResponseBody
+    public String list(ModelMapping model) throws Exception {
+        ModelQuery modelQuery = repositoryService.createModelQuery();
+        if(StringUtils.isNotBlank(model.getCategory())){
+            modelQuery.modelCategory(model.getCategory());
+        }
+        if(StringUtils.isNotBlank(model.getKey())){
+            modelQuery.modelKey(model.getKey());
+        }
+        if(StringUtils.isNotBlank(model.getName())){
+            modelQuery.modelNameLike("%"+model.getName()+"%");
+        }
+        List list = modelQuery.list();
+
+        List results = ValueProviderUtils.buildDataByProvider(model.getMetadata(), list);
+        EasyuiPageOutput easyuiPageOutput = new EasyuiPageOutput((long)results.size(), results);
+        return easyuiPageOutput.toString();
     }
 
 }

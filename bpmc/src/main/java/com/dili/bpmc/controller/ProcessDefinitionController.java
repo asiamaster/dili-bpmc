@@ -2,8 +2,12 @@ package com.dili.bpmc.controller;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.serializer.SerializerFeature;
+import com.dili.bpmc.sdk.domain.ModelMapping;
+import com.dili.bpmc.sdk.domain.ProcessDefinitionMapping;
 import com.dili.bpmc.service.ProcessDefinitionService;
 import com.dili.ss.domain.BaseOutput;
+import com.dili.ss.domain.EasyuiPageOutput;
+import com.dili.ss.metadata.ValueProviderUtils;
 import com.dili.uap.sdk.domain.UserTicket;
 import com.dili.uap.sdk.exception.NotLoginException;
 import com.dili.uap.sdk.session.SessionContext;
@@ -14,6 +18,7 @@ import org.activiti.engine.RuntimeService;
 import org.activiti.engine.form.FormProperty;
 import org.activiti.engine.form.StartFormData;
 import org.activiti.engine.repository.ProcessDefinition;
+import org.activiti.engine.repository.ProcessDefinitionQuery;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -171,5 +176,30 @@ public class ProcessDefinitionController {
         StartFormData startFormData =  formService.getStartFormData(processDefinitionId);
         List<FormProperty> formProperties = startFormData.getFormProperties();
         return formProperties.toString();
+    }
+
+    /**
+     * 查询
+     * @param processDefinition
+     * @return
+     */
+    @RequestMapping(value = "/list.action",method = {RequestMethod.GET,RequestMethod.POST})
+    @ResponseBody
+    public String list(ProcessDefinitionMapping processDefinition) throws Exception {
+        ProcessDefinitionQuery processDefinitionQuery = repositoryService.createProcessDefinitionQuery();
+        if(StringUtils.isNotBlank(processDefinition.getId())){
+            processDefinitionQuery.processDefinitionId(processDefinition.getId());
+        }
+        if(StringUtils.isNotBlank(processDefinition.getName())){
+            processDefinitionQuery.processDefinitionNameLike("%"+processDefinition.getName()+"%");
+        }
+        if(StringUtils.isNotBlank(processDefinition.getKey())){
+            processDefinitionQuery.processDefinitionKey(processDefinition.getKey());
+        }
+        List list = processDefinitionQuery.list();
+
+        EasyuiPageOutput easyuiPageOutput = new EasyuiPageOutput((long)list.size(), list);
+        return easyuiPageOutput.toString();
+
     }
 }

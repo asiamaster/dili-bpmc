@@ -32,8 +32,30 @@
             <div id="nav" style="padding-left:15px;padding-top:10px;" align="left">
                 <#nav/>
             </div>
+
         </div>
+
         <div region="center" style="width:100%;padding-top: 1px" height="auto">
+            <div class="easyui-panel" style="width:100%;" align="left" >
+                <form id="queryForm" class="easyui-form" method="post" fit="true">
+                    <div class="search-wrap">
+                        <div class="search-item">
+                            <input class="easyui-textbox" name="name" id="modelName" style="width:100%" labelAlign="right" data-options="label:'模型名称:'" />
+                        </div>
+                        <div class="search-item">
+                            <input class="easyui-textbox" name="key" id="modelKey" style="width:100%" labelAlign="right" data-options="label:'KEY:'" />
+                        </div>
+                        <div class="search-item">
+                            <input class="easyui-textbox" name="category" id="modelCategory" style="width:100%" labelAlign="right" data-options="label:'Category:'" />
+                        </div>
+                        <div class="search-wrap-btn">
+                            <a href="#" class="easyui-linkbutton" iconCls="icon-search" id="queryBtn"
+                               onclick="queryGrid()">查询</a>&nbsp;&nbsp;
+                            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-clear" onclick="clearForm()">清除</a>
+                        </div>
+                    </div>
+                </form>
+            </div>
             <table class="easyui-datagrid" title="模型管理" id="modelGrid" fitColumns="true" fit="true" noheader="true"
                    pagination="false" rownumbers="false" remoteSort="false" toolbar="#modelGridToolbar"
                    loadMsg="数据加载中..." singleSelect="true" method="post" multiSort="false" sortName="id"
@@ -67,6 +89,7 @@
                 </tr>
                 </thead>
             </table>
+
             <div id="modelGridToolbar" style="padding: 2px 5px;">
                 <a href="#" class="easyui-linkbutton" iconCls="icon-add" onclick="openCreateModelDlg()" plain="true">新增</a>
                 <a href="#" class="easyui-linkbutton" iconCls="icon-edit" onclick="editModel()" plain="true">编辑</a>
@@ -132,6 +155,23 @@
     </div>
 
 <script>
+    /**
+     * 表格查询
+     */
+    function queryGrid() {
+        var opts = $("#modelGrid").datagrid("options");
+        if (null == opts.url || "" == opts.url) {
+            opts.url = "${contextPath}/model/list.action";
+        }
+        $("#modelGrid").datagrid("load", bindGridMeta2Form("modelGrid", "queryForm"));
+    }
+
+    /**
+     * 清空表单
+     */
+    function clearForm() {
+        $('#queryForm').form('clear');
+    }
     /**
      * 删除模型
      */
