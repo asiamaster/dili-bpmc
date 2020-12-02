@@ -130,7 +130,7 @@ public class EventApi {
 			eventReceivedDto.setEventType(EventType.MESSAGE);
 			String executionId = getExecutionId(eventReceivedDto);
 			if (executionId == null) {
-				return BaseOutput.failure("信号[" + eventReceivedDto.getEventName() + "]发送失败，不存在执行的流程");
+				return BaseOutput.failure("消息[" + eventReceivedDto.getEventName() + "]发送失败，不存在执行的流程");
 			}
 			runtimeService.messageEventReceived(eventReceivedDto.getEventName(), executionId, eventReceivedDto.getVariables());
 			return BaseOutput.success("抛出消息[" + eventReceivedDto.getEventName() + "]发送成功");

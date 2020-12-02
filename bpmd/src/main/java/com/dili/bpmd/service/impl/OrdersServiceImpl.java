@@ -228,6 +228,7 @@ public class OrdersServiceImpl extends BaseServiceImpl<Orders, Long> implements 
         updateSelective(orders);
         EventReceivedDto eventReceivedDto = DTOUtils.newInstance(EventReceivedDto.class);
         eventReceivedDto.setEventName("notActive");
+        eventReceivedDto.setProcessInstanceId(processInstanceId);
         return eventRpc.signal(eventReceivedDto);
     }
 
