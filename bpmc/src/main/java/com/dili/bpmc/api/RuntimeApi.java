@@ -199,8 +199,8 @@ public class RuntimeApi {
      */
     @RequestMapping(value = "/findActiveProcessInstance", method = {RequestMethod.GET, RequestMethod.POST})
     public BaseOutput<ProcessInstanceMapping> findActiveProcessInstance(@RequestParam(required = false) String processInstanceId, @RequestParam(required = false) String businessKey, @RequestParam(required = false) String superProcessInstanceId){
-        if(StringUtils.isBlank(processInstanceId) && StringUtils.isBlank(businessKey)){
-            return BaseOutput.failure("processInstanceId或businessKey不能为空");
+        if(StringUtils.isBlank(processInstanceId) && StringUtils.isBlank(businessKey) && StringUtils.isBlank(superProcessInstanceId)){
+            return BaseOutput.failure("superProcessInstanceId、processInstanceId或businessKey不能全部为空");
         }
         ProcessInstanceQuery processInstanceQuery = runtimeService.createProcessInstanceQuery();
         if(StringUtils.isNotBlank(processInstanceId)){
@@ -263,7 +263,7 @@ public class RuntimeApi {
      * @return
      */
     @RequestMapping(value = "/listHistoricProcessInstance", method = {RequestMethod.GET, RequestMethod.POST})
-    public BaseOutput<List<ProcessInstanceMapping>> listProcessInstance(HistoricProcessInstanceQueryDto historicProcessInstanceQueryDto){
+    public BaseOutput<List<ProcessInstanceMapping>> listHistoricProcessInstance(HistoricProcessInstanceQueryDto historicProcessInstanceQueryDto){
         HistoricProcessInstanceQuery historicProcessInstanceQuery = historyService.createHistoricProcessInstanceQuery();
         if(StringUtils.isNotBlank(historicProcessInstanceQueryDto.getProcessInstanceId())){
             historicProcessInstanceQuery.processInstanceId(historicProcessInstanceQueryDto.getProcessInstanceId());

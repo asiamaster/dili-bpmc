@@ -3,10 +3,7 @@ package com.dili.bpmc.controller;
 import com.dili.bpmc.domain.ActTaskTitle;
 import com.dili.bpmc.service.ActTaskTitleService;
 import com.dili.ss.domain.BaseOutput;
-import java.util.List;
-
 import com.dili.uap.sdk.domain.UserTicket;
-import com.dili.uap.sdk.exception.NotLoginException;
 import com.dili.uap.sdk.session.SessionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
