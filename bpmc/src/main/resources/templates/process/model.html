@@ -93,6 +93,7 @@
             <div id="modelGridToolbar" style="padding: 2px 5px;">
                 <a href="#" class="easyui-linkbutton" iconCls="icon-add" onclick="openCreateModelDlg()" plain="true">新增</a>
                 <a href="#" class="easyui-linkbutton" iconCls="icon-edit" onclick="editModel()" plain="true">编辑</a>
+                <a href="#" class="easyui-linkbutton" iconCls="icon-edit" onclick="openUpdateModelDlg()" plain="true">修改</a>
                 <a href="#" class="easyui-linkbutton" iconCls="icon-remove" onclick="deleteModel()" plain="true">删除</a>
                 <a href="#" class="easyui-linkbutton" iconCls="icon-data" onclick="showModelImg()" plain="true">图片</a>
                 <a href="#" class="easyui-linkbutton" iconCls="icon-play" onclick="deploy()" plain="true">部署</a>
@@ -152,9 +153,95 @@
                 </table>
             </form>
         </div>
+        <!-- 隐藏编辑框 -->
+        <div id="editDlg" class="easyui-dialog" resizable="false" constrain="true" shadow="true" draggable="false" title="修改模型" style="padding: 10px; width: 450px;" modal="true" border="thin" closed="true"
+             data-options="
+				width:380,
+				height:250,
+				buttons: [{
+				    id:'updateModel',
+					text:'确认',
+					iconCls:'icon-ok',
+					handler:updateModel
+				}]
+			">
+            <form id="editForm" class="easyui-form" method="post" fit="true">
+                <input name="_id" id="_id" type="hidden">
+                <table width="330px">
+                    <tr style="height:40px;">
+                        <td>
+                            <input class="easyui-textbox" name="_name" id="_name" style="width:100%" labelWidth="48" labelAlign="right" data-options="label:'&lowast;名称:', required:true, validType:'length[2,40]'" />
+                        </td>
+                    </tr>
+                    <tr style="height:40px;">
+                        <td>
+                            <input class="easyui-textbox" name="_key" id="_key" style="width:100%" labelWidth="48" labelAlign="right" data-options="label:'&lowast;KEY:', required:true, validType:'length[2,40]'" />
+                        </td>
+                    </tr>
+                    <tr style="height:40px;">
+                        <td>
+                            <input class="easyui-textbox" name="_category" id="_category" style="width:100%" labelWidth="48" labelAlign="right" data-options="label:'类别:', validType:'length[0,40]'" />
+                        </td>
+                    </tr>
+                </table>
+            </form>
+        </div>
     </div>
 
 <script>
+    /**
+     * 修改
+     */
+    function updateModel(){
+        if(!$('#editForm').form("validate")){
+            return;
+        }
+        $("#updateModel").linkbutton("disable");
+        var _formData = removeKeyStartWith($("#editForm").serializeObject(true),"_");
+        var _url = "${contextPath}/model/update.action";
+
+        $.ajax({
+            type: "POST",
+            url: _url,
+            data: _formData,
+            processData:true,
+            dataType: "json",
+            async : true,
+            success: function (ret) {
+                $("#updateModel").linkbutton("enable");
+                if(ret.success){
+                    $('#modelGrid').datagrid("reload");
+                    $('#editDlg').dialog('close');
+                }else{
+                    swal('错误', ret.result, 'error');
+                }
+            },
+            error: function(){
+                $("#updateModel").linkbutton("enable");
+                swal('错误', '修改模型失败', 'error');
+            }
+        });
+    }
+
+    /**
+     * 打开修改窗口
+     */
+    function openUpdateModelDlg(){
+        var selected = $("#modelGrid").datagrid("getSelected");
+        if (null == selected) {
+            swal('警告', '请选中一条数据', 'warning');
+            return;
+        }
+        $('#editDlg').dialog('open');
+        $('#editDlg').dialog('center');
+        formFocus("editForm", "_name");
+        var formData = $.extend({}, selected);
+        formData = addKeyStartWith(getOriginalData(formData), "_");
+        $('#editForm').form('clear');
+        $('#editForm').form('load', formData);
+
+    }
+
     /**
      * 表格查询
      */

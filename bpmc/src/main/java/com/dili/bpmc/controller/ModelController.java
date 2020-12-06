@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.dili.bpmc.sdk.domain.ModelMapping;
 import com.dili.ss.activiti.service.ActivitiService;
+import com.dili.ss.domain.BaseOutput;
 import com.dili.ss.domain.EasyuiPageOutput;
 import com.dili.ss.metadata.ValueProviderUtils;
 import org.activiti.engine.RepositoryService;
@@ -24,6 +25,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 流程模型控制器
@@ -96,4 +98,27 @@ public class ModelController {
         return easyuiPageOutput.toString();
     }
 
+    /**
+     * 查询
+     * @param modelParam
+     * @return
+     */
+    @RequestMapping(value = "/update.action",method = {RequestMethod.GET,RequestMethod.POST})
+    @ResponseBody
+    public BaseOutput<String> update(Model modelParam) {
+        Model model = repositoryService.getModel(modelParam.getId());
+        model.setName(modelParam.getName());
+        model.setCategory(modelParam.getCategory());
+        model.setKey(modelParam.getKey());
+        Map<String, String> metaInfo = (Map<String, String>) JSON.parse(model.getMetaInfo());
+        metaInfo.put("name",modelParam.getName());
+        model.setMetaInfo(JSON.toJSONString(metaInfo));
+        try {
+            repositoryService.saveModel(model);
+        } catch (Exception e) {
+            log.error("id为"+modelParam.getId()+"修改模型设计失败:"+e.getMessage());
+            return BaseOutput.failure(e.getMessage());
+        }
+        return BaseOutput.success();
+    }
 }
