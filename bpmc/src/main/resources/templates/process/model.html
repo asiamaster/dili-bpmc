@@ -199,7 +199,6 @@
         $("#updateModel").linkbutton("disable");
         var _formData = removeKeyStartWith($("#editForm").serializeObject(true),"_");
         var _url = "${contextPath}/model/update.action";
-
         $.ajax({
             type: "POST",
             url: _url,
@@ -210,8 +209,9 @@
             success: function (ret) {
                 $("#updateModel").linkbutton("enable");
                 if(ret.success){
-                    $('#modelGrid').datagrid("reload");
-                    $('#editDlg').dialog('close');
+                    var opts = $("#modelGrid").datagrid("options");
+                    $("#modelGrid").datagrid("reload");
+                    $("#editDlg").dialog("close");
                 }else{
                     swal('错误', ret.result, 'error');
                 }
@@ -246,10 +246,6 @@
      * 表格查询
      */
     function queryGrid() {
-        var opts = $("#modelGrid").datagrid("options");
-        if (null == opts.url || "" == opts.url) {
-            opts.url = "${contextPath}/model/list.action";
-        }
         $("#modelGrid").datagrid("load", bindGridMeta2Form("modelGrid", "queryForm"));
     }
 
@@ -382,6 +378,10 @@
 
 $(function() {
     <%if(has(models)){%>
+        var opts = $("#modelGrid").datagrid("options");
+        if (null == opts.url || "" == opts.url) {
+            opts.url = "${contextPath}/model/list.action";
+        }
     $("#modelGrid").datagrid("loadData", ${models});
     <%}%>
     initFileUpload();
