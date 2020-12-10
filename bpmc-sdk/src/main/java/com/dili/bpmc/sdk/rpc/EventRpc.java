@@ -4,9 +4,9 @@ import com.dili.bpmc.sdk.domain.EventSubscriptionMapping;
 import com.dili.bpmc.sdk.dto.EventReceivedDto;
 import com.dili.ss.domain.BaseOutput;
 import com.dili.ss.retrofitful.annotation.*;
+import com.dili.ss.seata.annotation.GlobalTx;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * 事件接口
@@ -45,6 +45,7 @@ public interface EventRpc {
 	 * @param eventReceivedDto processInstanceId或executionId 必填一项
 	 */
 	@POST("/api/event/messageEventReceived")
+	@GlobalTx
 	BaseOutput<String> messageEventReceived(@VOBody EventReceivedDto eventReceivedDto);
 
 	/**
@@ -55,6 +56,7 @@ public interface EventRpc {
 	 * @param eventReceivedDto processInstanceId 选填
 	 */
 	@POST("/api/event/signalEventReceived")
+	@GlobalTx
 	BaseOutput<String> signalEventReceived(@VOBody EventReceivedDto eventReceivedDto);
 
 	/**
@@ -65,6 +67,7 @@ public interface EventRpc {
 	 * @return
 	 */
 	@POST("/api/event/signal")
+	@GlobalTx
 	BaseOutput<String> signal(@VOBody EventReceivedDto eventReceivedDto);
 
 

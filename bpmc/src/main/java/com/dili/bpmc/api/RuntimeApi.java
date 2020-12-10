@@ -20,6 +20,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -109,6 +110,7 @@ public class RuntimeApi {
      * @return
      */
     @RequestMapping(value = "/setVariables", method = {RequestMethod.GET, RequestMethod.POST})
+    @Transactional
     public BaseOutput setVariables(ProcessInstanceVariablesDto setProcessInstanceVariablesDto){
         try {
             // 当前活动的id，对应receiveTask.bpmn文件中的活动节点的id的属性值
@@ -132,6 +134,7 @@ public class RuntimeApi {
      * @return
      */
     @RequestMapping(value = "/removeVariable", method = {RequestMethod.GET, RequestMethod.POST})
+    @Transactional
     public BaseOutput removeVariable(@RequestParam String processInstanceId, @RequestParam String activityId, @RequestParam String key){
         try {
             // 当前活动的id，对应receiveTask.bpmn文件中的活动节点的id的属性值
@@ -156,6 +159,7 @@ public class RuntimeApi {
      * @return
      */
     @RequestMapping(value = "/setVariable", method = {RequestMethod.GET, RequestMethod.POST})
+    @Transactional
     public BaseOutput setVariable(@RequestParam String processInstanceId, @RequestParam String activityId, @RequestParam String key, @RequestParam String value){
         try {
             // 当前活动的id，对应receiveTask.bpmn文件中的活动节点的id的属性值
@@ -297,6 +301,7 @@ public class RuntimeApi {
      * @return
      */
     @RequestMapping(value = "/updateBusinessKey", method = {RequestMethod.GET, RequestMethod.POST})
+    @Transactional
     public BaseOutput updateBusinessKey(@RequestParam String processInstanceId, @RequestParam String businessKey){
         runtimeService.updateBusinessKey(processInstanceId, businessKey);
         return BaseOutput.success();
@@ -311,6 +316,7 @@ public class RuntimeApi {
      * @return 流程实例对象封装
      */
     @RequestMapping(value = "/startProcessInstanceByKey", method = {RequestMethod.GET, RequestMethod.POST})
+    @Transactional
     public BaseOutput<ProcessInstanceMapping> startProcessInstanceByKey(StartProcessInstanceDto startProcessInstanceDto) throws Exception {
         //流程发起前设置发起人，记录在流程历史中
 //        在流程开始之前设置，会自动在表ACT_HI_PROCINST 中的START_USER_ID_中设置用户ID：
@@ -329,6 +335,7 @@ public class RuntimeApi {
      * @return 流程实例对象封装
      */
     @RequestMapping(value = "/startProcessInstanceById", method = {RequestMethod.GET, RequestMethod.POST})
+    @Transactional
     public BaseOutput<ProcessInstanceMapping> startProcessInstanceById(StartProcessInstanceDto startProcessInstanceDto) throws Exception {
         //流程发起前设置发起人，记录在流程历史中
 //        在流程开始之前设置，会自动在表ACT_HI_PROCINST 中的START_USER_ID_中设置用户ID：
@@ -345,6 +352,7 @@ public class RuntimeApi {
      * @throws IOException
      */
     @RequestMapping(value = "/stopProcessInstanceById", method = {RequestMethod.GET, RequestMethod.POST})
+    @Transactional
     public BaseOutput stopProcessInstanceById(@RequestParam String processInstanceId, @RequestParam(required = false) String deleteReason) throws IOException {
         try {
             //流程已经结束

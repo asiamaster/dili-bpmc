@@ -5,6 +5,7 @@ import com.dili.bpmc.sdk.domain.ProcessInstanceMapping;
 import com.dili.bpmc.sdk.dto.*;
 import com.dili.ss.domain.BaseOutput;
 import com.dili.ss.retrofitful.annotation.*;
+import com.dili.ss.seata.annotation.GlobalTx;
 
 import java.util.List;
 import java.util.Map;
@@ -40,6 +41,7 @@ public interface RuntimeRpc {
 	 * @return
 	 */
 	@POST("/api/runtime/setVariables")
+	@GlobalTx
 	BaseOutput setVariables(@VOBody ProcessInstanceVariablesDto setProcessInstanceVariablesDto);
 
 	/**
@@ -51,6 +53,7 @@ public interface RuntimeRpc {
 	 * @return
 	 */
 	@GET("/api/runtime/setVariable")
+	@GlobalTx
 	BaseOutput setVariable(@ReqParam(value = "processInstanceId") String processInstanceId, @ReqParam(value = "activityId") String activityId, @ReqParam(value = "key") String key, @ReqParam(value = "value") String value);
 
 	/**
@@ -61,6 +64,7 @@ public interface RuntimeRpc {
 	 * @return
 	 */
 	@GET("/api/runtime/removeVariable")
+	@GlobalTx
 	BaseOutput removeVariable(@ReqParam(value = "processInstanceId") String processInstanceId, @ReqParam(value = "activityId") String activityId, @ReqParam(value = "key") String key);
 
 	/**
@@ -99,6 +103,7 @@ public interface RuntimeRpc {
 	 * @return
 	 */
 	@GET("/api/runtime/updateBusinessKey")
+	@GlobalTx
 	BaseOutput updateBusinessKey(@ReqParam(value = "processInstanceId") String processInstanceId, @ReqParam(value = "businessKey") String businessKey);
 
 	/**
@@ -110,6 +115,7 @@ public interface RuntimeRpc {
 	 * @return 流程实例对象封装
 	 */
 	@GET("/api/runtime/startProcessInstanceByKey")
+	@GlobalTx
 	BaseOutput<ProcessInstanceMapping> startProcessInstanceByKey(@VOBody StartProcessInstanceDto startProcessInstanceDto);
 
 	/**
@@ -121,6 +127,7 @@ public interface RuntimeRpc {
 	 * @return 流程实例对象封装
 	 */
 	@GET("/api/runtime/startProcessInstanceById")
+	@GlobalTx
 	BaseOutput<ProcessInstanceMapping> startProcessInstanceById(@VOBody StartProcessInstanceDto startProcessInstanceDto);
 
 	/**
@@ -130,6 +137,7 @@ public interface RuntimeRpc {
 	 * @return
 	 */
 	@GET("/api/runtime/stopProcessInstanceById")
+	@GlobalTx
 	BaseOutput stopProcessInstanceById(@ReqParam(value = "processInstanceId") String processInstanceId, @ReqParam(value = "deleteReason", required = false) String deleteReason);
 
 }

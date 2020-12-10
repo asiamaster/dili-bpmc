@@ -25,6 +25,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -90,6 +91,7 @@ public class TaskApi {
 	 * @param taskId 任务id 必填
 	 */
 	@RequestMapping(value = "/claim", method = { RequestMethod.GET, RequestMethod.POST })
+	@Transactional
 	public BaseOutput<String> claim(@RequestParam String taskId, @RequestParam(required = false) String userId) {
 		try {
 			taskService.claim(taskId, userId);
@@ -110,6 +112,7 @@ public class TaskApi {
 	 * @return taskId
 	 */
 	@RequestMapping(value = "/complete", method = { RequestMethod.GET, RequestMethod.POST })
+	@Transactional
 	public BaseOutput<String> complete(TaskCompleteDto taskCompleteDto) {
 		// 强制插手人签收任务
 		if (StringUtils.isNotBlank(taskCompleteDto.getAssignee())) {
@@ -133,6 +136,7 @@ public class TaskApi {
 	 * @param taskCompleteDto variables
 	 */
 	@RequestMapping(value = "/completeByForce", method = { RequestMethod.GET, RequestMethod.POST })
+	@Transactional
 	public BaseOutput<String> completeByForce(TaskCompleteDto taskCompleteDto) {
 		Task task = taskService.createTaskQuery().taskId(taskCompleteDto.getTaskId()).singleResult();
 		if (task == null) {
@@ -152,6 +156,7 @@ public class TaskApi {
 	 * @throws IOException
 	 */
 	@RequestMapping(value = "/submitTaskForm", method = { RequestMethod.GET, RequestMethod.POST })
+	@Transactional
 	public BaseOutput<String> submitTaskForm(TaskCompleteDto taskCompleteDto, HttpServletRequest request) {
 		// 强制插手人签收任务
 		if (StringUtils.isNotBlank(taskCompleteDto.getAssignee())) {
@@ -175,6 +180,7 @@ public class TaskApi {
 	 * @param candidateId 转交人,必填
 	 */
 	@RequestMapping(value = "/setAssignee", method = { RequestMethod.GET, RequestMethod.POST })
+	@Transactional
 	public BaseOutput<String> setAssignee(@RequestParam String taskId, @RequestParam String candidateId) {
 		Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
 		if (task == null) {
@@ -194,6 +200,7 @@ public class TaskApi {
 	 * @param delegateId 被委托人， 必填
 	 */
 	@RequestMapping(value = "/delegate", method = { RequestMethod.GET, RequestMethod.POST })
+	@Transactional
 	public BaseOutput<String> delegate(@RequestParam String taskId, @RequestParam String delegateId) {
 		Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
 		if (task == null) {
@@ -215,6 +222,7 @@ public class TaskApi {
 	 * @throws IOException
 	 */
 	@RequestMapping(value = "/resolve", method = { RequestMethod.GET, RequestMethod.POST })
+	@Transactional
 	public BaseOutput<String> resolve(TaskVariablesDto taskVariablesDto, HttpServletRequest request) {
 		// 根据taskId提取任务
 		Task task = taskService.createTaskQuery().taskId(taskVariablesDto.getTaskId()).singleResult();
@@ -269,6 +277,7 @@ public class TaskApi {
 	 * @return
 	 */
 	@RequestMapping(value = "/setVariablesLocal", method = { RequestMethod.GET, RequestMethod.POST })
+	@Transactional
 	public BaseOutput setVariablesLocal(TaskVariablesDto taskVariablesDto) {
 		taskService.setVariablesLocal(taskVariablesDto.getTaskId(), taskVariablesDto.getVariables());
 		return BaseOutput.success();
@@ -436,6 +445,7 @@ public class TaskApi {
 	 */
 	@Deprecated
 	@RequestMapping(value = "/signal", method = { RequestMethod.GET, RequestMethod.POST })
+	@Transactional
 	public BaseOutput<String> signal(@RequestParam String activityId, @RequestParam String processInstanceId, @RequestParam Map variables, HttpServletRequest request) {
 		try {
 			Execution execution = runtimeService.createExecutionQuery().processInstanceId(processInstanceId).activityId(activityId)// 当前活动的id，对应receiveTask.bpmn文件中的活动节点的id的属性值
@@ -461,6 +471,7 @@ public class TaskApi {
 	 */
 	@Deprecated
 	@RequestMapping(value = "/signalEventReceived", method = { RequestMethod.GET, RequestMethod.POST })
+	@Transactional
 	public BaseOutput<String> signalEventReceived(@RequestParam String signalName, @RequestParam(required = false) String executionId, @RequestParam Map variables, HttpServletRequest request) {
 		try {
 			if (StringUtils.isBlank(executionId)) {
@@ -484,6 +495,7 @@ public class TaskApi {
 	 */
 	@Deprecated
 	@RequestMapping(value = "/messageEventReceived", method = { RequestMethod.GET, RequestMethod.POST })
+	@Transactional
 	public BaseOutput<String> messageEventReceived(@RequestParam String messageName, String processInstanceId, @RequestParam Map<String, Object> variables, HttpServletRequest request) {
 		try {
 			Execution execution = runtimeService.createExecutionQuery().messageEventSubscriptionName(messageName).processInstanceId(processInstanceId).singleResult();

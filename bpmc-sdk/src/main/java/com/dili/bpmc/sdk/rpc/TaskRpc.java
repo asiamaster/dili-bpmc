@@ -7,6 +7,7 @@ import com.dili.bpmc.sdk.dto.TaskDto;
 import com.dili.bpmc.sdk.dto.TaskIdentityDto;
 import com.dili.ss.domain.BaseOutput;
 import com.dili.ss.retrofitful.annotation.*;
+import com.dili.ss.seata.annotation.GlobalTx;
 
 import java.util.List;
 import java.util.Map;
@@ -24,6 +25,7 @@ public interface TaskRpc {
 	 * @param taskId 任务id 必填
 	 */
 	@GET("/api/task/claim")
+	@GlobalTx
 	BaseOutput<String> claim(@ReqParam(value = "taskId") String taskId, @ReqParam(value = "userId") String userId);
 
 	/**
@@ -32,6 +34,7 @@ public interface TaskRpc {
 	 * @param taskId 任务id 必填
 	 */
 	@POST("/api/task/complete")
+	@GlobalTx
 	BaseOutput<String> complete(@ReqParam(value = "taskId") String taskId);
 
 	/**
@@ -43,6 +46,7 @@ public interface TaskRpc {
 	 * @return 任务id
 	 */
 	@POST("/api/task/complete")
+	@GlobalTx
 	BaseOutput<String> complete(@VOBody TaskCompleteDto taskCompleteDto);
 
 	/**
@@ -52,6 +56,7 @@ public interface TaskRpc {
 	 * @param taskCompleteDto variables
 	 */
 	@POST("/api/task/completeByForce")
+	@GlobalTx
 	BaseOutput<String> completeByForce(@VOBody TaskCompleteDto taskCompleteDto);
 
 	/**
@@ -61,6 +66,7 @@ public interface TaskRpc {
 	 * @param assignee 强制插手认领人
 	 */
 	@POST("/api/task/complete")
+	@GlobalTx
 	BaseOutput<String> complete(@ReqParam(value = "taskId") String taskId, @ReqParam(value = "assignee", required = false) String assignee);
 
 	/**
@@ -90,6 +96,7 @@ public interface TaskRpc {
 	 * @return
 	 */
 	@POST("/api/task/setVariablesLocal")
+	@GlobalTx
 	BaseOutput setVariablesLocal(@VOBody TaskVariablesDto setTaskVariablesDto);
 
 	/**
