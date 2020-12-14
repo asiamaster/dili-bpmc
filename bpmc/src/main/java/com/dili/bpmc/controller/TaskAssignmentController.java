@@ -2,6 +2,9 @@ package com.dili.bpmc.controller;
 
 import com.dili.bpmc.domain.TaskAssignment;
 import com.dili.bpmc.service.TaskAssignmentService;
+import com.dili.logger.sdk.annotation.BusinessLogger;
+import com.dili.logger.sdk.base.LoggerContext;
+import com.dili.logger.sdk.glossary.LoggerConstant;
 import com.dili.ss.domain.BaseOutput;
 import com.dili.uap.sdk.domain.UserTicket;
 import com.dili.uap.sdk.session.SessionContext;
@@ -59,6 +62,7 @@ public class TaskAssignmentController {
      * @param taskAssignment
      * @return
      */
+    @BusinessLogger(businessType = "bpmc", content = "新增TaskAssignment", operationType = "add", systemCode = "BPMC")
     @RequestMapping(value="/insert.action", method = {RequestMethod.GET, RequestMethod.POST})
     public @ResponseBody BaseOutput insert(TaskAssignment taskAssignment) {
         UserTicket userTicket = SessionContext.getSessionContext().getUserTicket();
@@ -68,6 +72,12 @@ public class TaskAssignmentController {
         taskAssignment.setCreaterId(userTicket.getId());
         taskAssignment.setModifierId(userTicket.getId());
         taskAssignmentService.insertSelective(taskAssignment);
+        LoggerContext.put(LoggerConstant.LOG_BUSINESS_CODE_KEY, taskAssignment.getTaskDefinitionKey());
+        LoggerContext.put(LoggerConstant.LOG_BUSINESS_ID_KEY, taskAssignment.getId());
+
+        LoggerContext.put(LoggerConstant.LOG_OPERATOR_ID_KEY, userTicket.getId());
+        LoggerContext.put(LoggerConstant.LOG_OPERATOR_NAME_KEY, userTicket.getRealName());
+        LoggerContext.put(LoggerConstant.LOG_MARKET_ID_KEY, userTicket.getFirmId());
         return BaseOutput.success("新增成功");
     }
 
@@ -76,6 +86,7 @@ public class TaskAssignmentController {
      * @param taskAssignment
      * @return
      */
+    @BusinessLogger(businessType = "bpmc", content = "修改TaskAssignment", operationType = "edit", systemCode = "BPMC")
     @RequestMapping(value="/update.action", method = {RequestMethod.GET, RequestMethod.POST})
     public @ResponseBody BaseOutput update(TaskAssignment taskAssignment) {
         UserTicket userTicket = SessionContext.getSessionContext().getUserTicket();
@@ -84,6 +95,13 @@ public class TaskAssignmentController {
         }
         taskAssignment.setModifierId(userTicket.getId());
         taskAssignmentService.updateExactSimple(taskAssignment);
+
+        LoggerContext.put(LoggerConstant.LOG_BUSINESS_CODE_KEY, taskAssignment.getTaskDefinitionKey());
+        LoggerContext.put(LoggerConstant.LOG_BUSINESS_ID_KEY, taskAssignment.getId());
+
+        LoggerContext.put(LoggerConstant.LOG_OPERATOR_ID_KEY, userTicket.getId());
+        LoggerContext.put(LoggerConstant.LOG_OPERATOR_NAME_KEY, userTicket.getRealName());
+        LoggerContext.put(LoggerConstant.LOG_MARKET_ID_KEY, userTicket.getFirmId());
         return BaseOutput.success("修改成功");
     }
 
@@ -92,9 +110,18 @@ public class TaskAssignmentController {
      * @param id
      * @return
      */
+    @BusinessLogger(businessType = "bpmc", content = "删除TaskAssignment", operationType = "del", systemCode = "BPMC")
     @RequestMapping(value="/delete.action", method = {RequestMethod.GET, RequestMethod.POST})
     public @ResponseBody BaseOutput delete(Long id) {
         taskAssignmentService.delete(id);
+        LoggerContext.put(LoggerConstant.LOG_BUSINESS_CODE_KEY, id);
+        LoggerContext.put(LoggerConstant.LOG_BUSINESS_ID_KEY, id);
+        UserTicket userTicket = SessionContext.getSessionContext().getUserTicket();
+        if (userTicket != null) {
+            LoggerContext.put(LoggerConstant.LOG_OPERATOR_ID_KEY, userTicket.getId());
+            LoggerContext.put(LoggerConstant.LOG_OPERATOR_NAME_KEY, userTicket.getRealName());
+            LoggerContext.put(LoggerConstant.LOG_MARKET_ID_KEY, userTicket.getFirmId());
+        }
         return BaseOutput.success("删除成功");
     }
 }

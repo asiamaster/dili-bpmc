@@ -5,6 +5,11 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.dili.logger.sdk.annotation.BusinessLogger;
+import com.dili.logger.sdk.base.LoggerContext;
+import com.dili.logger.sdk.glossary.LoggerConstant;
+import com.dili.uap.sdk.domain.UserTicket;
+import com.dili.uap.sdk.session.SessionContext;
 import org.activiti.engine.ActivitiException;
 import org.activiti.engine.FormService;
 import org.activiti.engine.RuntimeService;
@@ -84,6 +89,7 @@ public class ActFormController {
 	 * @param actForm
 	 * @return
 	 */
+	@BusinessLogger(businessType = "bpmc", content = "新增ActForm", operationType = "add", systemCode = "BPMC")
 	@RequestMapping(value = "/insert.action", method = { RequestMethod.GET, RequestMethod.POST })
 	public @ResponseBody BaseOutput insert(ActForm actForm) {
 		// 设置默认任务表单URL,必填参数1(@RequestParam):formKey,参数2/3(@RequestParam):processDefinitionId或taskId必填一个
@@ -93,6 +99,14 @@ public class ActFormController {
 			actForm.setTaskUrl("/actForm/dynamicForm.html");
 		}
 		actFormService.insertSelective(actForm);
+		LoggerContext.put(LoggerConstant.LOG_BUSINESS_CODE_KEY, actForm.getFormKey());
+		LoggerContext.put(LoggerConstant.LOG_BUSINESS_ID_KEY, actForm.getId());
+		UserTicket userTicket = SessionContext.getSessionContext().getUserTicket();
+		if (userTicket != null) {
+			LoggerContext.put(LoggerConstant.LOG_OPERATOR_ID_KEY, userTicket.getId());
+			LoggerContext.put(LoggerConstant.LOG_OPERATOR_NAME_KEY, userTicket.getRealName());
+			LoggerContext.put(LoggerConstant.LOG_MARKET_ID_KEY, userTicket.getFirmId());
+		}
 		return BaseOutput.success("新增成功");
 	}
 
@@ -102,9 +116,18 @@ public class ActFormController {
 	 * @param actForm
 	 * @return
 	 */
+	@BusinessLogger(businessType = "bpmc", content = "修改ActForm", operationType = "edit", systemCode = "BPMC")
 	@RequestMapping(value = "/update.action", method = { RequestMethod.GET, RequestMethod.POST })
 	public @ResponseBody BaseOutput update(ActForm actForm) {
 		actFormService.updateExactSimple(actForm);
+		LoggerContext.put(LoggerConstant.LOG_BUSINESS_CODE_KEY, actForm.getFormKey());
+		LoggerContext.put(LoggerConstant.LOG_BUSINESS_ID_KEY, actForm.getId());
+		UserTicket userTicket = SessionContext.getSessionContext().getUserTicket();
+		if (userTicket != null) {
+			LoggerContext.put(LoggerConstant.LOG_OPERATOR_ID_KEY, userTicket.getId());
+			LoggerContext.put(LoggerConstant.LOG_OPERATOR_NAME_KEY, userTicket.getRealName());
+			LoggerContext.put(LoggerConstant.LOG_MARKET_ID_KEY, userTicket.getFirmId());
+		}
 		return BaseOutput.success("修改成功");
 	}
 
@@ -114,9 +137,18 @@ public class ActFormController {
 	 * @param id
 	 * @return
 	 */
+	@BusinessLogger(businessType = "bpmc", content = "删除ActForm", operationType = "del", systemCode = "BPMC")
 	@RequestMapping(value = "/delete.action", method = { RequestMethod.GET, RequestMethod.POST })
 	public @ResponseBody BaseOutput delete(Long id) {
 		actFormService.delete(id);
+		LoggerContext.put(LoggerConstant.LOG_BUSINESS_CODE_KEY, id);
+		LoggerContext.put(LoggerConstant.LOG_BUSINESS_ID_KEY, id);
+		UserTicket userTicket = SessionContext.getSessionContext().getUserTicket();
+		if (userTicket != null) {
+			LoggerContext.put(LoggerConstant.LOG_OPERATOR_ID_KEY, userTicket.getId());
+			LoggerContext.put(LoggerConstant.LOG_OPERATOR_NAME_KEY, userTicket.getRealName());
+			LoggerContext.put(LoggerConstant.LOG_MARKET_ID_KEY, userTicket.getFirmId());
+		}
 		return BaseOutput.success("删除成功");
 	}
 

@@ -4,6 +4,9 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.dili.bpmc.sdk.domain.ProcessDefinitionMapping;
 import com.dili.bpmc.service.ProcessDefinitionService;
+import com.dili.logger.sdk.annotation.BusinessLogger;
+import com.dili.logger.sdk.base.LoggerContext;
+import com.dili.logger.sdk.glossary.LoggerConstant;
 import com.dili.ss.domain.BaseOutput;
 import com.dili.ss.domain.EasyuiPageOutput;
 import com.dili.uap.sdk.domain.UserTicket;
@@ -123,9 +126,18 @@ public class ProcessDefinitionController {
      * @param response
      * @throws IOException
      */
+    @BusinessLogger(businessType = "bpmc", content = "删除流程定义", operationType = "del", systemCode = "BPMC")
     @RequestMapping(value = "/delete.action", method = {RequestMethod.GET, RequestMethod.POST})
     public void delete(@RequestParam String deploymentId, HttpServletRequest request, HttpServletResponse response) throws IOException {
         repositoryService.deleteDeployment(deploymentId);
+        LoggerContext.put(LoggerConstant.LOG_BUSINESS_CODE_KEY, deploymentId);
+        LoggerContext.put(LoggerConstant.LOG_BUSINESS_ID_KEY, deploymentId);
+        UserTicket userTicket = SessionContext.getSessionContext().getUserTicket();
+        if (userTicket != null) {
+            LoggerContext.put(LoggerConstant.LOG_OPERATOR_ID_KEY, userTicket.getId());
+            LoggerContext.put(LoggerConstant.LOG_OPERATOR_NAME_KEY, userTicket.getRealName());
+            LoggerContext.put(LoggerConstant.LOG_MARKET_ID_KEY, userTicket.getFirmId());
+        }
         response.sendRedirect(request.getContextPath() + INDEX );
     }
 
@@ -136,10 +148,19 @@ public class ProcessDefinitionController {
      * @param response
      * @throws IOException
      */
+    @BusinessLogger(businessType = "bpmc", content = "清空流程定义", operationType = "clear", systemCode = "BPMC")
     @RequestMapping(value = "/clear.action", method = {RequestMethod.GET, RequestMethod.POST})
     public void clear(@RequestParam String deploymentId, HttpServletRequest request, HttpServletResponse response) throws IOException {
         //将给定的部署和级联删除删除到流程实例、历史流程实例和作业。
         repositoryService.deleteDeployment(deploymentId, true);
+        LoggerContext.put(LoggerConstant.LOG_BUSINESS_CODE_KEY, deploymentId);
+        LoggerContext.put(LoggerConstant.LOG_BUSINESS_ID_KEY, deploymentId);
+        UserTicket userTicket = SessionContext.getSessionContext().getUserTicket();
+        if (userTicket != null) {
+            LoggerContext.put(LoggerConstant.LOG_OPERATOR_ID_KEY, userTicket.getId());
+            LoggerContext.put(LoggerConstant.LOG_OPERATOR_NAME_KEY, userTicket.getRealName());
+            LoggerContext.put(LoggerConstant.LOG_MARKET_ID_KEY, userTicket.getFirmId());
+        }
         response.sendRedirect(request.getContextPath() + INDEX );
     }
 

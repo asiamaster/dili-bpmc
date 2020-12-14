@@ -2,10 +2,15 @@ package com.dili.bpmc.controller;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.serializer.SerializerFeature;
+import com.dili.logger.sdk.annotation.BusinessLogger;
+import com.dili.logger.sdk.base.LoggerContext;
+import com.dili.logger.sdk.glossary.LoggerConstant;
 import com.dili.ss.activiti.service.ActivitiService;
 import com.dili.ss.constant.ResultCode;
 import com.dili.ss.domain.BaseOutput;
 import com.dili.ss.exception.BusinessException;
+import com.dili.uap.sdk.domain.UserTicket;
+import com.dili.uap.sdk.session.SessionContext;
 import org.activiti.engine.*;
 import org.activiti.engine.repository.Deployment;
 import org.apache.commons.io.IOUtils;
@@ -109,14 +114,26 @@ public class DeploymentController {
      * @return
      * @throws Exception
      */
+    @BusinessLogger(businessType = "bpmc", content = "部署流程", operationType = "deploy", systemCode = "BPMC")
     @GetMapping(value = "/deploy.action")
     public void deploy(@RequestParam("modelId")String modelId, HttpServletRequest request, HttpServletResponse response) throws IOException, BusinessException {
         try {
-            activitiService.deployByModelId(modelId);
+            Deployment deployment = activitiService.deployByModelId(modelId);
+            if (deployment != null) {
+                LoggerContext.put(LoggerConstant.LOG_BUSINESS_CODE_KEY, deployment.getName());
+                LoggerContext.put(LoggerConstant.LOG_BUSINESS_ID_KEY, modelId);
+                UserTicket userTicket = SessionContext.getSessionContext().getUserTicket();
+                if (userTicket != null) {
+                    LoggerContext.put(LoggerConstant.LOG_OPERATOR_ID_KEY, userTicket.getId());
+                    LoggerContext.put(LoggerConstant.LOG_OPERATOR_NAME_KEY, userTicket.getRealName());
+                    LoggerContext.put(LoggerConstant.LOG_MARKET_ID_KEY, userTicket.getFirmId());
+                }
+            }
         }catch (ActivitiException e){
             log.warn(e.getMessage());
             throw new BusinessException(ResultCode.DATA_ERROR, e.getMessage());
         }
+
         response.sendRedirect(request.getContextPath() + INDEX);
     }
 

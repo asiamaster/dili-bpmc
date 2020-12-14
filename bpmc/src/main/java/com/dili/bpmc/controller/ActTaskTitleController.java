@@ -2,6 +2,9 @@ package com.dili.bpmc.controller;
 
 import com.dili.bpmc.domain.ActTaskTitle;
 import com.dili.bpmc.service.ActTaskTitleService;
+import com.dili.logger.sdk.annotation.BusinessLogger;
+import com.dili.logger.sdk.base.LoggerContext;
+import com.dili.logger.sdk.glossary.LoggerConstant;
 import com.dili.ss.domain.BaseOutput;
 import com.dili.uap.sdk.domain.UserTicket;
 import com.dili.uap.sdk.session.SessionContext;
@@ -48,6 +51,7 @@ public class ActTaskTitleController {
      * @param actTaskTitle
      * @return BaseOutput
      */
+    @BusinessLogger(businessType = "bpmc", content = "新增ActTaskTitle", operationType = "add", systemCode = "BPMC")
     @RequestMapping(value="/insert.action", method = {RequestMethod.GET, RequestMethod.POST})
     public @ResponseBody BaseOutput insert(ActTaskTitle actTaskTitle) {
         UserTicket userTicket = SessionContext.getSessionContext().getUserTicket();
@@ -57,6 +61,12 @@ public class ActTaskTitleController {
         actTaskTitle.setCreaterId(userTicket.getId());
         actTaskTitle.setModifierId(userTicket.getId());
         actTaskTitleService.insertSelective(actTaskTitle);
+        LoggerContext.put(LoggerConstant.LOG_BUSINESS_CODE_KEY, actTaskTitle.getProcessDefinitionId());
+        LoggerContext.put(LoggerConstant.LOG_BUSINESS_ID_KEY, actTaskTitle.getId());
+
+        LoggerContext.put(LoggerConstant.LOG_OPERATOR_ID_KEY, userTicket.getId());
+        LoggerContext.put(LoggerConstant.LOG_OPERATOR_NAME_KEY, userTicket.getRealName());
+        LoggerContext.put(LoggerConstant.LOG_MARKET_ID_KEY, userTicket.getFirmId());
         return BaseOutput.success("新增成功");
     }
 
@@ -65,6 +75,7 @@ public class ActTaskTitleController {
      * @param actTaskTitle
      * @return BaseOutput
      */
+    @BusinessLogger(businessType = "bpmc", content = "修改ActTaskTitle", operationType = "edit", systemCode = "BPMC")
     @RequestMapping(value="/update.action", method = {RequestMethod.GET, RequestMethod.POST})
     public @ResponseBody BaseOutput update(ActTaskTitle actTaskTitle) {
         UserTicket userTicket = SessionContext.getSessionContext().getUserTicket();
@@ -73,6 +84,12 @@ public class ActTaskTitleController {
         }
         actTaskTitle.setModifierId(userTicket.getId());
         actTaskTitleService.updateExactSimple(actTaskTitle);
+        LoggerContext.put(LoggerConstant.LOG_BUSINESS_CODE_KEY, actTaskTitle.getProcessDefinitionId());
+        LoggerContext.put(LoggerConstant.LOG_BUSINESS_ID_KEY, actTaskTitle.getId());
+
+        LoggerContext.put(LoggerConstant.LOG_OPERATOR_ID_KEY, userTicket.getId());
+        LoggerContext.put(LoggerConstant.LOG_OPERATOR_NAME_KEY, userTicket.getRealName());
+        LoggerContext.put(LoggerConstant.LOG_MARKET_ID_KEY, userTicket.getFirmId());
         return BaseOutput.success("修改成功");
     }
 
@@ -81,9 +98,18 @@ public class ActTaskTitleController {
      * @param id
      * @return BaseOutput
      */
+    @BusinessLogger(businessType = "bpmc", content = "删除ActTaskTitle", operationType = "del", systemCode = "BPMC")
     @RequestMapping(value="/delete.action", method = {RequestMethod.GET, RequestMethod.POST})
     public @ResponseBody BaseOutput delete(Long id) {
         actTaskTitleService.delete(id);
+        LoggerContext.put(LoggerConstant.LOG_BUSINESS_CODE_KEY, id);
+        LoggerContext.put(LoggerConstant.LOG_BUSINESS_ID_KEY, id);
+        UserTicket userTicket = SessionContext.getSessionContext().getUserTicket();
+        if (userTicket != null) {
+            LoggerContext.put(LoggerConstant.LOG_OPERATOR_ID_KEY, userTicket.getId());
+            LoggerContext.put(LoggerConstant.LOG_OPERATOR_NAME_KEY, userTicket.getRealName());
+            LoggerContext.put(LoggerConstant.LOG_MARKET_ID_KEY, userTicket.getFirmId());
+        }
         return BaseOutput.success("删除成功");
     }
 }

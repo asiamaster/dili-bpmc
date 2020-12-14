@@ -3,10 +3,15 @@ package com.dili.bpmc.controller;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.dili.bpmc.sdk.domain.ModelMapping;
+import com.dili.logger.sdk.annotation.BusinessLogger;
+import com.dili.logger.sdk.base.LoggerContext;
+import com.dili.logger.sdk.glossary.LoggerConstant;
 import com.dili.ss.activiti.service.ActivitiService;
 import com.dili.ss.domain.BaseOutput;
 import com.dili.ss.domain.EasyuiPageOutput;
 import com.dili.ss.metadata.ValueProviderUtils;
+import com.dili.uap.sdk.domain.UserTicket;
+import com.dili.uap.sdk.session.SessionContext;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.repository.Model;
 import org.activiti.engine.repository.ModelQuery;
@@ -44,6 +49,7 @@ public class ModelController {
     @Autowired
     private ActivitiService activitiService;
 
+
     /**
      * 模型管理首页
      * @param modelMap
@@ -67,9 +73,18 @@ public class ModelController {
      * @param modelId 模型id
      * @return
      */
+    @BusinessLogger(businessType = "bpmc", content = "删除流程", operationType = "del", systemCode = "BPMC")
     @RequestMapping(value = "/del.action", method = {RequestMethod.GET})
     public void deleteModel(@RequestParam String modelId, HttpServletRequest request, HttpServletResponse response) throws IOException {
         activitiService.deleteModel(modelId);
+        LoggerContext.put(LoggerConstant.LOG_BUSINESS_CODE_KEY, modelId);
+        LoggerContext.put(LoggerConstant.LOG_BUSINESS_ID_KEY, modelId);
+        UserTicket userTicket = SessionContext.getSessionContext().getUserTicket();
+        if (userTicket != null) {
+            LoggerContext.put(LoggerConstant.LOG_OPERATOR_ID_KEY, userTicket.getId());
+            LoggerContext.put(LoggerConstant.LOG_OPERATOR_NAME_KEY, userTicket.getRealName());
+            LoggerContext.put(LoggerConstant.LOG_MARKET_ID_KEY, userTicket.getFirmId());
+        }
         response.sendRedirect(request.getContextPath() + "/model/index.html");
     }
 
@@ -99,10 +114,11 @@ public class ModelController {
     }
 
     /**
-     * 查询
+     * 修改
      * @param modelParam
      * @return
      */
+    @BusinessLogger(businessType = "bpmc", content = "修改流程", operationType = "edit", systemCode = "BPMC")
     @RequestMapping(value = "/update.action",method = {RequestMethod.GET,RequestMethod.POST})
     @ResponseBody
     public BaseOutput<String> update(Model modelParam) {
@@ -115,6 +131,14 @@ public class ModelController {
         model.setMetaInfo(JSON.toJSONString(metaInfo));
         try {
             repositoryService.saveModel(model);
+            LoggerContext.put(LoggerConstant.LOG_BUSINESS_CODE_KEY, modelParam.getName());
+            LoggerContext.put(LoggerConstant.LOG_BUSINESS_ID_KEY, modelParam.getId());
+            UserTicket userTicket = SessionContext.getSessionContext().getUserTicket();
+            if (userTicket != null) {
+                LoggerContext.put(LoggerConstant.LOG_OPERATOR_ID_KEY, userTicket.getId());
+                LoggerContext.put(LoggerConstant.LOG_OPERATOR_NAME_KEY, userTicket.getRealName());
+                LoggerContext.put(LoggerConstant.LOG_MARKET_ID_KEY, userTicket.getFirmId());
+            }
         } catch (Exception e) {
             log.error("id为"+modelParam.getId()+"修改模型设计失败:"+e.getMessage());
             return BaseOutput.failure(e.getMessage());
