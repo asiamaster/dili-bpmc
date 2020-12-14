@@ -165,6 +165,11 @@
 			<version>${sharp-sword.version}</version>
 			<scope>provided</scope>
 		</dependency>
+		<dependency>
+			<groupId>com.dili</groupId>
+			<artifactId>ss-seata</artifactId>
+			<version>${sharp-sword.version}</version>
+		</dependency>
 		<!-- 哨兵依赖 -->
 		<dependency>
 			<groupId>com.alibaba.cloud</groupId>

@@ -13,7 +13,7 @@ import tk.mybatis.spring.annotation.MapperScan;
         SecurityAutoConfiguration.class,
         org.activiti.spring.boot.SecurityAutoConfiguration.class
 })
-@ComponentScan(basePackages = { "com.dili.ss", "com.dili.bpmc", "com.dili.uap.sdk", "com.dili.logger.sdk","com.dili.commons" })
+@ComponentScan(basePackages = { "com.dili.ss", "com.dili.ss.seata", "com.dili.bpmc", "com.dili.uap.sdk", "com.dili.logger.sdk","com.dili.commons" })
 @RestfulScan({"com.dili.uap.sdk.rpc", "com.dili.bpmc.rpc", "com.dili.bpmc.sdk.rpc"})
 @MapperScan(basePackages = {"com.dili.bpmc.dao", "com.dili.ss.dao"})
 @DTOScan(value={"com.dili.ss", "com.dili.uap", "com.dili.bpmc"})
