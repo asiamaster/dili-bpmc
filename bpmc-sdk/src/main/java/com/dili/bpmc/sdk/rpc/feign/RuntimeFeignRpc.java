@@ -18,7 +18,7 @@ import java.util.Map;
 /**
  * 运行时接口
  */
-@FeignClient(name = "dili-bpmc")
+@FeignClient(name = "dili-bpmc", contextId = "runtime-service")
 public interface RuntimeFeignRpc {
 
 	/**

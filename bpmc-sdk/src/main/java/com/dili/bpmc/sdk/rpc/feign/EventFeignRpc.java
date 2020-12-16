@@ -16,7 +16,7 @@ import java.util.List;
 /**
  * 事件接口
  */
-@FeignClient(name = "dili-bpmc")
+@FeignClient(name = "dili-bpmc", contextId = "event-service")
 public interface EventFeignRpc {
 
 	/**

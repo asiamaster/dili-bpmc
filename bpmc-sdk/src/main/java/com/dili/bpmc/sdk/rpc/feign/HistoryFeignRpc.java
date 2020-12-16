@@ -14,7 +14,7 @@ import java.util.List;
 /**
  * 流程历史远程方法接口
  */
-@FeignClient(name = "dili-bpmc")
+@FeignClient(name = "dili-bpmc", contextId = "history-service")
 public interface HistoryFeignRpc {
 
     @GetMapping("/api/history/listHistoricTaskInstance")

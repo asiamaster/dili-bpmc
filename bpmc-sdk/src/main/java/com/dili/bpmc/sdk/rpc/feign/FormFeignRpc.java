@@ -15,7 +15,7 @@ import java.util.List;
  * @Date: 2019/12/6 16:18
  * @Description:
  */
-@FeignClient(name = "dili-bpmc")
+@FeignClient(name = "dili-bpmc", contextId = "form-service")
 public interface FormFeignRpc {
 
     @GetMapping("/api/form/getByKey")

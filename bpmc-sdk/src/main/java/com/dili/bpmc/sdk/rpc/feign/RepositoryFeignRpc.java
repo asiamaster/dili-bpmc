@@ -14,7 +14,7 @@ import java.util.List;
 /**
  * 仓库接口
  */
-@FeignClient(name = "dili-bpmc")
+@FeignClient(name = "dili-bpmc", contextId = "repository-service")
 public interface RepositoryFeignRpc {
 
 	/**

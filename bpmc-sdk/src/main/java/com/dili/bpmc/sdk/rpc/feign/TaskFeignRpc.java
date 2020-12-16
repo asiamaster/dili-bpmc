@@ -18,7 +18,7 @@ import java.util.Map;
 /**
  * 任务接口
  */
-@FeignClient(name = "dili-bpmc")
+@FeignClient(name = "dili-bpmc", contextId = "test-service")
 public interface TaskFeignRpc {
 
 	/**
