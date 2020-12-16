@@ -6,7 +6,6 @@ import com.dili.bpmc.sdk.dto.TaskDto;
 import com.dili.bpmc.sdk.dto.TaskIdentityDto;
 import com.dili.bpmc.sdk.dto.TaskVariablesDto;
 import com.dili.ss.domain.BaseOutput;
-import com.dili.ss.retrofitful.annotation.GET;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -103,7 +102,7 @@ public interface TaskFeignRpc {
 	 * @param taskId，必填
 	 * @return
 	 */
-	@GET("/api/task/getById")
+	@GetMapping("/api/task/getById")
 	BaseOutput<TaskMapping> getById(@RequestParam(value = "taskId") String taskId);
 
 	/**
