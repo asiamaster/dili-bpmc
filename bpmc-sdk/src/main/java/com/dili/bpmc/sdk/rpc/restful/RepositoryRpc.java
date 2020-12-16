@@ -1,8 +1,7 @@
-package com.dili.bpmc.sdk.rpc;
+package com.dili.bpmc.sdk.rpc.restful;
 
 import com.dili.bpmc.sdk.domain.MessageMapping;
 import com.dili.bpmc.sdk.domain.ProcessDefinitionMapping;
-import com.dili.bpmc.sdk.domain.ProcessInstanceMapping;
 import com.dili.bpmc.sdk.domain.SignalMapping;
 import com.dili.ss.domain.BaseOutput;
 import com.dili.ss.retrofitful.annotation.GET;
@@ -11,7 +10,6 @@ import com.dili.ss.retrofitful.annotation.Restful;
 import org.activiti.bpmn.model.BpmnModel;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * 仓库接口

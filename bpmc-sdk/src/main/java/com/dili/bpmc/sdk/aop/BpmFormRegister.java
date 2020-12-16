@@ -4,7 +4,7 @@ import com.dili.bpmc.sdk.annotation.BpmAction;
 import com.dili.bpmc.sdk.annotation.BpmRedirect;
 import com.dili.bpmc.sdk.annotation.BpmTask;
 import com.dili.bpmc.sdk.domain.ActForm;
-import com.dili.bpmc.sdk.rpc.BpmcFormRpc;
+import com.dili.bpmc.sdk.rpc.restful.BpmcFormRpc;
 import com.dili.ss.domain.BaseOutput;
 import com.dili.ss.dto.DTOUtils;
 import com.dili.ss.util.SpringUtil;

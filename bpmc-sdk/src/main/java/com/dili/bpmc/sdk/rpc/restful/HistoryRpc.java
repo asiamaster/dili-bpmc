@@ -1,4 +1,4 @@
-package com.dili.bpmc.sdk.rpc;
+package com.dili.bpmc.sdk.rpc.restful;
 
 import com.dili.bpmc.sdk.domain.HistoricTaskInstanceMapping;
 import com.dili.ss.domain.BaseOutput;

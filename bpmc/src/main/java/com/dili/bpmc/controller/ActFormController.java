@@ -29,7 +29,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.dili.bpmc.sdk.domain.ActControl;
 import com.dili.bpmc.sdk.domain.ActForm;
-import com.dili.bpmc.sdk.rpc.FormRpc;
+import com.dili.bpmc.sdk.rpc.restful.FormRpc;
 import com.dili.bpmc.service.ActControlService;
 import com.dili.bpmc.service.ActFormService;
 import com.dili.ss.domain.BaseOutput;

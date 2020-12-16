@@ -1,4 +1,4 @@
-package com.dili.bpmc.sdk.rpc;
+package com.dili.bpmc.sdk.rpc.restful;
 
 import com.dili.bpmc.sdk.domain.EventSubscriptionMapping;
 import com.dili.bpmc.sdk.dto.EventReceivedDto;

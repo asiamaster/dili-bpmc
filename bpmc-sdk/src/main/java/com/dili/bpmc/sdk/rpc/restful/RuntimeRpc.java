@@ -1,8 +1,10 @@
-package com.dili.bpmc.sdk.rpc;
+package com.dili.bpmc.sdk.rpc.restful;
 
 import com.dili.bpmc.sdk.domain.ExecutionMapping;
 import com.dili.bpmc.sdk.domain.ProcessInstanceMapping;
-import com.dili.bpmc.sdk.dto.*;
+import com.dili.bpmc.sdk.dto.HistoricProcessInstanceQueryDto;
+import com.dili.bpmc.sdk.dto.ProcessInstanceVariablesDto;
+import com.dili.bpmc.sdk.dto.StartProcessInstanceDto;
 import com.dili.ss.domain.BaseOutput;
 import com.dili.ss.retrofitful.annotation.*;
 import com.dili.ss.seata.annotation.GlobalTx;
