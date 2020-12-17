@@ -265,7 +265,7 @@ public class ActFormController {
 		}
 		String redirectUrl = variables.get("redirectUrl");
 		if (StringUtils.isBlank(redirectUrl)) {
-			redirectUrl = SpringUtil.getProperty("bpmc.server.address") + "/task/taskCenter.html";
+			redirectUrl = SpringUtil.getProperty("project.serverPath") + "/task/taskCenter.html";
 		}
 		return "redirect:" + redirectUrl;
 	}
