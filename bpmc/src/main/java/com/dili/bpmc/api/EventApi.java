@@ -1,5 +1,6 @@
 package com.dili.bpmc.api;
 
+import com.alibaba.csp.sentinel.annotation.SentinelResource;
 import com.dili.bpmc.consts.EventType;
 import com.dili.bpmc.dao.EventSubscriptionMapper;
 import com.dili.bpmc.sdk.domain.EventSubscriptionMapping;
@@ -57,6 +58,7 @@ public class EventApi {
 	 * 根据条件查询运行时边界事件名称列表
 	 * @return
 	 */
+	@SentinelResource("listEventName")
 	@RequestMapping(value = "/listEventName", method = { RequestMethod.GET, RequestMethod.POST })
 	public BaseOutput<List<String>> listEventName(EventSubscriptionMapping eventSubscriptionMapping) {
 		try {
