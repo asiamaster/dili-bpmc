@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
-@FeignClient(name = "dili-bpmc", contextId = "bpmcForm-service")
+@FeignClient(name = "dili-bpmc", contextId = "bpmcForm-service", url="${BpmcRpc.url:}")
 public interface BpmcFormFeignRpc {
 
 	/**
