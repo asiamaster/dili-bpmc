@@ -32,5 +32,14 @@ public class BpmcApplication {
         SpringApplication.run(BpmcApplication.class, args);
     }
 
+//    @Bean
+//    public WebServerFactoryCustomizer<ConfigurableWebServerFactory> myWebServerFactoryCustomizer(){
+//        return new WebServerFactoryCustomizer<ConfigurableWebServerFactory>() {
+//            @Override
+//            public void customize(ConfigurableWebServerFactory factory) {
+//                factory.setPort(28617);
+//            }
+//        };
+//    }
 }
 
