@@ -1,4 +1,4 @@
--- 2020.12.14
+-- 2020.12.14 未执行
 -- BPMC新增business_type
 insert into `data_dictionary_value` (dd_code,firm_id,firm_code,order_number,name,code,state) values('log_business_type',1,'group',111,'流控中心','bpmc',1);
 

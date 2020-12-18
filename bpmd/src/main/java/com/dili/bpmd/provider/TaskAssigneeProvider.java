@@ -2,7 +2,7 @@ package com.dili.bpmd.provider;
 
 import com.dili.bpmc.sdk.domain.TaskMapping;
 import com.dili.bpmc.sdk.dto.TaskDto;
-import com.dili.bpmc.sdk.rpc.TaskRpc;
+import com.dili.bpmc.sdk.rpc.restful.TaskRpc;
 import com.dili.ss.domain.BaseOutput;
 import com.dili.ss.dto.DTOUtils;
 import com.dili.ss.metadata.BatchProviderMeta;

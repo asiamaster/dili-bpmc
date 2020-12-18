@@ -1,6 +1,6 @@
 package com.dili.bpmd.api;
 
-import com.dili.bpmc.sdk.rpc.TaskRpc;
+import com.dili.bpmc.sdk.rpc.restful.TaskRpc;
 import com.dili.bpmd.consts.BpmConsts;
 import com.dili.bpmd.consts.OrderState;
 import com.dili.bpmd.service.OrdersService;
