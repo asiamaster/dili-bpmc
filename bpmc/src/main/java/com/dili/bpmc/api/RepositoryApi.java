@@ -83,6 +83,25 @@ public class RepositoryApi {
         return BaseOutput.successData(repositoryService.getBpmnModel(processDefinitionId));
     }
 
+    /**
+     * 查询最新流程定义
+     * get all BPMN information like additional
+     * @param processDefinitionKey
+     * @throws Exception
+     */
+    @RequestMapping(value = "/getLatestProcessDefinition", method = {RequestMethod.GET, RequestMethod.POST})
+    public BaseOutput<ProcessDefinitionMapping> getLatestProcessDefinition(@RequestParam String processDefinitionKey){
+        ProcessDefinition processDefinition = repositoryService.createProcessDefinitionQuery().processDefinitionKey(processDefinitionKey).latestVersion().singleResult();
+        if(processDefinition == null){
+            return BaseOutput.success();
+        }
+        ProcessDefinitionMapping processDefinitionMapping = DTOUtils.asInstance(processDefinition, ProcessDefinitionMapping.class);
+        //由于DTO不支持is和has语义，只能手工设置
+        processDefinitionMapping.setHasGraphicalNotation(processDefinition.hasGraphicalNotation());
+        processDefinitionMapping.setHasStartFormKey(processDefinition.hasStartFormKey());
+        processDefinitionMapping.setIsSuspended(processDefinition.isSuspended());
+        return BaseOutput.successData(processDefinitionMapping);
+    }
 
 
     /**
@@ -94,6 +113,9 @@ public class RepositoryApi {
     @RequestMapping(value = "/getProcessDefinition", method = {RequestMethod.GET, RequestMethod.POST})
     public BaseOutput<ProcessDefinitionMapping> getProcessDefinition(@RequestParam String processDefinitionId){
         ProcessDefinition processDefinition = repositoryService.getProcessDefinition(processDefinitionId);
+        if(processDefinition == null){
+            return BaseOutput.success();
+        }
         ProcessDefinitionMapping processDefinitionMapping = DTOUtils.asInstance(processDefinition, ProcessDefinitionMapping.class);
         //由于DTO不支持is和has语义，只能手工设置
         processDefinitionMapping.setHasGraphicalNotation(processDefinition.hasGraphicalNotation());

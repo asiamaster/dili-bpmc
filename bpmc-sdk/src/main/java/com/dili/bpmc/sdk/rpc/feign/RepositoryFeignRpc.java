@@ -42,11 +42,19 @@ public interface RepositoryFeignRpc {
 	BaseOutput<BpmnModel> getBpmnModel(@RequestParam(value = "processDefinitionId") String processDefinitionId);
 
 	/**
-	 * 根据流程定义id查询部署信息
+	 * 根据流程定义id查询流程定义
 	 * @param processDefinitionId
 	 * @return
 	 */
 	@GetMapping("/api/repository/getProcessDefinition")
 	BaseOutput<ProcessDefinitionMapping> getProcessDefinition(@RequestParam(value = "processDefinitionId") String processDefinitionId);
+
+	/**
+	 * 根据流程定义Key查询最新流程定义
+	 * @param processDefinitionKey
+	 * @return
+	 */
+	@GetMapping("/api/repository/getLatestProcessDefinition")
+	BaseOutput<ProcessDefinitionMapping> getLatestProcessDefinition(@RequestParam(value = "processDefinitionKey") String processDefinitionKey);
 
 }

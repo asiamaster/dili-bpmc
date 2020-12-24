@@ -175,25 +175,6 @@ public class RuntimeApi {
         }
     }
 
-//    @RequestMapping(value = "/setVariables", method = {RequestMethod.GET, RequestMethod.POST})
-//    public BaseOutput setVariables(@RequestParam String executionId, @RequestParam Map<String, String> variables){
-//        try {
-//            runtimeService.setVariables(executionId, variables);
-//            return BaseOutput.success();
-//        } catch (Exception e) {
-//            return BaseOutput.failure(e.getMessage());
-//        }
-//    }
-//    @RequestMapping(value = "/setVariable", method = {RequestMethod.GET, RequestMethod.POST})
-//    public BaseOutput setVariables(@RequestParam String executionId, @RequestParam String key, @RequestParam String value){
-//        try {
-//            runtimeService.setVariable(executionId, key, value);
-//            return BaseOutput.success();
-//        } catch (Exception e) {
-//            return BaseOutput.failure(e.getMessage());
-//        }
-//    }
-
     /**
      * 根据流程实例id或businessKey查询进行中的流程实例
      * 两个参数至少传一个
