@@ -6,6 +6,7 @@ import com.dili.bpmc.dao.EventSubscriptionMapper;
 import com.dili.bpmc.sdk.domain.EventSubscriptionMapping;
 import com.dili.bpmc.sdk.dto.EventReceivedDto;
 import com.dili.ss.domain.BaseOutput;
+import org.activiti.engine.IdentityService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
 import org.activiti.engine.runtime.Execution;
@@ -38,6 +39,8 @@ public class EventApi {
 	private RuntimeService runtimeService;
 	@Autowired
 	private TaskService taskService;
+	@Autowired
+	private IdentityService identityService;
 	@SuppressWarnings("all")
 	@Autowired
 	private EventSubscriptionMapper eventSubscriptionMapper;
@@ -85,6 +88,9 @@ public class EventApi {
 			if (executionId == null) {
 				return BaseOutput.failure("信号[" + eventReceivedDto.getEventName() + "]发送失败，不存在执行的流程");
 			}
+			if(eventReceivedDto.getUserId() != null) {
+				identityService.setAuthenticatedUserId(eventReceivedDto.getUserId());
+			}
 			runtimeService.signal(executionId, eventReceivedDto.getVariables());
 			return BaseOutput.success("信号[" + eventReceivedDto.getEventName() + "]发送成功");
 		} catch (Exception e) {
@@ -106,6 +112,9 @@ public class EventApi {
 		try {
 			eventReceivedDto.setEventType(EventType.SIGNAL);
 			String executionId = getExecutionId(eventReceivedDto);
+			if(eventReceivedDto.getUserId() != null) {
+				identityService.setAuthenticatedUserId(eventReceivedDto.getUserId());
+			}
 			//根据executionId触发信号事件
 			if (StringUtils.isNotBlank(executionId)) {
 				runtimeService.signalEventReceived(eventReceivedDto.getEventName(), executionId, eventReceivedDto.getVariables());
@@ -134,6 +143,9 @@ public class EventApi {
 			String executionId = getExecutionId(eventReceivedDto);
 			if (executionId == null) {
 				return BaseOutput.failure("消息[" + eventReceivedDto.getEventName() + "]发送失败，不存在执行的流程");
+			}
+			if(eventReceivedDto.getUserId() != null) {
+				identityService.setAuthenticatedUserId(eventReceivedDto.getUserId());
 			}
 			runtimeService.messageEventReceived(eventReceivedDto.getEventName(), executionId, eventReceivedDto.getVariables());
 			return BaseOutput.success("抛出消息[" + eventReceivedDto.getEventName() + "]发送成功");

@@ -49,4 +49,11 @@ public interface EventReceivedDto extends IDTO {
      */
     String getEventType();
     void setEventType(String eventType);
+
+    /**
+     * 用于在启动子流程时，设置子流程的启动人
+     * @return
+     */
+    String getUserId();
+    void setUserId(String userId);
 }

@@ -133,9 +133,13 @@ public class ProcessInstanceController {
         }
         //默认显示的流程实例
         request.setAttribute("procInst", currentProcessInstance);
-        BaseOutput<User> output = userRpc.get(Long.parseLong(currentProcessInstance.getStartUserId()));
-        //远程获取用户名失败则直接显示用户id
-        request.setAttribute("startUser", output.isSuccess() ? output.getData().getRealName() : currentProcessInstance.getStartUserId());
+        if(currentProcessInstance.getStartUserId() == null){
+            request.setAttribute("startUser", "");
+        }else {
+            BaseOutput<User> output = userRpc.get(Long.parseLong(currentProcessInstance.getStartUserId()));
+            //远程获取用户名失败则直接显示用户id
+            request.setAttribute("startUser", output.isSuccess() ? output.getData().getRealName() : currentProcessInstance.getStartUserId());
+        }
         //进行中的任务
         List<Task> runningTasks = taskService.createTaskQuery().processInstanceId(currentProcessInstance.getId()).active().list();
         if(!CollectionUtils.isEmpty(runningTasks)) {
