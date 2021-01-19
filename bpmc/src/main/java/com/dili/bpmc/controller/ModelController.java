@@ -12,23 +12,34 @@ import com.dili.ss.domain.EasyuiPageOutput;
 import com.dili.ss.metadata.ValueProviderUtils;
 import com.dili.uap.sdk.domain.UserTicket;
 import com.dili.uap.sdk.session.SessionContext;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.activiti.bpmn.converter.BpmnXMLConverter;
+import org.activiti.bpmn.model.BpmnModel;
+import org.activiti.editor.language.json.converter.BpmnJsonConverter;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.repository.Model;
 import org.activiti.engine.repository.ModelQuery;
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamReader;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
@@ -145,4 +156,84 @@ public class ModelController {
         }
         return BaseOutput.success();
     }
+
+    /**
+     * 根据模型id获取xml
+     * @param modelId
+     * @return
+     */
+    @GetMapping(value = "/xml.action")
+    @ResponseBody
+    public BaseOutput<String> getXml(@RequestParam("modelId") String modelId) {
+        try {
+            Model modelData = repositoryService.getModel(modelId);
+            byte[] modelEditorSource = repositoryService.getModelEditorSource(modelData.getId());
+
+            BpmnJsonConverter jsonConverter = new BpmnJsonConverter();
+            JsonNode editorNode = new ObjectMapper().readTree((new String(modelEditorSource,"UTF-8")).getBytes("UTF-8"));
+            BpmnModel bpmnModel = jsonConverter.convertToBpmnModel(editorNode);
+
+            BpmnXMLConverter xmlConverter = new BpmnXMLConverter();
+            byte[] exportBytes = xmlConverter.convertToXML(bpmnModel,"UTF-8");
+            return BaseOutput.successData(new String(exportBytes,"UTF-8"));
+        }catch (Exception e) {
+            e.printStackTrace();
+            return BaseOutput.failure(e.getMessage());
+        }
+    }
+
+    /**
+     * 保存xml模型
+     * @param id
+     * @param xml
+     * @param name
+     * @param description
+     * @return
+     */
+    @PostMapping(value="/saveModel.action")
+    @ResponseBody
+    public BaseOutput saveModel(@RequestParam String id,
+                                @RequestParam String name,
+                                @RequestParam(required = false) String key,
+                                @RequestParam(required = false) String category,
+                                @RequestParam(required = false) String description,
+                                @RequestParam String xml) {
+        try{
+            String unescapeXml = StringEscapeUtils.unescapeHtml(xml);//因过滤处理XSS时会对<,>等字符转码，此处需将字符串还原
+            InputStream in_nocode   =   new ByteArrayInputStream(unescapeXml.getBytes("UTF-8"));
+            XMLInputFactory xmlFactory  = XMLInputFactory.newInstance();
+            XMLStreamReader reader = xmlFactory.createXMLStreamReader(in_nocode);
+
+            BpmnXMLConverter xmlConverter = new BpmnXMLConverter();
+            BpmnModel bpmnModel = xmlConverter.convertToBpmnModel(reader);
+
+            BpmnJsonConverter jsonConverter = new BpmnJsonConverter();
+            JsonNode j =jsonConverter.convertToJson(bpmnModel);
+
+            ObjectMapper objectMapper = new ObjectMapper();
+            byte[] modelEditorSource = objectMapper.writeValueAsBytes(j);
+
+            MultiValueMap<String,String> values = new LinkedMultiValueMap<String,String>();
+            values.add("json_xml", new String(modelEditorSource,"UTF-8"));
+            values.add("svg_xml", "");
+            values.add("name", name);
+            values.add("description", description);
+
+            Model model = repositoryService.getModel(id);
+            ObjectNode modelJson = (ObjectNode) objectMapper.readTree(model.getMetaInfo());
+            modelJson.put("name", values.getFirst("name"));
+            modelJson.put("description", values.getFirst("description"));
+            model.setMetaInfo(modelJson.toString());
+            model.setName(name);
+            model.setCategory(category);
+            model.setKey(key);
+            repositoryService.saveModel(model);
+            repositoryService.addModelEditorSource(model.getId(), values.getFirst("json_xml").getBytes("utf-8"));
+            return BaseOutput.success();
+        }catch(Exception e){
+            e.printStackTrace();
+            return BaseOutput.failure("更新模型XML失败:"+e.getMessage());
+        }
+    }
+
 }

@@ -91,8 +91,8 @@
 
             <div id="modelGridToolbar" style="padding: 2px 5px;">
                 <a href="#" class="easyui-linkbutton" iconCls="icon-add" onclick="openCreateModelDlg()" plain="true">新增</a>
-                <a href="#" class="easyui-linkbutton" iconCls="icon-edit" onclick="editModel()" plain="true">编辑</a>
-                <a href="#" class="easyui-linkbutton" iconCls="icon-edit" onclick="openUpdateModelDlg()" plain="true">修改</a>
+                <a href="#" class="easyui-linkbutton" iconCls="icon-edit" onclick="editModel()" plain="true">设计</a>
+                <a href="#" class="easyui-linkbutton" iconCls="icon-edit" onclick="openUpdateXmlDlg()" plain="true">修改</a>
                 <a href="#" class="easyui-linkbutton" iconCls="icon-remove" onclick="deleteModel()" plain="true">删除</a>
                 <a href="#" class="easyui-linkbutton" iconCls="icon-data" onclick="showModelImg()" plain="true">图片</a>
                 <a href="#" class="easyui-linkbutton" iconCls="icon-play" onclick="deploy()" plain="true">部署</a>
@@ -152,52 +152,61 @@
                 </table>
             </form>
         </div>
-        <!-- 隐藏编辑框 -->
-        <div id="editDlg" class="easyui-dialog" resizable="false" constrain="true" shadow="true" draggable="false" title="修改模型" style="padding: 10px; width: 450px;" modal="true" border="thin" closed="true"
+
+        <!-- 更新模型xml编辑框 -->
+        <div id="updateXmlDlg" class="easyui-dialog" resizable="false" constrain="true" shadow="true" draggable="false" title="修改模型XML" style="padding: 10px; width: 920px;" modal="true" border="thin" closed="true"
              data-options="
-				width:380,
-				height:250,
-				buttons: [{
-				    id:'updateModel',
-					text:'确认',
-					iconCls:'icon-ok',
-					handler:updateModel
-				}]
-			">
-            <form id="editForm" class="easyui-form" method="post" fit="true">
-                <input name="_id" id="_id" type="hidden">
-                <table width="330px">
-                    <tr style="height:40px;">
-                        <td>
-                            <input class="easyui-textbox" name="_name" id="_name" style="width:100%" labelWidth="48" labelAlign="right" data-options="label:'&lowast;名称:', required:true, validType:'length[2,40]'" />
+                        width:900,
+                        height:520,
+                        buttons: [{
+                            id:'updateXmlBtn',
+                            text:'确认',
+                            iconCls:'icon-ok',
+                            handler:updateXml
+                        }]
+                    ">
+            <form id="updateXmlForm" class="easyui-form" method="post" fit="true">
+                <table >
+                    <tr >
+                        <td width="290" >
+                            <input class="easyui-textbox" name="id" id="xmlId" style="width:100%;" labelAlign="right" data-options="label:'&lowast;id:', readonly:true, required:true, validType:'length[2,40]'" />
+                        </td>
+                        <td width="290" >
+                            <input class="easyui-textbox" name="name" id="xmlName" style="width:100%" labelAlign="right" data-options="label:'&lowast;名称:', required:true, validType:'length[1,20]'" />
+                        </td>
+                        <td width="290" >
+                            <input class="easyui-textbox" name="category" id="xmlCategory" style="width:100%" labelWidth="48" labelAlign="right" data-options="label:'类别:', validType:'length[0,40]'" />
                         </td>
                     </tr>
-                    <tr style="height:40px;">
-                        <td>
-                            <input class="easyui-textbox" name="_key" id="_key" style="width:100%" labelWidth="48" labelAlign="right" data-options="label:'&lowast;KEY:', required:true, validType:'length[2,40]'" />
+                    <tr >
+                        <td >
+                            <input class="easyui-textbox" name="key" id="xmlKey" style="width:100%;" labelAlign="right" data-options="label:'KEY:', validType:'length[0,40]'" />
+                        </td>
+                        <td colspan="2">
+                            <input class="easyui-textbox" name="description" id="xmlDescription" style="width:100%;" labelAlign="right" data-options="label:'描述:', validType:'length[0,40]'" />
                         </td>
                     </tr>
-                    <tr style="height:40px;">
-                        <td>
-                            <input class="easyui-textbox" name="_category" id="_category" style="width:100%" labelWidth="48" labelAlign="right" data-options="label:'类别:', validType:'length[0,40]'" />
+                    <tr >
+                        <td colspan="3" >
+                            <input class="easyui-textbox" name="xml" id="xml" style="width:100%;height:330px;" labelAlign="right" data-options="label:'&lowast;XML:', required:true, multiline:true" />
                         </td>
                     </tr>
                 </table>
             </form>
         </div>
     </div>
-
 <script>
+
     /**
-     * 修改
+     * 修改Xml
      */
-    function updateModel(){
-        if(!$('#editForm').form("validate")){
+    function updateXml(){
+        if(!$('#updateXmlForm').form("validate")){
             return;
         }
-        $("#updateModel").linkbutton("disable");
-        var _formData = removeKeyStartWith($("#editForm").serializeObject(true),"_");
-        var _url = "${contextPath}/model/update.action";
+        $("#updateXmlBtn").linkbutton("disable");
+        var _formData = $("#updateXmlForm").serializeObject(true);
+        var _url = "${contextPath}/model/saveModel.action";
         $.ajax({
             type: "POST",
             url: _url,
@@ -206,18 +215,17 @@
             dataType: "json",
             async : true,
             success: function (ret) {
-                $("#updateModel").linkbutton("enable");
+                $("#updateXmlBtn").linkbutton("enable");
                 if(ret.success){
-                    var opts = $("#modelGrid").datagrid("options");
                     $("#modelGrid").datagrid("reload");
-                    $("#editDlg").dialog("close");
+                    $("#updateXmlDlg").dialog("close");
                 }else{
                     swal('错误', ret.result, 'error');
                 }
             },
             error: function(){
-                $("#updateModel").linkbutton("enable");
-                swal('错误', '修改模型失败', 'error');
+                $("#updateXmlBtn").linkbutton("enable");
+                swal('错误', '修改模型XML失败', 'error');
             }
         });
     }
@@ -225,19 +233,38 @@
     /**
      * 打开修改窗口
      */
-    function openUpdateModelDlg(){
+    function openUpdateXmlDlg(){
         var selected = $("#modelGrid").datagrid("getSelected");
         if (null == selected) {
             swal('警告', '请选中一条数据', 'warning');
             return;
         }
-        $('#editDlg').dialog('open');
-        $('#editDlg').dialog('center');
-        formFocus("editForm", "_name");
+        $('#updateXmlDlg').dialog('open');
+        $('#updateXmlDlg').dialog('center');
+        formFocus("updateXmlForm", "xml");
         var formData = $.extend({}, selected);
-        formData = addKeyStartWith(getOriginalData(formData), "_");
-        $('#editForm').form('clear');
-        $('#editForm').form('load', formData);
+        $.ajax({
+            type: "GET",
+            url: "${contextPath}/model/xml.action",
+            data:{modelId:selected.id},
+            processData:true,
+            dataType: "json",
+            async : true,
+            success: function (output) {
+                if(output.success){
+                    formData = getOriginalData(formData);
+                    formData.xml = output.data
+                    formData.description = JSON.parse(selected.metaInfo).description;
+                    $('#updateXmlForm').form('clear');
+                    $('#updateXmlForm').form('load', formData);
+                }else{
+                    swal('错误', output.message, 'error');
+                }
+            },
+            error: function(){
+                swal('错误', '获取模型xml失败', 'error');
+            }
+        });
 
     }
 
