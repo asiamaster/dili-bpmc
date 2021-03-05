@@ -104,7 +104,7 @@ public interface RuntimeRpc {
 	 * @param businessKey
 	 * @return
 	 */
-	@GET("/api/runtime/updateBusinessKey")
+	@POST("/api/runtime/updateBusinessKey")
 	@GlobalTx
 	BaseOutput updateBusinessKey(@ReqParam(value = "processInstanceId") String processInstanceId, @ReqParam(value = "businessKey") String businessKey);
 
@@ -116,7 +116,7 @@ public interface RuntimeRpc {
 	 * @param startProcessInstanceDto variables     启动变量，选填
 	 * @return 流程实例对象封装
 	 */
-	@GET("/api/runtime/startProcessInstanceByKey")
+	@POST("/api/runtime/startProcessInstanceByKey")
 	@GlobalTx
 	BaseOutput<ProcessInstanceMapping> startProcessInstanceByKey(@VOBody StartProcessInstanceDto startProcessInstanceDto);
 
@@ -128,7 +128,7 @@ public interface RuntimeRpc {
 	 * @param startProcessInstanceDto variables     启动变量，选填
 	 * @return 流程实例对象封装
 	 */
-	@GET("/api/runtime/startProcessInstanceById")
+	@POST("/api/runtime/startProcessInstanceById")
 	@GlobalTx
 	BaseOutput<ProcessInstanceMapping> startProcessInstanceById(@VOBody StartProcessInstanceDto startProcessInstanceDto);
 
@@ -138,7 +138,7 @@ public interface RuntimeRpc {
 	 * @param deleteReason 结束原因
 	 * @return
 	 */
-	@GET("/api/runtime/stopProcessInstanceById")
+	@POST("/api/runtime/stopProcessInstanceById")
 	@GlobalTx
 	BaseOutput stopProcessInstanceById(@ReqParam(value = "processInstanceId") String processInstanceId, @ReqParam(value = "deleteReason", required = false) String deleteReason);
 
