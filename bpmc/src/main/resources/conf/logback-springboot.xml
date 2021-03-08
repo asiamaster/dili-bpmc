@@ -45,7 +45,8 @@
     <!-- 测试环境 -->
     <springProfile name="test">
         <root level="INFO">
-            <appender-ref ref="FILE"/>
+            <appender-ref ref="CONSOLE"/>
+<!--            <appender-ref ref="FILE"/>-->
         </root>
     </springProfile>
     <!-- 灰度、生产环境 -->
