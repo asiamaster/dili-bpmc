@@ -28,7 +28,7 @@
     <parent>
         <artifactId>dili-bpmc</artifactId>
         <groupId>com.dili</groupId>
-        <version>1.4.1-SNAPSHOT</version>
+        <version>1.4.0-SNAPSHOT</version>
     </parent>
 
     <build>
@@ -107,7 +107,7 @@
         <dependency>
             <groupId>com.dili</groupId>
             <artifactId>uap-sdk</artifactId>
-            <version>3.0.0-SNAPSHOT</version>
+            <version>3.1.0-SNAPSHOT</version>
             <exclusions>
                 <exclusion>
                     <artifactId>ss-beetl</artifactId>
@@ -118,12 +118,6 @@
                     <groupId>com.dili</groupId>
                 </exclusion>
             </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>com.dili</groupId>
-            <artifactId>ss-processor</artifactId>
-            <version>${sharp-sword.version}</version>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.dili</groupId>
